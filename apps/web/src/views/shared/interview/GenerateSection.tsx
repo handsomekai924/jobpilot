@@ -259,7 +259,7 @@ export function GenerateSection({
         </Typography>
       </Surface>
 
-      <ScrollArea>
+      <ScrollArea sx={{ pt: 0 }}>
         <DataTable
           columns={jobColumns}
           rows={jobs}

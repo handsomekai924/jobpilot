@@ -119,7 +119,7 @@ export function RecordsSection({
         </Typography>
       </Surface>
 
-      <ScrollArea>
+      <ScrollArea sx={{ pt: 0 }}>
         <DataTable
           columns={recordColumns}
           rows={records}

@@ -289,7 +289,6 @@ export function WorkbenchSection({
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         gap: 2.5,
-        // 宽屏两栏等高各自滚；窄屏整块一起滚（栏 overflowY visible）
         flex: 1,
         minHeight: 0,
         overflow: "hidden",
@@ -374,33 +373,38 @@ export function WorkbenchSection({
             ) : (
               <>
                 <Box sx={{ maxHeight: 280, overflowY: "auto", display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  {jobs.map((j) => (
-                    <Box
-                      key={j.encrypt_job_id}
-                      component="label"
-                      sx={{
-                        display: "flex", gap: 1, alignItems: "center", cursor: "pointer",
-                        p: 1, borderRadius: "10px",
-                        "&:hover": { bgcolor: "action.hover" },
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected.has(j.encrypt_job_id)}
-                        onChange={() => toggleSelected(j.encrypt_job_id)}
-                      />
-                      <Typography sx={{ ...typeScale.bodySm, flex: 1, minWidth: 0 }}>
-                        {j.job_name} @ {j.brand_name}
-                      </Typography>
-                      <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-                        {[j.location, j.salary_desc].filter(Boolean).join(" · ")}
-                      </Typography>
-                    </Box>
-                  ))}
+                  {jobs.map((j) => {
+                    const meta = [j.location, j.salary_desc].filter(Boolean).join(" · ");
+                    return (
+                      <Box
+                        key={j.encrypt_job_id}
+                        component="label"
+                        sx={{
+                          display: "flex", gap: 1, alignItems: "center", cursor: "pointer",
+                          p: 1, borderRadius: "10px",
+                          "&:hover": { bgcolor: "action.hover" },
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          style={{ flex: "0 0 auto" }}
+                          checked={selected.has(j.encrypt_job_id)}
+                          onChange={() => toggleSelected(j.encrypt_job_id)}
+                        />
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography sx={{ ...typeScale.bodySm, overflowWrap: "anywhere" }}>
+                            {j.job_name} @ {j.brand_name}
+                          </Typography>
+                          {meta && (
+                            <Typography noWrap title={meta} sx={{ ...typeScale.s, color: "text.secondary" }}>
+                              {meta}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    );
+                  })}
                 </Box>
-                {/* 分页行（缺陷「左侧分页器文本变形」）：窄栏里一行不挤字——
-                    flexWrap 允许换行，文本 nowrap + tabular-nums 一行完整显示（flexBasis 100% 整行换行），
-                    两个按钮 flex: 0 0 auto 不被压扁。 */}
                 <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", justifyContent: "center" }}>
                   <Button
                     size="small" variant="gray"
@@ -435,7 +439,6 @@ export function WorkbenchSection({
             )}
           </Box>
         </Surface>
-        </ScrollArea>
       </Box>
 
       {/* ---------------- 右栏：任务进度 + 匹配结果 ---------------- */}
@@ -514,7 +517,6 @@ export function WorkbenchSection({
             ))}
           </Box>
         )}
-        </ScrollArea>
       </Box>
     </Box>
   );

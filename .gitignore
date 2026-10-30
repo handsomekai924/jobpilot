@@ -44,5 +44,4 @@ filters.json
 jobs.db
 jobs.db.migrated
 
-# Web 控制台运行时数据（状态库 boss.db 所在处；llm_config 之类的旧账本也落在这里面）
-data/
+/data/

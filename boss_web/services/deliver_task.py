@@ -54,7 +54,6 @@ logger = logging.getLogger(__name__)
 
 ST_RUNNING = "running"
 
-#: 发送通道所属站点：任务占用、`site_settings` 的节流/配额都按它分账。
 SITE = "boss"
 
 hub.register(
@@ -63,7 +62,7 @@ hub.register(
         title="批量发送",
         policy=POLICY_GLOBAL_SINGLE,
         title_fn=lambda req: f"批量发送（{len(req.get('job_ids') or [])}条）",
-        site=SITE,  # todo3 Stage 1：随本模块一起搬进 boss-platform-boss，届时由 adapter 自述
+        site=SITE,
     )
 )
 ST_DONE = "done"
@@ -284,9 +283,7 @@ class DeliverTask:
         self.items: list[dict[str, Any]] = []
         self.events: deque[dict[str, Any]] = deque(maxlen=100)
         self.cancel_flag = False
-        #: 本次生效的站点限速/配额（`site_settings`），任务中心只读视图用。
         self.limits: dict[str, Any] = {}
-        #: 整批停住 / 剩下的没发的原因（`flow.DeliverReport.stopped_reason` 同义）。
         self.stopped_reason: str = ""
         self.lock = threading.RLock()
 
@@ -572,7 +569,6 @@ class DeliverTaskManager:
             store.close()
             return
 
-        # 站点限速/配额（site_settings）：限速是站点属性，条间隔与每日上限照它办
         settings, sent_today = load_site_limits(SITE)
         interval = settings.throttle_seconds or self._interval
         quota_left = settings.quota_left(sent_today)

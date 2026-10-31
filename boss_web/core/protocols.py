@@ -1,8 +1,6 @@
-"""能力协议（todo3 2.1）：五套 Protocol + 喂料口 + 门面。
+"""能力协议：五套 Protocol + 喂料口 + 门面。
 
-登录、筛选、抓取、发对话、投递五套协议差异极大，按能力拆开——策略落在能力上，
-工厂/注册表落在门面上（`registry`）。server 编排层只 import 这里的 Protocol，
-不 import 任何 `boss_*` 实现。
+server 编排层只 import 这里的 Protocol，不 import 任何 `boss_*` 实现。
 """
 
 from __future__ import annotations
@@ -56,11 +54,7 @@ class AuthSink(Protocol):
 
 @runtime_checkable
 class AuthFlow(Protocol):
-    """交互式登录：人机协作，不是同步方法。
-
-    喂料模型（2026-10-14 拍板）：**推送为主**——`AuthSink` 只通知，
-    验证码 / 滑块票据由外部经 `submit_*` 塞回，`poll` 看状态。
-    """
+    """交互式登录：推送为主，外部经 `submit_*` 喂料，`poll` 看状态。"""
 
     def caps(self) -> AuthCaps:
         """登录能力自述；缺哪项 UI 就降级哪项入口。"""
@@ -114,7 +108,7 @@ class JobSource(Protocol):
 
 @runtime_checkable
 class Messenger(Protocol):
-    """发对话（打招呼）。BOSS = 建会话(friend/add) + MQTT 发正文；其他站点另说。"""
+    """发对话（打招呼）：建会话 + 发正文。"""
 
     def open_session(self, ref: JobRef) -> SessionRef:
         """建会话（不发正文）。"""
@@ -128,11 +122,8 @@ class Messenger(Protocol):
 
 @runtime_checkable
 class Applier(Protocol):
-    """投递简历——**独立于发对话**，且默认带门槛（todo3 2.3）。
+    """投递简历：独立于发对话。
 
-    术语约定：「发对话」= 打招呼/聊天正文；「投递」= 简历送达（BOSS 对应
-    `resume/onekeydeliver.json` 一类的投递通道）。两者是两个阶段，别混叫「投递」。
-    产品层的「投递」是**平台能力**（BOSS 的投递行为 = 打招呼，直投站 = 投简历）；
     本协议里「投/apply」专指简历送达那一腿，发对话走 `Messenger`。
     """
 
@@ -163,7 +154,7 @@ class SiteAdapter(Protocol):
         """登录态摘要（`logged_in` / `phone_masked` / `busy`），`/api/platforms` 用。"""
 
     def classify_fault(self, err: Exception) -> DeliverFault:
-        """配额/限频/风控分类（2026-10-14 升到站点级共享）：发对话与投递共用。"""
+        """配额/限频/风控分类（发对话与投递共用）。"""
 
 
 __all__ = [

@@ -13,6 +13,7 @@ import type { PlatformSession } from "../platform/types";
 /** 登录喂料三态（waiting_human 状态机的 UI 半边，docs 5.5）。 */
 export type AuthFeedKind = "code" | "slider" | "scan";
 
+/** 一条待喂料记录。 */
 export interface AuthFeed {
   task_id: string;
   site: string;
@@ -24,6 +25,7 @@ export interface AuthFeed {
   at: number;
 }
 
+/** 会话 store 形状：会话表 + 待喂料表。 */
 interface SessionStore {
   /** site_id → 会话摘要 */
   sessions: Record<string, PlatformSession>;
@@ -36,6 +38,7 @@ interface SessionStore {
   clearAll: () => void;
 }
 
+/** 会话与登录喂料 store。 */
 export const useSessionStore = create<SessionStore>((set) => ({
   sessions: {},
   feeds: {},
@@ -47,6 +50,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
 
   setFeed: (feed) => set((s) => ({ feeds: { ...s.feeds, [feed.task_id]: feed } })),
 
+  /** 摘掉某任务的待喂料；没有就原样返回。 */
   clearFeed: (taskId) =>
     set((s) => {
       if (!(taskId in s.feeds)) return s;
@@ -58,6 +62,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
   clearAll: () => set({ sessions: {}, feeds: {} }),
 }));
 
+/** 登录任务的终态（含空串）。 */
 const TERMINAL = new Set(["done", "error", "cancelled", ""]);
 
 /**

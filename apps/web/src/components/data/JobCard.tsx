@@ -1,3 +1,5 @@
+/** 职位卡片（列表行）：公司/标题/薪资 + 右侧分数环。 */
+
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type { JobSummary, JdStatus } from "../../api/dto";
@@ -7,6 +9,7 @@ import { Pill, type PillTone } from "./Pill";
 import { ScoreRing } from "./ScoreRing";
 import { Surface } from "../surfaces/Surface";
 
+/** 职位卡片属性。 */
 export interface JobCardProps {
   job: JobSummary;
   onClick?: () => void;
@@ -16,23 +19,22 @@ export interface JobCardProps {
   leading?: ReactNode;
 }
 
+/** JD 状态 → 胶囊色调。 */
 function jdTone(status: JdStatus | string | null | undefined): PillTone {
   if (status === "failed") return "warn";
   if (status === "completed") return "ok";
   return "static";
 }
 
-/** 职位卡片（列表行）：公司/标题/薪资 + 右侧分数环。
- *
- * 缺陷「岗位项误触开详情」：卡片不带按压缩放（apple-press）——勾选框和主体同卡，
- * 按压动效会让「点勾选」的手感变成「开详情」；改为悬浮高亮（Surface hoverable）。
+/**
+ * 职位卡片：公司/标题/薪资标签 + 右侧分数环，可带勾选插槽与动作区。
+ * 卡片不带按压缩放，改用悬浮高亮——避免「点勾选」的手感变成「开详情」。
  */
 export function JobCard({ job, onClick, actions, leading }: JobCardProps) {
   return (
     <Surface padded={false} hoverable={!!onClick} onClick={onClick}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, p: 2 }}>
         {leading !== undefined && (
-          /* 前缀插槽里的点击（勾选等）不冒泡去开详情 */
           <Box
             sx={{ display: "flex", alignItems: "center", flex: "0 0 auto", ml: -0.5 }}
             onClick={(e) => e.stopPropagation()}

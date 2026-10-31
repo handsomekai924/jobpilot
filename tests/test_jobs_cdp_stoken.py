@@ -1,8 +1,6 @@
 """`__zp_stoken__` 的 CDP 取法：过期账本 / fetch 时自动续期。
 
-真 Chrome 那一段（拉浏览器 → 灌登录 Cookie → 开页 → 读 Cookie）在
-`boss_jobs.cdp_stoken` 里，单测不碰真浏览器（见 `conftest.py` 的
-`isolated_db`），只验「什么时候该去换新、换了怎么落盘」。
+单测不碰真浏览器（见 `conftest.py` 的 `isolated_db`），只验何时换新与换后如何落盘。
 """
 
 from __future__ import annotations
@@ -199,9 +197,7 @@ def test_ensure_强制换新(tmp_path: Path):
 
 
 def test_ensure_令牌没变就别再写盘(tmp_path: Path):
-    """`ensure()` 每条请求都会走；Cookie 里已经是这枚就别再 `_persist`——
-    否则日志上就是一行行「登录态已保存」刷屏（fetch.log 那个循环重复）。
-    """
+    """`ensure()` 每条请求都会走；Cookie 里已是这枚就别再 `_persist`，免得日志刷屏。"""
     session_db = tmp_path / "session.db"
     store = StokenStore(tmp_path / "boss.db")
     store.save(StokenRecord(token="0138OLD", minted_at=time.time(), expires_at=time.time() + 9999))
@@ -247,9 +243,7 @@ def test_ensure_强制换新有冷却(tmp_path: Path):
 
 
 def test_ensure_冷却只认本进程换过的(tmp_path: Path):
-    """`_last_renew_at` 是 0（本进程还没换过）时不该冷却——
-    否则「真的强制换新」会被上次落盘的 `minted_at` 误杀。
-    """
+    """`_last_renew_at` 为 0（本进程还没换过）时不冷却，否则强制换新会被旧 `minted_at` 误杀。"""
     store = StokenStore(tmp_path / "boss.db")
     store.save(StokenRecord(token="0138OLD", minted_at=time.time(), expires_at=time.time() + 9999))
     calls: list[str] = []
@@ -263,9 +257,7 @@ def test_ensure_冷却只认本进程换过的(tmp_path: Path):
 
 
 def test_ensure_账本没有但会话里有就信它(tmp_path: Path):
-    """手工从浏览器拷进 `doc('session')` 的那枚：没有过期时间戳，先用着，
-    撞 37 再说（别抢着覆盖用户的活）。
-    """
+    """手工拷进 `doc('session')` 的令牌没有过期时间戳，先用着，撞 37 再说。"""
     calls: list[str] = []
     p = CdpStokenProvider(
         http=FakeHttp({"__zp_stoken__": "0138MANUAL"}),
@@ -397,8 +389,7 @@ def test_档位_offscreen把窗口摆到屏幕外():
 
 
 def test_档位_hidden要关掉遮挡节流():
-    """窗口被 SW_HIDE 掉之后 Chrome 会停画 + 冻结后台定时器，
-    不关掉这三样站点 JS 可能就算不动令牌。"""
+    """窗口 SW_HIDE 后 Chrome 会停画并冻结后台定时器，必须关掉三项节流。"""
     flags = cdp._mode_flags("hidden")
     assert "--disable-backgrounding-occluded-windows" in flags
     assert "--disable-renderer-backgrounding" in flags
@@ -516,8 +507,7 @@ def test_调试口_两个协议都占着就换端口(launched, monkeypatch):
 
 
 def test_调试口_换端口时换一个profile(launched, monkeypatch):
-    """同一个 user-data-dir 的第二台 Chrome 会把启动交给第一台然后自己退出——
-    挪端口不换 profile 等于没挪。"""
+    """同一 user-data-dir 的第二台 Chrome 会把启动交给第一台，换端口必须换 profile。"""
     profiles: list[Path] = []
     procs: list[FakeProc] = []
     probes_9223 = iter(["", "ws://x"])

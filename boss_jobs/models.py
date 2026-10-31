@@ -92,26 +92,18 @@ def clean_desc(value: Any) -> str:
 
 @dataclass(frozen=True)
 class Job:
-    """一条清洗后的职位。字段分三截：todo.md 那 8 项、主键追溯、接口顺带回的杂项。
-
-    地点分量在拼好的 `location` 之外另存，方便按区筛。
+    """一条清洗后的职位；地点分量在拼好的 `location` 之外另存，方便按区筛。
 
     Attributes:
         location: 工作地点（`cityName` + `areaDistrict` + `businessDistrict` 三段拼好）。
-        salary_desc: 薪资待遇；顺带清掉防爬字体残留。
         job_experience: 工作经验要求；接口偶发为空时从 `jobLabels` 前两位认。
         job_degree: 学历要求；同上。
-        encrypt_job_id: 职位加密 id，全站唯一，入库主键。
-        raw_json: 原始 item，清洗前后可对照。
-        lid: 列表页 lid。
-        security_id: 详情接口用的 securityId。
-        page: 这条是从第几页捞的（入库后才有意义）。
         job_desc: 职位描述（JD 正文）；列表接口不回，靠 `JobClient.fetch_job_detail` 逐条补。
         detail_fetched_at: 详情抓取时间（`%Y-%m-%d %H:%M:%S`）；空串 = 还没抓过。
         jd_status: 详情处理状态：pending / collecting / completed / empty / failed / unchecked。
         is_blacklisted: 当前规则评估结果；历史分析另存自己的不可变快照。
         last_greeted_at: 最近一次「发招呼语」成功时间；30 天冷却的唯一岗位级依据，抓取 UPSERT 不覆盖。
-        site: 归属站点（`jobs.site`）；跨站点职位库按它过滤。
+        site: 归属站点（`jobs.site`）；清洗对象为空串，落库由列默认补齐。
     """
 
     job_name: str
@@ -159,8 +151,6 @@ class Job:
     blacklist_checked_at: str = ""
     auto_delivery_blocked: bool = True
     last_greeted_at: str = ""
-    #: 归属站点（`jobs.site`）：跨站点职位库按它过滤。抓下来还没入库的清洗对象
-    #: 是空串，落库由列默认（单站点旧账全归 BOSS）补齐，读出来就一直带着。
     site: str = ""
 
     @classmethod

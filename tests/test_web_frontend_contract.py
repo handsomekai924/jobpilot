@@ -1,8 +1,6 @@
 """前端契约：静态源码层面的回归检查。
 
-不跑浏览器（真 Chrome E2E 另有 `tools/wire_search.py` 手工路径），这里
-只读 JS/HTML 源文本，把「文档要求的界面契约」钉死——导航改名、配置迁移、
-发送带 mode/确认、API Key 不明文回显等。文本断言跑得快，也挡得住误删。
+不跑浏览器，只读 JS/HTML 源文本，钉死界面契约（导航、配置迁移、发送参数、API Key 回显）。
 """
 
 from __future__ import annotations
@@ -15,10 +13,7 @@ STATIC = Path(__file__).resolve().parents[1] / "boss_web" / "static"
 
 
 def _read(rel: str) -> str:
-    """读旧 SPA（`boss_web/static/legacy/`）下的相对路径文件文本。
-
-    M1 起旧壳整棵挪进 `legacy/`（`/legacy/` 入口，M3 删）；本文件钉的是旧壳契约。
-    """
+    """读旧 SPA（`boss_web/static/legacy/`）下的相对路径文件文本。"""
     path = STATIC / "legacy" / rel
     assert path.is_file(), f"缺少静态文件：legacy/{rel}"
     return path.read_text(encoding="utf-8")
@@ -108,11 +103,7 @@ def test_系统配置有独立招呼语页签(settings_js: str):
 
 
 def test_招呼语面板只改这一段约束():
-    """面板只开招呼语约束；其他提示词不上界面。
-
-    `maxlength` 钉死 500，和 `app_settings_store.GREETING_REQUIREMENT_MAX_LEN`
-    一致——改一处就得改另一处。
-    """
+    """面板只开招呼语约束，其他提示词不上界面。"""
     src = _read("js/views/greeting_prompt.js")
     assert "/api/system/greeting-prompt" in src
     assert "恢复默认" in src
@@ -179,13 +170,7 @@ def test_兼职期望切换筛选面板(settings_js: str):
 
 
 def test_临时期望发expectInfo不发encryptExpectId(settings_js: str):
-    """临时期望（temp_expect）主参数是 expectInfo JSON，键名是站点那五个。
-
-    对齐前端 `getFormData()` 的 temp-expect 分支：`JSON.stringify({expectType,
-    position, location, lowSalary, highSalary})`——`location` 是城市 code，
-    不是 `locationName`。UI 下拉要有这一项，且写回 `expect_info`。
-    临时期望不是列表条目，不该被当成 encryptExpectId。
-    """
+    """临时期望的主参数是 expectInfo JSON，不是 encryptExpectId。"""
     assert 'temp.value = "temp"' in settings_js, "期望下拉缺「临时期望」项"
     assert "临时期望（快速添加）" in settings_js
     for key in ("expectType", "position", "location", "lowSalary", "highSalary"):
@@ -201,11 +186,7 @@ def test_搜索条件提交的是code不是显示名(settings_js: str):
 
 
 def test_搜索条件多选是点开才弹不是列表框(settings_js: str):
-    """原生 `<select multiple size>` 会把选项一直摊开占半屏，不是「点击才显示」。
-
-    多选维度（经验/学历/规模/薪资方式/兼职/融资阶段）走勾选下拉；
-    城市/行业数据量大，走级联（见 `test_城市和行业是级联`）。
-    """
+    """多选维度走勾选下拉，不是原生常驻展开的列表框。"""
     assert "multiple size=" not in settings_js, "多选维度仍是原生列表框"
     assert "multiSelect" in settings_js
     ui = _read("js/ui.js")
@@ -215,10 +196,7 @@ def test_搜索条件多选是点开才弹不是列表框(settings_js: str):
 
 
 def test_城市和行业是级联(settings_js: str):
-    """城市树（省→市→区）和行业分组摊成 option 会卡死初始化，改成级联按需渲染。
-
-    提交值仍是 code：城市单 code，行业是叶子 code 数组。
-    """
+    """城市树与行业分组改成级联按需渲染，提交值仍是 code。"""
     assert "cascader" in settings_js
     assert "cityPicker" in settings_js
     assert "industryPicker" in settings_js
@@ -230,11 +208,7 @@ def test_城市和行业是级联(settings_js: str):
 
 
 def test_级联选完不自动关窗(settings_js: str):
-    """点完就收起会让人以为没选上，也改不了主意——留到「确定」或点外面再关。
-
-    单选点叶子不应再自动收起；点节点会重绘列表，e.target 已脱离文档，
-    点外面的判定要用事件路径。
-    """
+    """单选点叶子不自动收起下拉，点外面或「确定」才关。"""
     ui = _read("js/ui.js")
     assert "cascader-ok" in ui
     assert "popApi.close()" in ui
@@ -244,11 +218,7 @@ def test_级联选完不自动关窗(settings_js: str):
 
 
 def test_城市级联不许选省级(settings_js: str):
-    """城市树顶层是省（如「广东」101280000），搜索接口只吃市 / 区 code。
-
-    点省只展开下一级不取值；setValue / setNodes 撞见省级 code 也要丢掉，
-    免得旧配置把 101280000 原样发出去。直辖市两层同码（北京 101010100）仍可选。
-    """
+    """城市级联点省只展开，省级 code 不进入提交值。"""
     ui = _read("js/ui.js")
     assert "colIndex === 0 && node.children?.length" in ui, "点省级仍在取值"
     assert "isSelectableCode" in ui, "setValue 没挡省级 code"
@@ -282,10 +252,7 @@ def test_职位页摘要说清采集来源(jobs_js: str):
 
 
 def test_职位页摘要不把期望流下的关键词算进去(jobs_js: str):
-    """期望流只带筛选维度（from_search 不搬 query），摘要打关键词会看成「期望 + 关键词」。
-
-    stage / jobType 同理，兼职态 salary 被 payType/partTime 顶替。
-    """
+    """期望流下摘要不把关键词算进去，只带筛选维度。"""
     assert "if (search.query && !expectMode)" in jobs_js
     assert "if (search.jobType && !expectMode)" in jobs_js
     assert "if (search.salary && !partTime)" in jobs_js
@@ -449,14 +416,7 @@ def test_更新进度走_ws():
 
 
 def test_更新完成后只刷新不关标签页():
-    """验更新完成后只刷新不关标签页。
-
-    用户自己开的标签页 history.length === 1，window.close 照关不误；
-    重启的 exe 带 --no-browser 不会再开一个，关掉就等于页面全丢。
-    源码注释会用 window.close 字样写明为什么不能用，断言前先摘掉再看有没有真调用。
-    回执是进程内缓存的，不记标记就会「看到回执 → 刷新 → 又看到回执」无限刷；
-    存不进 sessionStorage 时要让用户手动 F5，别刷不完。
-    """
+    """更新完成后只刷新不关标签页。"""
     update_js = _read("js/update.js")
     code_only = update_js.replace("``window.close()``", "")
     assert "tryCloseTab" not in update_js
@@ -504,13 +464,7 @@ def test_系统配置多了版本更新页签(settings_js: str):
 
 
 def test_圆点只在有新版且未忽略时亮():
-    """验圆点只在有新版且未忽略时亮。
-
-    圆点默认是 hidden 的；`display: inline-block` 会把 UA 的 `[hidden]` 压掉，
-    那样圆点就一直挂着。判断也要两个字段都看：`should_prompt` 单独一个够用，
-    但 `has_update` 点明「有新版」这个前提，免得后端字段语义漂移时跟着误导。
-    已忽略的版本不亮：should_prompt 后端已含 !suppressed，前端别再拿 ignored 反卡。
-    """
+    """圆点只在有新版且未忽略时显示。"""
     settings_js = _read("js/views/settings.js")
     body = _fn_body(settings_js, "onUpdateDot")
     assert "has_update" in body
@@ -523,13 +477,7 @@ def test_圆点只在有新版且未忽略时亮():
 
 
 def test_圆点一直挂着不靠弹窗续命():
-    """验关掉弹窗后圆点仍按缓存一直亮着。
-
-    关掉弹窗 ≠ 忽略——只要还有没被忽略的新版，圆点就得一直亮。
-    只靠 60s 一轮的 `boss:update` 事件是不够的：关完弹窗进设置页那一分钟里
-    没有事件，圆点就灭了，看着像「关掉就没提示」。所以检测结果要进缓存，
-    页面一挂载就按缓存画上。
-    """
+    """关掉弹窗后圆点仍按缓存一直亮着。"""
     update_js = _read("js/update.js")
     settings_js = _read("js/views/settings.js")
     assert "lastStatus" in update_js
@@ -595,11 +543,7 @@ def test_app启动后台轻提示(app_js: str):
 
 
 def test_前端不再有常驻轮询(app_js: str):
-    """所有轮询改 WS：会话与版本检测都不许再挂常驻 setInterval。
-
-    会话由 `hello` / `session.changed` 推；版本由 `update.available` 推
-    （`hello` 的 version 字段补重连）。剩下的定时器只许是断线兜底或节流。
-    """
+    """会话与版本检测都改走 WS，不再挂常驻 setInterval。"""
     assert "setInterval(refreshBridge" not in app_js
     assert "session.changed" in app_js
     update_js = _read("js/update.js")
@@ -627,12 +571,7 @@ def _fn_body(src: str, name: str) -> str:
 
 
 def test_登录分派按任务类型不按页签():
-    """applyTask 必须按 task.kind 分派——两条流的 status 字符串是重叠的。
-
-    共用一个分派器就会串台：扫码任务一启动是 pending，落进短信的分支就
-    goStep(2) 把「滑块」那格点亮了，短信进度无端前进。
-    分派器本身只做转交，不许直接动界面进度。
-    """
+    """`applyTask` 按 `task.kind` 分派，两条登录流不串台。"""
     login = _read("js/views/login.js")
     body = _fn_body(login, "applyTask")
     assert "task.kind" in body
@@ -664,11 +603,7 @@ def test_后端任务快照带kind():
 
 
 def test_轮询处理不许抢页签():
-    """applyTask / applyQrTask 里调 setMode，页签就会被 900ms 的轮询拽回去。
-
-    点「短信登录」看起来没反应，就是这么来的：处理函数每秒强制切回扫码页签。
-    页签只听用户的（生成二维码 / 页签点击 / 页内切回接任务），状态机只管面板内容。
-    """
+    """`applyTask` / `applyQrTask` 不许调 `setMode` 抢页签。"""
     login = _read("js/views/login.js")
     for fn in ("applyTask", "applyQrTask", "applySmsTask"):
         body = _fn_body(login, fn)
@@ -676,11 +611,7 @@ def test_轮询处理不许抢页签():
 
 
 def test_切到短信就放弃扫码():
-    """切页签 = 换一条登录流，旧的当场作废——同一时刻只跑一条。
-
-    二维码留着只会挡住「发送验证码」（后端 409），用户得能重新生成一张。
-    旧码作废，下次生成必须重取图。
-    """
+    """切到短信登录页签就作废旧二维码，同一时刻只跑一条登录流。"""
     login = _read("js/views/login.js")
     body = _fn_body(login, "switchFlow")
     assert "abandonLogin" in body, "切页签必须作废旧的那条登录流"
@@ -690,11 +621,7 @@ def test_切到短信就放弃扫码():
 
 
 def test_简历解析进度只在任务中心():
-    """解析进度板块整块挪走：本页不画进度，只跟到结束好收结果。
-
-    留一半进度在业务页就会两处不一致：任务中心停了本页还在跑，
-    或者反过来。统一到任务中心后，本页只许留任务 id 与终态收尾。
-    """
+    """解析进度只在任务中心，本页不画进度。"""
     resume = _read("js/views/resume.js")
     assert "parsePanel" not in resume
     assert "paintParse" not in resume
@@ -703,11 +630,7 @@ def test_简历解析进度只在任务中心():
 
 
 def test_匹配进度只在任务中心(match_js: str):
-    """匹配的进度面板与「在跑的匹配任务」多行列表都挪走，停/看进度去任务中心。
-
-    批量投递的发送进度面板也挪走：留一半进度在业务页就会两处不一致，
-    停止/重试统一去任务中心，本页只留「结束收结果 + 终态提示」。
-    """
+    """匹配与批量投递的进度只在任务中心。"""
     assert "matchPanel" not in match_js
     assert "paintMatchRunning" not in match_js
     assert "在跑的匹配任务" not in match_js
@@ -718,10 +641,7 @@ def test_匹配进度只在任务中心(match_js: str):
 
 
 def test_面试题页内不许再开任务中心弹窗():
-    """面试题的任务中心弹窗整套删掉，入口交给顶栏，页内不再放跳转按钮。
-
-    页内弹窗只管面试题、换页即丢；独立页管全部任务，停止/重试/删除都在那。
-    """
+    """面试题页内不再开任务中心弹窗，入口交给顶栏。"""
     iv = _read("js/views/interview.js")
     assert "openTaskCenter" not in iv
     assert "paintTaskCenter" not in iv
@@ -731,11 +651,7 @@ def test_面试题页内不许再开任务中心弹窗():
 
 
 def test_职位采集进度只在任务中心(jobs_js: str):
-    """采集 / 补全描述的进度面板都整块挪走：本页只留开始按钮，看进度去任务中心。
-
-    和解析/匹配同一理由：留一半进度在业务页就会两处不一致。本页只跟到
-    结束好收结果（重载职位列表），进度条、日志、停止都在任务中心。
-    """
+    """采集与补全描述的进度只在任务中心。"""
     assert "crawlPanel" not in jobs_js
     assert "PHASE_LABELS" not in jobs_js, "阶段文案后端快照给 current，页面不再自维护一份"
     assert "crawl-task" not in jobs_js, "页面上不许再挂采集进度板块"
@@ -748,12 +664,7 @@ def test_职位采集进度只在任务中心(jobs_js: str):
 
 
 def test_任务观察器收帧即画不回源():
-    """watchTask 收到 WS 任务帧直接画，不许每帧再回源打一次 HTTP status。
-
-    帧里本来就带业务快照（data.raw，和各页原 HTTP status 同形状）。事件密集
-    时每帧回源会在服务端日志里刷出一串 GET，和 1.5s 轮询没两样。HTTP 只留给
-    首帧与 WS 断线兜底；hello / task.snapshot 的全量列表里也能挑出本任务。
-    """
+    """`watchTask` 收到 WS 任务帧直接画，不回源打 HTTP status。"""
     src = _read("js/task_watch.js")
     assert "payloadOf" in src
     assert "kick(" not in src, "事件触发的回源刷掉，帧里就有快照"
@@ -766,10 +677,7 @@ def test_任务观察器收帧即画不回源():
 
 
 def test_首页不再内嵌找职位进度():
-    """首页的「找职位进度」卡连同 WS 驱动的刷新全删掉，只留一句去哪看的说明。
-
-    首页本来就有顶栏在跑角标；再画一块进度就要两处状态同步，没必要。
-    """
+    """首页不再内嵌找职位进度卡。"""
     home = _read("js/views/home.js")
     assert "找职位进度" not in home
     assert "home-crawl-task" not in home
@@ -779,12 +687,7 @@ def test_首页不再内嵌找职位进度():
 
 
 def test_任务中心入口只在顶栏(index_html: str):
-    """任务中心只留顶栏一个入口：主导航 + 在跑角标，业务页一个跳转按钮都不许留。
-
-    入口散在各业务页就会有人从这里进、从那里进，过滤参数还得跟着到处维护；
-    统一从顶栏进，页面自己的查询参数预过滤留给书签/手输。
-    扫描跳过 `tasks.js` 自身（它的说明里会写查询参数预过滤，不算入口）。
-    """
+    """任务中心只留顶栏一个入口，业务页不留跳转按钮。"""
     assert 'href="#/tasks"' in index_html, "顶栏主导航要留任务中心入口"
     assert 'id="bridge-tasks"' in index_html, "顶栏在跑角标也是入口"
     views = STATIC / "js" / "views"

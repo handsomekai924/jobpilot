@@ -1,17 +1,10 @@
-"""多站点收口的架构守卫（todo3 第八节成功标准 #3 / #4 / #7）。
+"""多站点收口的架构守卫：依赖无环、模板方法洞数固定、任务运行时只有一份。
 
-这三条是**主张**，不是文档里的一句话——不钉死的话，接第二个站点时一定会被一点点
-啃掉：多调一个站点方法（洞从 3 变 4）、新任务自造一个事件环、`core` 反过来 import
-业务层。这里把它们变成会红的测试：
-
-- #3 依赖无环：`core` 只 import 自己和标准库，内部还得无环；
-- #4 模板方法洞数固定：`run_crawl` / `run_deliver` 的站点调用点**各恰好 3 个**，
-  且只许在模板里出现；
-- #7 任务运行时只有一份：`events` 事件环不许再增生，新增长任务复用 `task_runtime`。
-
-#2（共享层不认站点协议）见 `test_core_boundaries.py`；#5（投递门槛是共享规则）
-见 `test_core_flow.py` 的两条门槛用例；#1 / #8 是流程与工期主张，静态测不了，
-得等第二站点立项后拿 `git diff` 验。
+Attributes:
+    TEMPLATE_HOLES: 每个模板方法的站点调用路径集合；多一个少一个都是契约破坏。
+    SHARED_INPUTS: 共享规则的判据输入，不算模板方法的洞。
+    EVENT_DEQUE_OWNERS: 现存自持 events 事件环的模块名单；新增长任务应复用 task_runtime。
+    ALIAS_PREFIXES: 平台作用域资源的前缀；裸路径是 legacy 专用兼容别名。
 """
 
 from __future__ import annotations
@@ -23,27 +16,19 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CORE = ROOT / "boss_web" / "core"
 SERVICES = ROOT / "boss_web" / "services"
 
-# ---------------------------------------------------------------------------
-# #4 模板方法洞数固定
-# ---------------------------------------------------------------------------
-
-#: 每个模板方法的站点调用点，路径是「`adapter.` 之后的完整点串」。
-#: 多一个少一个都是契约破坏——多一个 = 共享层开始夹带站点编排，少一个 = 洞没填。
 TEMPLATE_HOLES: dict[str, frozenset[str]] = {
     "run_crawl": frozenset({
-        "catalog.to_search_params",  # 通用条件 → 站点私有参数串
-        "jobs.iter_pages",  # 翻页迭代（翻页策略是站点语义）
-        "jobs.fetch_detail",  # 抓详情（形状站点私有）
+        "catalog.to_search_params",
+        "jobs.iter_pages",
+        "jobs.fetch_detail",
     }),
     "run_deliver": frozenset({
-        "messenger.open_session",  # 建会话（不发正文）
-        "messenger.send_text",  # 发正文
-        "applier.apply",  # 投简历
+        "messenger.open_session",
+        "messenger.send_text",
+        "applier.apply",
     }),
 }
 
-#: 共享规则的**输入**，不是洞：站点只是如实自述能力 / 回报会话阶段 / 归类故障，
-#: 不许借它们夹带编排步骤。`run_deliver` 允许调这三个，且只许调这三个。
 SHARED_INPUTS: frozenset[str] = frozenset({
     "applier.caps",
     "messenger.conversation_state",
@@ -85,12 +70,7 @@ def _template(name: str) -> ast.FunctionDef:
 
 
 def test_洞数固定_每个模板方法的站点调用点恰好三个():
-    """成功标准 #4：`run_crawl` / `run_deliver` 各恰好 3 个站点调用点。
-
-    数的是**洞**（`SHARED_INPUTS` 那三个共享判据不算，见下一条）。
-    多出第 4 个洞 = 共享层开始夹带站点编排，第二站点就得跟着硬塞；
-    少一个 = 契约被改了没人知道。
-    """
+    """成功标准 #4：`run_crawl` / `run_deliver` 各恰好 3 个站点调用点。"""
     for name, want in TEMPLATE_HOLES.items():
         got = _site_calls(_template(name)) - SHARED_INPUTS
         assert got == set(want), (
@@ -101,11 +81,7 @@ def test_洞数固定_每个模板方法的站点调用点恰好三个():
 
 
 def test_洞只在模板里_别处不许再有站点调用点():
-    """成功标准 #4 的另一半：站点调用点只许住在模板方法体内。
-
-    `_ref_of` 这类辅助只许**读** `adapter.site_id`，不许调站点方法——
-    读属性是取站点身份，调方法就是新开一个洞。
-    """
+    """成功标准 #4 的另一半：站点调用点只许住在模板方法体内。"""
     tree = ast.parse((CORE / "flow.py").read_text(encoding="utf-8"))
     strays: list[str] = []
     for node in ast.walk(tree):
@@ -139,20 +115,10 @@ def _enclosing_function(tree: ast.AST, target: ast.AST) -> str:
 
 
 def test_共享规则的输入不是洞():
-    """`caps` / `conversation_state` / `classify_fault` 是门槛与熔断的判据输入。
-
-    它们在 `run_deliver` 里被调，但不算洞——站点只是如实自述，不能借它们夹带
-    编排步骤。这条钉住区分：新增的站点调用要么进 `TEMPLATE_HOLES` 当第 4 个洞
-    （先改契约再说），要么被 #4 的上一条逮住。
-    """
+    """`caps` / `conversation_state` / `classify_fault` 是门槛与熔断的判据输入，不算洞。"""
     got = _site_calls(_template("run_deliver"))
     assert SHARED_INPUTS <= got, f"run_deliver 少调了共享判据：{sorted(SHARED_INPUTS - got)}"
     assert not (SHARED_INPUTS & TEMPLATE_HOLES["run_deliver"]), "洞与判据输入不许重叠"
-
-
-# ---------------------------------------------------------------------------
-# #3 依赖无环
-# ---------------------------------------------------------------------------
 
 
 def _core_modules() -> dict[str, pathlib.Path]:
@@ -181,17 +147,14 @@ def _imports_of(path: pathlib.Path, module: str) -> set[str]:
         if not target.startswith("boss_web.core"):
             continue
         edges.add(target)
-        if node.module is None:  # `from . import a, b`
+        if node.module is None:
             for alias in node.names:
                 edges.add(f"{base}.{alias.name}")
     return edges
 
 
 def test_依赖无环_core只认自己():
-    """成功标准 #3：`core` 内部 import 无环，对外只认标准库。
-
-    一旦成环，todo3 Stage 1 的 `packages/core` 就拆不出去（拆包时循环依赖是硬墙）。
-    """
+    """成功标准 #3：`core` 内部 import 无环，对外只认标准库。"""
     modules = _core_modules()
     assert modules, "一个 core 模块都没扫到，守卫等于没跑"
     graph = {
@@ -199,7 +162,7 @@ def test_依赖无环_core只认自己():
         for name, path in modules.items()
     }
     cycles: list[str] = []
-    state: dict[str, int] = {}  # 0=没走 1=在栈上 2=走完
+    state: dict[str, int] = {}
 
     def walk(node: str, trail: list[str]) -> None:
         """DFS 找环，撞到栈上的就记一条。"""
@@ -217,12 +180,6 @@ def test_依赖无环_core只认自己():
     assert not cycles, "core 内部 import 成环了：\n" + "\n".join(cycles)
 
 
-# ---------------------------------------------------------------------------
-# #7 任务运行时只有一份
-# ---------------------------------------------------------------------------
-
-#: 现存的 `events` 事件环持有者。**这个集合是历史债，不是范本**——
-#: 新增长任务不许再往里加名字，事件环该从 `task_runtime` 拿。
 EVENT_DEQUE_OWNERS: frozenset[str] = frozenset({
     "blacklist_recheck",
     "crawl_task",
@@ -258,12 +215,7 @@ def _events_owner(path: pathlib.Path) -> bool:
 
 
 def test_事件环不再增生():
-    """成功标准 #7：长任务的 `events` 事件环只有现存这些，不许再加。
-
-    新增长任务该复用 `task_runtime` 的登记/广播，不是再抄一份
-    `self.events: deque(maxlen=…)`。这里钉死集合：加名字就红，
-    到时候要么说明白为什么非得自造，要么改成复用。
-    """
+    """成功标准 #7：长任务的 `events` 事件环只有现存这些，不许再加。"""
     found = {p.stem for p in SERVICES.glob("*.py") if _events_owner(p)}
     added = found - EVENT_DEQUE_OWNERS
     removed = EVENT_DEQUE_OWNERS - found
@@ -282,13 +234,6 @@ def test_钉住的名单不是空的():
     assert not (SHARED_INPUTS & TEMPLATE_HOLES["run_deliver"])
 
 
-# ---------------------------------------------------------------------------
-# 别名收口：后端不许再往回发 legacy 裸路径
-# ---------------------------------------------------------------------------
-
-#: 平台作用域资源的前缀。裸的 `/api/<前缀>/…` 是 legacy 专用兼容别名，
-#: 由 `api/__init__.py` 双挂载；**后端自报的 URL**（滑块帮助页的 `post_url`
-#: / `page_url`、二维码图）只许是 `/api/sites/{site}/…`，别名一摘就断在半路。
 ALIAS_PREFIXES: tuple[str, ...] = (
     "/api/auth",
     "/api/filters",
@@ -333,12 +278,7 @@ def _is_alias(text: str) -> bool:
 
 
 def test_后端不往回发legacy裸路径():
-    """别名是给 legacy SPA 的，后端自己吐的 URL 一律站点作用域。
-
-    这条是**踩过才加的**：`login_task` 把 `/api/auth/slider/…` 写进滑块帮助页的
-    `post_url`，前端开窗那条却是 `/api/sites/boss/auth/slider/…`——两个口径，
-    别名一摘帮助页就再也提交不了票据。加了这条之后再有人图省事写裸路径会当场红。
-    """
+    """别名是给 legacy SPA 的，后端自己吐的 URL 一律站点作用域。"""
     leaks: list[str] = []
     for path in _backend_files():
         for text in _string_literals(path):
@@ -372,8 +312,8 @@ def test_扫描器认得出站点调用点(tmp_path):
         "def run(adapter, other):\n"
         "    adapter.catalog.to_search_params(c)\n"
         "    adapter.jobs.iter_pages(p)\n"
-        "    other.catalog.to_search_params(c)\n"  # 不是 adapter，不数
-        "    adapter.site_id\n"  # 属性读取不是调用点
+        "    other.catalog.to_search_params(c)\n"
+        "    adapter.site_id\n"
         "    return adapter.applier.caps()\n",
         encoding="utf-8",
     )

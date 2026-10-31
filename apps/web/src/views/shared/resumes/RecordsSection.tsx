@@ -13,13 +13,14 @@ import {
 } from "../../../components";
 import { radius, typeScale } from "../../../theme/tokens";
 import { fmtNumber, fmtTime } from "../../../utils/format";
-import { resumeApi } from "../repos";
+import { resumeApi } from "../../../api/shared";
 import { DiffView, SecTitle } from "./chapters";
 import {
   CHANGE_TYPE_LABEL, FORMAT_OPTIONS, REV_STATUS_META, REV_PAGE_SIZE, msgOf,
   type RevisionDetail, type RevisionRow,
 } from "./types";
 
+/** 优化记录段：修改稿归档列表与详情侧栏（diff / 变更点 / 下载 / 保存）。 */
 export function RecordsSection({ openRevisionId, onOpened }: {
   openRevisionId: string | null;
   onOpened: () => void;
@@ -44,6 +45,7 @@ export function RecordsSection({ openRevisionId, onOpened }: {
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
+  /** 按当前偏移拉一页记录摘要。 */
   const loadList = useCallback(async () => {
     setListLoading(true);
     try {
@@ -58,8 +60,10 @@ export function RecordsSection({ openRevisionId, onOpened }: {
     }
   }, [offset]);
 
+  /** 首屏拉优化记录列表。 */
   useEffect(() => { void loadList(); }, [loadList]);
 
+  /** 拉一份修改稿详情并打开侧栏。 */
   const openDetail = useCallback(async (id: string) => {
     setOpeningId(id);
     try {
@@ -72,13 +76,14 @@ export function RecordsSection({ openRevisionId, onOpened }: {
     }
   }, [toast]);
 
-  // 从「简历优化」的「查看修改稿」跳过来：直接开这份详情
+  /** 从「简历优化」跳过来时直接打开对应修改稿，并清掉待开标记。 */
   useEffect(() => {
     if (!openRevisionId) return;
     void openDetail(openRevisionId);
     onOpened();
   }, [openRevisionId, openDetail, onOpened]);
 
+  /** 打开保存弹窗，预填标题、文件名与格式。 */
   const openSave = () => {
     if (!detail) return;
     const base = detail.resume_title || "resume";
@@ -131,6 +136,7 @@ export function RecordsSection({ openRevisionId, onOpened }: {
     }
   };
 
+  /** 按选定格式打开下载地址。 */
   const download = (id: string) => {
     window.open(resumeApi.revisionDownloadUrl(id, dlFormat), "_blank");
   };
@@ -138,6 +144,7 @@ export function RecordsSection({ openRevisionId, onOpened }: {
   /** 删除记录：先弹窗二次确认（`removeTarget`），确认后才真删；弹窗等删除回包再关。 */
   const remove = (row: RevisionRow) => setRemoveTarget(row);
 
+  /** 确认后真删；删的是当前详情就关侧栏。 */
   const runRemove = async () => {
     const row = removeTarget;
     if (!row || removing) return;
@@ -281,8 +288,6 @@ export function RecordsSection({ openRevisionId, onOpened }: {
               {detail.changes && detail.changes.length > 0 ? (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
                   {detail.changes.map((c, i) => (
-                    // 每条三行定死（缺陷清单「详情」）：第 1 行章节 + 类型同行，
-                    // 第 2 行原因、第 3 行摘要各占一行——混在一行时长原因会把摘要挤没
                     <Box key={i} sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
                       <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
                         <Pill tone="static">{c.section || "—"}</Pill>

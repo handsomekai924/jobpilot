@@ -1,9 +1,8 @@
 /**
  * 出题：按抓取批次 / 职位名挑一批岗位 → 批量生成。
  *
- * 题量不给手填（2026-10-29）：按匹配度自动 10–15，请求不带 `question_count`；
- * 出题按钮并进筛选条容器，不再单独占一块。在跑任务占用的岗位标「任务中」并跳过；
- * 行内也能单个生成 / 查看题目（开 PrepSheet）。
+ * 题量按匹配度自动（10–15），请求不带 `question_count`；细节见
+ * `notes/apps/web/src/views/shared/interview/GenerateSection.md`。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,11 +15,12 @@ import {
 import { typeScale } from "../../../theme/tokens";
 import { fmtTime } from "../../../utils/format";
 import type { TaskSnapshot } from "../../../stores/taskStore";
-import { crawlBatchApi, interviewApi } from "../repos";
+import { crawlBatchApi, interviewApi } from "../../../api/shared";
 import { errMsg, PAGE_SIZE, type JobRow, type PrepTarget } from "./types";
 import { Pager, RowCheck } from "./bits";
 import { PrepSheet } from "./PrepSheet";
 
+/** 出题段：筛选岗位、勾选批量生成，行内可单个生成或查看题目。 */
 export function GenerateSection({
   busy, interviewTasks, onTaskStarted,
 }: {
@@ -44,8 +44,8 @@ export function GenerateSection({
   /** 出题请求在飞（"batch" = 批量，否则是单岗 id）：按钮转文案并禁用，防连点重复出题。 */
   const [genKey, setGenKey] = useState<string | null>(null);
 
-  // 抓取批次下拉：共用口 `/api/crawl/tasks`（跨站点全量，批次只是职位来源）
   const [batchOptions, setBatchOptions] = useState<{ code: string; name: string }[]>([]);
+  /** 拉抓取批次供搜索范围下拉。 */
   useEffect(() => {
     let dead = false;
     void (async () => {
@@ -58,9 +58,7 @@ export function GenerateSection({
             name: `批次 ${fmtTime(t.created_at)} #${t.task_id.slice(-6)}`,
           })),
         );
-      } catch {
-        // 批次下拉拿不到就只剩「全部抓取记录」，不挡出题
-      }
+      } catch {}
     })();
     return () => { dead = true; };
   }, []);
@@ -83,12 +81,13 @@ export function GenerateSection({
     }
   }, [crawlTaskId, title, jobsPage, toast]);
 
+  /** 搜索范围变化重拉岗位列表。 */
   useEffect(() => {
     void loadJobs();
   }, [loadJobs]);
 
-  // 生成任务收尾后，岗位列表的「已生成」徽章要对账一次（WS 推终态时触发）
   const seenStatus = useRef<Record<string, string>>({});
+  /** 任务转终态时刷新岗位，让「任务中」按钮及时恢复。 */
   useEffect(() => {
     const next: Record<string, string> = {};
     let justFinished = false;
@@ -125,6 +124,7 @@ export function GenerateSection({
     }
   };
 
+  /** 批量出题：跳过已在任务里的岗位并提示。 */
   const onBatchGenerate = () => {
     const ids = [...selected].filter((id) => !busy.has(id));
     const skipped = selected.size - ids.length;
@@ -245,7 +245,6 @@ export function GenerateSection({
         >
           查询
         </Button>
-        {/* 出题动作并进筛选条（2026-10-29），不再单独占一个容器 */}
         <Button
           variant="filled"
           sx={{ ml: "auto" }}
@@ -265,7 +264,6 @@ export function GenerateSection({
           emptyText="没有符合条件的岗位"
           rowActions={(j) => (
             <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-              {/* 没生成过题就没有可看的——禁用，别开了个空侧栏（缺陷清单「查看按钮」） */}
               <Button
                 size="small"
                 variant="plain"

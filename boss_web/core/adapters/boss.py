@@ -1,7 +1,6 @@
 """BOSS 直聘站点适配器：薄壳包现有 `boss_jobs` / `boss_login` / `boss_filter`。
 
-Stage 0 只站接口面——能力方法往下委派现成实现，不搬业务。平台私有检索路径
-（求职期望流）留在这里当私有方法，不进 `JobSource` 共享抽象（todo3 2.1 拍板）。
+能力方法往下委派现成实现，不搬业务；平台私有检索路径留在本模块。
 """
 
 from __future__ import annotations
@@ -44,11 +43,7 @@ def _core_page(result: Any, *, page: int, has_more: bool | None = None) -> PageR
 
 
 class BossAdapter:
-    """BOSS 站点门面：五能力 + 故障分类 + 私有入口。
-
-    注册走 `adapters.load()`（`register("boss")(BossAdapter)`），不在类定义期
-    装饰——能力类排在本类后面，定义期实例化会踩到未定义的名字。
-    """
+    """BOSS 站点门面：五能力 + 故障分类 + 私有入口。"""
 
     site_id = SITE_ID
     display_name = "BOSS直聘"
@@ -85,11 +80,7 @@ class BossAdapter:
         }
 
     def classify_fault(self, err: Exception) -> DeliverFault:
-        """BOSS 业务码 → 统一故障类（发对话/投递共用）。
-
-        code 7 = 登录失效；36 = 账号风控；37 = 缺 `__zp_stoken__` 安全网关；
-        「开聊提醒」= 每日沟通配额。
-        """
+        """BOSS 业务码 → 统一故障类（发对话/投递共用）。"""
         from boss_jobs.errors import ChatSendError, JobApiError, JobTransportError
 
         if isinstance(err, JobApiError):
@@ -110,8 +101,6 @@ class BossAdapter:
         if isinstance(err, JobTransportError):
             return DeliverFault.UNKNOWN
         return DeliverFault.UNKNOWN
-
-    # --- 平台私有扩展：求职期望流（不进 JobSource 共享抽象） ---
 
     def fetch_expects(self) -> Any:
         """拉当前账号的求职期望列表（`boss_jobs.ExpectList`）。"""
@@ -138,12 +127,15 @@ class BossAdapter:
             """把已拼好的参数串喂给 client（client 只认 `to_params`/`for_page`）。"""
 
             def __init__(self, base: Mapping[str, Any], p: int) -> None:
+                """收下参数串副本与页码。"""
                 self._params = {**dict(base), "page": str(p)}
 
             def to_params(self) -> dict[str, str]:
+                """回查询参数。"""
                 return {k: str(v) for k, v in self._params.items()}
 
             def for_page(self, p: int) -> "_Stub":
+                """回换了页码的新对象。"""
                 return _Stub(self._params, p)
 
         result = create_client().fetch_expect_page(_Stub(params, page), page=page)
@@ -151,7 +143,7 @@ class BossAdapter:
 
 
 class BossAuthFlow:
-    """登录：薄壳包 `boss_web.services.login_task`（喂料模型见 todo3 2.4）。"""
+    """登录：薄壳包 `boss_web.services.login_task`。"""
 
     def caps(self) -> AuthCaps:
         """BOSS 三样都有：短信 / 人机协作滑块 / APP 扫码。"""
@@ -309,10 +301,7 @@ class BossMessenger:
         return SendReceipt(ok=True, message=getattr(delivery, "text", "") or "")
 
     def conversation_state(self, session: SessionRef) -> ConversationState:
-        """按聊天历史判门槛：对方有回话 = REPLIED；只有我方 = 等回复。
-
-        历史探针当不了送达判据（见 `boss_jobs.config`），这里只判门槛。
-        """
+        """按聊天历史判门槛：对方有回话 = `REPLIED`；只有我方 = 等回复。"""
         from boss_jobs.client import create_client
 
         encrypt_boss_id = str(session.extra.get("encrypt_boss_id") or "")
@@ -330,11 +319,7 @@ class BossMessenger:
 
 
 class BossApplier:
-    """投递简历：门槛 + 通道自述。
-
-    `onekeydeliver` 通道本体尚未接入（现状只有发对话）——`caps()` 如实自述
-    通道名与门槛，`apply()` 明确拒绝，不假装成功。
-    """
+    """投递简历：门槛 + 通道自述；onekeydeliver 通道尚未接入，`apply()` 明确拒绝。"""
 
     def caps(self) -> DeliveryCaps:
         """默认双方对话后才可投；通道名自述 onekeydeliver。"""
@@ -351,10 +336,7 @@ class BossApplier:
 
 
 class _ParamFilter:
-    """把 `Catalog.to_search_params` 产出的参数串喂给 `JobClient`。
-
-    client 只认 `to_params()` / `for_page()` 两个口，这里是纯适配。
-    """
+    """把 `Catalog.to_search_params` 产出的参数串喂给 `JobClient`。"""
 
     def __init__(self, params: Mapping[str, Any]) -> None:
         """收下参数串副本。"""

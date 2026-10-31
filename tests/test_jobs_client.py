@@ -157,10 +157,7 @@ def cookie_map(http) -> dict[str, str]:
 
 
 class _StubFilter:
-    """最小可用的 JobSearchFilter 桩：只要 to_params/for_page。
-
-    crawl/iter_pages 必须给 search_filter 或 expect_filter，走管线的用例都带上它。
-    """
+    """最小可用的 `JobSearchFilter` 桩：只要 `to_params` / `for_page`。"""
 
     def __init__(self, params=None):
         """初始化。"""
@@ -176,10 +173,7 @@ class _StubFilter:
 
 
 def test_crawl_cleans_and_stores_each_page_then_sleeps(tmp_path):
-    """每页入库后才睡，睡完再要下一页——顺序错了就会被这个用例抓住。
-
-    页与页之间各睡一次 1s（共 2 次；最后一页空，不再翻页所以不睡）。
-    """
+    """每页入库后才睡，睡完再要下一页——顺序错了就会被这个用例抓住。"""
     pages = [
         ok_page([api_item("a1"), api_item("a2")], has_more=True),
         ok_page([api_item("b1")], has_more=True),
@@ -203,10 +197,7 @@ def test_crawl_cleans_and_stores_each_page_then_sleeps(tmp_path):
 
 
 def test_crawl_saves_before_sleep(tmp_path):
-    """睡眠之前必须已经入库——中途 Ctrl-C 也不能丢已到手的页。
-
-    睡第 1 次时（翻第 2 页前）库里该已经有第 1 页。
-    """
+    """睡眠之前必须已经入库——中途 Ctrl-C 也不能丢已到手的页。"""
     pages = [
         ok_page([api_item("a1")], has_more=True),
         ok_page([api_item("b1")], has_more=True),
@@ -331,10 +322,7 @@ def test_crawl_两个filter都不给就报错(tmp_path):
 
 
 def test_crawl_搜索流_翻页时换页码(tmp_path):
-    """翻页时换 page 参数。
-
-    首页要塞满 15 条才不会被「不满页 + hasMore=false」提前收手。
-    """
+    """翻页时换 page 参数。"""
     pages = [
         {"code": 0, "zpData": {"jobList": [api_item(f"s{i}")], "hasMore": True}}
         for i in range(2)
@@ -410,10 +398,7 @@ def test_chat_remind_dialog_is_tagged():
 
 
 def test_format_api_message_prefers_dialog_content():
-    """顶层 message 常常只是短标签，真话在 chatRemindDialog.content 里。
-
-    没弹窗就退回顶层 message / msg。
-    """
+    """顶层 message 常常只是短标签，真话在 chatRemindDialog.content 里。"""
     raw = {
         "code": 1,
         "message": "开聊提醒",
@@ -1307,10 +1292,7 @@ def test_enrich_page_details_survives_single_failure(tmp_path):
 
 
 def test_enrich_page_details_已有描述不再重复获取(tmp_path):
-    """重抓一页时，已入库且已有 JD 的不该再打详情接口。
-
-    只给 b 准备一条响应——a / c 已有描述，不该再发请求。
-    """
+    """重抓一页时，已入库且已有 JD 的不该再打详情接口。"""
     from boss_jobs.models import Job, PageResult
 
     jobs = (

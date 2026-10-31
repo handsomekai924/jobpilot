@@ -1,13 +1,8 @@
-"""共享层的边界守卫（todo3 第三节：依赖方向、import 禁令）。
+"""共享层的边界守卫：站点私有语义与反向依赖不得渗进 `boss_web/core/`。
 
-`boss_web/core/` 是多平台抽象的内核，`boss_web/core/adapters/` 才是站点实现。
-两者之间这条线必须守住：站点私有语义（BOSS 的 code 36 / 开聊提醒 /
-`__zp_stoken__` 这些）只能留在 adapter 与站点任务里，**不许渗进共享层的代码
-字符串**——一旦渗进来，接第二个站点就会把 BOSS 的风控文案原样甩给别家用户。
-
-扫的是 `ast.Constant` 且跳过 docstring：docstring 里提这些词是文档（写明边界），
-代码字符串里冒出来才是漏。同理 import 禁令只盯 `boss_*` 与 server 的业务层，
-内核不许反向依赖它们。
+Attributes:
+    SITE_PRIVATE_WORDS: 站点私有语义的指纹；共享层的代码字符串里一个都不该出现。
+    FORBIDDEN_IMPORTS: 内核不许反向依赖的模块。
 """
 
 from __future__ import annotations
@@ -17,24 +12,22 @@ import pathlib
 
 CORE = pathlib.Path(__file__).resolve().parent.parent / "boss_web" / "core"
 
-#: 站点私有语义的指纹；共享层的代码字符串里一个都不该出现。
 SITE_PRIVATE_WORDS: tuple[str, ...] = (
-    "开聊提醒",  # BOSS 每日沟通配额的专属提醒
-    "每日沟通",  # 同上，BOSS 的配额语义
-    "code 36",  # BOSS 账号风控
-    "code 37",  # BOSS 缺 __zp_stoken__ 的安全网关
+    "开聊提醒",
+    "每日沟通",
+    "code 36",
+    "code 37",
     "安全网关",
     "__zp_stoken__",
     "stoken",
     "zhipin",
     "BOSS直聘",
-    "求职期望",  # BOSS 私有检索路径
+    "求职期望",
     "encrypt_job_id",
     "securityId",
     "security_id",
 )
 
-#: 内核不许反向依赖的模块。
 FORBIDDEN_IMPORTS: tuple[str, ...] = (
     "boss_jobs",
     "boss_login",
@@ -74,7 +67,7 @@ def _docstring_lines(tree: ast.AST) -> set[int]:
 
 
 def _code_strings(path: pathlib.Path) -> list[str]:
-    """源码里**代码用到**的字符串字面量，docstring 与注释不算。"""
+    """源码里代码用到的字符串字面量，docstring 与注释不算。"""
     tree = ast.parse(path.read_text(encoding="utf-8"))
     skip = _docstring_lines(tree)
     return [
@@ -87,11 +80,7 @@ def _code_strings(path: pathlib.Path) -> list[str]:
 
 
 def test_共享层不掺站点私有语义():
-    """BOSS 的风控文案/私有字段名只能留在 adapter 与站点任务里。
-
-    这条守卫是**活的**：`core/limits.py` 曾把「安全网关」写进熔断的停批原因，
-    就是它逮住的。
-    """
+    """BOSS 的风控文案/私有字段名只能留在 adapter 与站点任务里。"""
     files = _shared_files()
     assert files, "共享层一个文件都没扫到，守卫等于没跑"
     leaks: list[str] = []
@@ -104,10 +93,7 @@ def test_共享层不掺站点私有语义():
 
 
 def test_共享层零依赖():
-    """内核只依赖标准库和自己，不许 import `boss_*` 或 server 业务层。
-
-    依赖方向一旦倒过来，`packages/core`（todo3 Stage 1）就拆不出去。
-    """
+    """内核只依赖标准库和自己，不许 import `boss_*` 或 server 业务层。"""
     for path in _shared_files():
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):

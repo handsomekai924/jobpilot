@@ -13,15 +13,15 @@ import { byId } from "../platform/registry";
 import { PLATFORM_NAV, SHEET_MERGED_NAV } from "../platform/types";
 import { platformKeyFromPath } from "./match";
 import { PlatformLayout, SharedLayout, ShellLayout } from "./layouts";
-import { OverviewPage } from "../views/shared/OverviewPage";
-import { TasksPage } from "../views/shared/TasksPage";
-import { SettingsPage } from "../views/shared/SettingsPage";
-import { LoginPage } from "../views/platform/LoginPage";
-import { JobsPage } from "../views/platform/JobsPage";
-import { DeliverPage } from "../views/platform/DeliverPage";
-import { ResumesPage } from "../views/shared/ResumesPage";
-import { InterviewPage } from "../views/shared/InterviewPage";
-import { MatchPage } from "../views/shared/MatchPage";
+import { OverviewPage } from "../views/shared/overview/OverviewPage";
+import { TasksPage } from "../views/shared/tasks/TasksPage";
+import { SettingsPage } from "../views/shared/settings/SettingsPage";
+import { LoginPage } from "../views/platform/login/LoginPage";
+import { JobsPage } from "../views/platform/jobs/JobsPage";
+import { DeliverPage } from "../views/platform/deliver/DeliverPage";
+import { ResumesPage } from "../views/shared/resumes/ResumesPage";
+import { InterviewPage } from "../views/shared/interview/InterviewPage";
+import { MatchPage } from "../views/shared/match/MatchPage";
 import { PendingPage } from "../views/PendingPage";
 
 /**
@@ -66,7 +66,6 @@ function PlatformExtraPage() {
   const extra = platform?.nav_extras.find((n) => n.key === key);
   const title = extra?.label ?? "平台功能";
 
-  // 已并入「采集条件」的入口（如求职期望）：旧链接直接落回功能所在地
   if (key && SHEET_MERGED_NAV.has(key)) {
     return <Navigate to={`/${siteId}/jobs`} replace />;
   }
@@ -87,11 +86,11 @@ function PlatformIndexRedirect() {
   return <Navigate to={PLATFORM_NAV[0].route} replace />;
 }
 
+/** 路由表：共用分支 + 平台作用域分支 + 旧路由重定向。 */
 export function AppRoutes() {
   return (
     <Routes>
       <Route element={<ShellLayout />}>
-        {/* 共用分支：不出侧栏 */}
         <Route element={<SharedLayout />}>
           <Route index element={<Navigate to="/overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />
@@ -102,7 +101,6 @@ export function AppRoutes() {
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
-        {/* 平台作用域分支：出侧栏 */}
         <Route path=":siteId" element={<PlatformLayout />}>
           <Route index element={<PlatformIndexRedirect />} />
           <Route path="login" element={<LoginPage />} />
@@ -111,7 +109,6 @@ export function AppRoutes() {
           <Route path="*" element={<PlatformExtraPage />} />
         </Route>
 
-        {/* 旧路由重定向表：`/` 已由上面的 index 兜掉，其余按表走 */}
         {LEGACY_REDIRECTS.filter(([from]) => from !== "/").map(([from, to]) => (
           <Route key={from} path={from.replace(/^\//, "")} element={<Navigate to={to} replace />} />
         ))}

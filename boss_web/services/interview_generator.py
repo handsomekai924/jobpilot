@@ -352,17 +352,13 @@ def generate_questions(
     existing_questions: Sequence[str] = (),
     llm: LLMClient | None = None,
 ) -> list[InterviewQuestion]:
-    """调 LLM 生成一岗的面试题。
-
-    LLM 未配置抛 `ValidationWebError`，输出非法抛 `ValueError`。
-    给了 `question_type` 就走补题：只出这一型、避开已有题、数量不越 `SUPPLEMENT_MAX`。
+    """调 LLM 生成一岗的面试题；未配置抛 `ValidationWebError`，输出非法抛 `ValueError`。
 
     Args:
         job_data: 职位信息（job_name / brand_name / job_desc / …）。
         resume_content: 简历全文。
         match_result: 匹配结果（match_score / pros / cons）。
-        question_count: 题量；缺省按匹配度定，范围 `INTERVIEW_QUESTION_MIN`~`MAX`。
-            补题时就是用户填的数量（1~`SUPPLEMENT_MAX`）。
+        question_count: 题量；缺省按匹配度定，补题时为用户填的数量。
         question_type: 补题题型；空 = 整套出题。
         existing_questions: 已有题目正文，补题时避开重复。
         llm: 注入的客户端（测试用）；缺省按当前配置新建。

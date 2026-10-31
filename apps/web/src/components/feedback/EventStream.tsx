@@ -1,11 +1,15 @@
+/** 任务事件流：新事件从顶部进入，弹簧滑入，只保留最近若干条。 */
+
 import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion } from "motion/react";
 import { springs, typeScale } from "../../theme/tokens";
 import { fmtClock } from "../../utils/format";
 import { Pill, type PillTone } from "../data/Pill";
 
+/** 事件类型。 */
 export type EventKind = "info" | "ok" | "warn" | "error" | "muted";
 
+/** 一条任务事件。 */
 export interface TaskEvent {
   /** 事件名/消息 */
   name: string;
@@ -14,6 +18,7 @@ export interface TaskEvent {
   kind?: EventKind;
 }
 
+/** 事件流属性。 */
 export interface EventStreamProps {
   events: TaskEvent[];
   /** 最多显示条数（默认 30，旧件 renderEvents 行为） */
@@ -23,6 +28,7 @@ export interface EventStreamProps {
   maxHeight?: number;
 }
 
+/** 事件类型 → 胶囊色调。 */
 const kindTone: Record<EventKind, PillTone | "static"> = {
   info: "accent",
   ok: "ok",

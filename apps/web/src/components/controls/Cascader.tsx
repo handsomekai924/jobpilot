@@ -1,3 +1,5 @@
+/** 级联选择（城市单选 / 行业多选）：列式下钻，父级导航、叶子取值。 */
+
 import { useRef, useState } from "react";
 import { Box, Popover, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -5,15 +7,17 @@ import { typeScale } from "../../theme/tokens";
 import { mergeSx } from "../../theme/sx";
 import { Button } from "./Button";
 
+/** 级联树节点：带子级只导航，叶子即取值。 */
 export interface CascaderNode {
   code: string;
   name: string;
   children?: CascaderNode[];
 }
 
+/** 级联选择属性：单选传 string，多选传 string[]。 */
 export interface CascaderProps {
   nodes: CascaderNode[];
-  /** 協选（城市）传 string；多选（行业）传 string[] */
+  /** 单选传 string；多选传 string[] */
   value?: string | string[];
   multiple?: boolean;
   onChange: (value: string | string[] | "") => void;
@@ -23,6 +27,7 @@ export interface CascaderProps {
   sx?: SxProps<Theme>;
 }
 
+/** 深度优先遍历整棵树。 */
 function eachNode(nodes: CascaderNode[], fn: (n: CascaderNode) => void): void {
   for (const n of nodes) {
     fn(n);
@@ -30,6 +35,7 @@ function eachNode(nodes: CascaderNode[], fn: (n: CascaderNode) => void): void {
   }
 }
 
+/** 按 code 深度优先查找节点；未命中回 null。 */
 function findNode(nodes: CascaderNode[], code: string): CascaderNode | null {
   for (const n of nodes) {
     if (n.code === code) return n;
@@ -40,12 +46,8 @@ function findNode(nodes: CascaderNode[], code: string): CascaderNode | null {
 }
 
 /**
- * 级联选择（城市/行业）：列式下钻。
- * 单选——带子级的节点只展开不取值（接口只吃市/区 code），叶子即取值；
- * 多选——父级只导航，叶子勾选，「确定」提交（legacy ui.js cascader 语义）。
- *
- * 与 Select 同一条体验硬约束（缺陷清单「下拉框」）：鼠标收起后不把焦点留在
- * 触发器上（restore-focus 会把聚焦蓝框又带回来），Esc 键盘收起保留焦点。
+ * 级联选择：列式下钻；单选叶子即取值，多选叶子勾选、「确定」提交。
+ * 收起时鼠标不保留焦点、Esc 保留焦点（详见 notes）。
  */
 export function Cascader({
   nodes, value, multiple = false, onChange, placeholder = "不限", label, disabled = false, sx,
@@ -70,6 +72,7 @@ export function Cascader({
     setAnchor(null);
   }
 
+  /** 触发器上显示的已选摘要：≤2 项列全名，否则「首项 等 N 项」。 */
   function summary(): string {
     if (multiple) {
       const names: string[] = [];
@@ -83,6 +86,7 @@ export function Cascader({
     return hit ? hit.name : selectedCodes[0] || placeholder;
   }
 
+  /** 按当前下钻路径拼出各列节点。 */
   function columns(): CascaderNode[][] {
     const cols: CascaderNode[][] = [nodes];
     for (const node of drill) {
@@ -92,13 +96,14 @@ export function Cascader({
     return cols;
   }
 
+  /** 展开弹层；单选时下钻到当前值所在分支。 */
   function openAt(e: React.MouseEvent<HTMLElement>) {
     setDraft(selectedCodes);
-    // 打开时下钻到当前值所在分支
     const code = selectedCodes[0];
     const hit = code ? findNode(nodes, code) : null;
     if (hit && !hit.children?.length) {
       const path: CascaderNode[] = [];
+      /** 递归收集命中节点的祖先路径。 */
       const walk = (list: CascaderNode[], trail: CascaderNode[]): boolean =>
         list.some((n) => {
           if (n.code === hit.code) {
@@ -140,7 +145,6 @@ export function Cascader({
           height: 36,
           px: 1.5,
           border: "1px solid transparent",
-          // 边框跟随展开态而非 :focus：点开后 Popover 会把焦点抢走，:focus 边框会一闪而过
           borderColor: open ? "primary.main" : "transparent",
           borderRadius: "12px",
           bgcolor: "surface2",
@@ -150,7 +154,6 @@ export function Cascader({
           opacity: disabled ? 0.5 : 1,
           transition: "border-color 120ms ease",
           "&:focus": { outline: "none" },
-          // 键盘 Tab 聚焦（未展开）时也保留焦点边框
           "&:focus-visible": { borderColor: "primary.main" },
           "&::after": { content: '"▾"', color: "text.secondary", fontSize: 11 },
         }}
@@ -189,7 +192,6 @@ export function Cascader({
               key={i}
               sx={{
                 minWidth: 160,
-                // 每列最多露 5 项（行高约 36px），超出列内滚动
                 maxHeight: 180,
                 overflowY: "auto",
                 borderRight: i < cols.length - 1 ? "1px solid" : 0,

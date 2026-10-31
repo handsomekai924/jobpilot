@@ -3,6 +3,7 @@
 按 `__file__` 定位项目根，与当前工作目录无关。
 
 Attributes:
+    SITE_ID: 登录态归属的站点 id。
     PROJECT_ROOT: 项目根目录，即 `boss_login/` 的上一级。
     DEFAULT_DB_PATH: 状态库路径，环境变量 `BOSS_DB` 可覆盖。
 """
@@ -24,7 +25,6 @@ PROJECT_ROOT = boss_db.PROJECT_ROOT
 
 DEFAULT_DB_PATH = boss_db.DEFAULT_DB_PATH
 
-#: 登录态归属的站点 id（todo3 Stage 1：随 boss-platform-boss 一起搬，届时由 adapter 自述）。
 SITE_ID: Final[str] = "boss"
 
 

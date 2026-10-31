@@ -1,25 +1,19 @@
 /**
- * 总览「职位库」数据：把各站点 `GET /api/sites/{site}/jobs/stats` 的返回归一并合并。
+ * 总览「职位库」数据：归一并合并各站点 `GET /api/sites/{site}/jobs/stats` 的返回。
  *
- * 后端形状（boss_jobs/store.py summary() + boss_web/api/jobs.py stats()）：
- *   jobs / pages / raw_seen / kept_seen / dropped_seen / missing_desc
- *   top_cities: [{city, count}]（GROUP BY city_name LIMIT 10）
- *   pages_log: [{page, raw_count, kept_count, dropped_count, inserted_count,
- *                updated_count, fetched_at}]（api 还补了 inserted/updated 别名）
- *
- * 两个坑：`fetched_at` 是 "YYYY-MM-DD HH:MM:SS" 字符串（store._now()），不是秒级
- * 时间戳；`missing_desc` 是全库计数、不分站点，合并取 max 免得按站点数翻倍。
+ * 后端形状与合并口径见 `notes/apps/web/src/views/shared/overview/stats.md`。
  */
 
+/** 城市计数。 */
 export interface CityCount {
   city: string;
   count: number;
 }
 
+/** 一条采集流水（`at` 为 "YYYY-MM-DD HH:MM:SS"）。 */
 export interface PageLogRow {
   site: string;
   page: number;
-  /** "YYYY-MM-DD HH:MM:SS" */
   at: string;
   raw: number;
   kept: number;
@@ -28,6 +22,7 @@ export interface PageLogRow {
   updated: number;
 }
 
+/** 合并后的职位库统计。 */
 export interface LibraryStats {
   jobs: number;
   pages: number;
@@ -42,10 +37,12 @@ export interface LibraryStats {
 export const CITY_LIMIT = 8;
 export const PAGE_LOG_LIMIT = 10;
 
+/** 非有限数字一律归 0。 */
 function num(v: unknown): number {
   return typeof v === "number" && Number.isFinite(v) ? v : 0;
 }
 
+/** 归一单条城市计数；形状不对回 null。 */
 function cityRow(v: unknown): CityCount | null {
   if (typeof v !== "object" || v == null) return null;
   const o = v as Record<string, unknown>;
@@ -53,6 +50,7 @@ function cityRow(v: unknown): CityCount | null {
   return { city: o.city, count: num(o.count) };
 }
 
+/** 归一单条采集流水；形状不对回 null。 */
 function pageRow(site: string, v: unknown): PageLogRow | null {
   if (typeof v !== "object" || v == null) return null;
   const o = v as Record<string, unknown>;
@@ -87,7 +85,6 @@ export function normalizeStats(site: string, raw: unknown): LibraryStats | null 
     raw: num(o.raw_seen),
     kept: num(o.kept_seen),
     dropped: num(o.dropped_seen),
-    // 全库计数（不分站点）：合并取 max，不求和
     missingDesc: num(o.missing_desc),
     cities,
     pageLog,

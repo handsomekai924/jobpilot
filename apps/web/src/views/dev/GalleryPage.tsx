@@ -1,3 +1,5 @@
+/** 组件画廊：设计系统与公用组件的可视化验收页。 */
+
 import { useState, type ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import {
@@ -244,6 +246,7 @@ export function GalleryPage() {
   );
 }
 
+/** 画廊分节：标题 + 内容。 */
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Box sx={{ mb: 4.5 }}>

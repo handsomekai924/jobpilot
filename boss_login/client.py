@@ -95,16 +95,6 @@ class ZhipinLoginClient:
         sleeper: 休眠函数，测试时可注入。
         clock: 取时间戳的函数，测试时可注入。
         headers: 叠加到默认请求头之上。
-
-    Attributes:
-        base_url: 站点根地址。
-        endpoints: 合并后的接口路径表。
-        timeout: 单次请求超时（秒）。
-        retries: 网络层重试次数。
-        backoff: 重试退避基数。
-        cooldown_seconds: 本地重发冷却（秒）。
-        code_length: 验证码位数。
-        max_code_attempts: 验证码最大尝试次数。
     """
 
     def __init__(

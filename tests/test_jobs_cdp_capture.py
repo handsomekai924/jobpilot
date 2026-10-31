@@ -1,10 +1,4 @@
-"""`boss_jobs.cdp_capture` 的测试。
-
-运行：`python -m pytest tests/test_jobs_cdp_capture.py -q`
-
-不起真的 CDP 服务端：事件管线用合成 CDP 事件喂 `handle_event()`，命令回包由
-按方法名回罐头的 `FakeCall` 提供；传输层用 `FakeWs` 顶替 socket，按脚本吐帧。
-"""
+"""`boss_jobs.cdp_capture` 的测试，用合成 CDP 事件与假 WebSocket 顶替真服务端。"""
 
 from __future__ import annotations
 
@@ -724,11 +718,7 @@ def test_finalize_is_idempotent_and_files_are_closed(tmp_path):
 
 
 class FakeWs:
-    """按脚本吐帧的 socket 替身。脚本元素可以是字符串，也可以是要抛的异常。
-
-    走 `responder` 时是「收到什么才回什么」——真实链路上回包只会跟在请求后面，
-    预先把回包排在 `script` 里会让读线程抢在 `send_call` 登记前就把连接读没了。
-    """
+    """按脚本吐帧的 socket 替身；脚本元素可以是字符串，也可以是要抛的异常。"""
 
     def __init__(self, script: list | None = None, responder=None) -> None:
         """初始化。"""

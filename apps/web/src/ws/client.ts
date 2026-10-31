@@ -16,19 +16,29 @@ export interface WsEnvelope {
   data: Record<string, unknown>;
 }
 
+/** 连接状态：连接中 / 已连上 / 断开。 */
 export type WsStatus = "connecting" | "open" | "down";
 
+/** 单条事件回调。 */
 export type WsHandler = (msg: WsEnvelope) => void;
 
+/** type → 订阅集合。 */
 const listeners = new Map<string, Set<WsHandler>>();
+/** `"*"` 订阅（收全部事件）。 */
 const anyListeners = new Set<WsHandler>();
 
+/** 当前连接（全应用单例）。 */
 let socket: WebSocket | null = null;
+/** 最近一次连接状态。 */
 let status: WsStatus = "connecting";
+/** 下一次重连延迟（指数退避，上限 15s）。 */
 let retryMs = 1000;
+/** 重连定时器。 */
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
+/** 心跳定时器。 */
 let pingTimer: ReturnType<typeof setInterval> | null = null;
 
+/** 把一帧分发给 `"*"` 订阅与按 type 订阅；回调异常只记日志。 */
 function dispatch(msg: WsEnvelope): void {
   if (msg.type === "pong") return;
   for (const h of anyListeners) {
@@ -50,10 +60,10 @@ function dispatch(msg: WsEnvelope): void {
   }
 }
 
+/** 状态变化时合成一帧 `ws.status`，各面板靠它起停降级轮询。 */
 function setStatus(next: WsStatus): void {
   if (status === next) return;
   status = next;
-  // 合成帧：各面板靠它启动/停掉降级轮询（沿用 legacy 约定）。
   dispatch({ type: "ws.status", ts: Date.now() / 1000, task_type: "", task_id: "", site: "", data: { status: next } });
 }
 
@@ -76,7 +86,7 @@ export function on(type: string, handler: WsHandler): () => void {
   };
 }
 
-/** @returns 连接状态：connecting / open / down */
+/** 当前连接状态。 */
 export function getStatus(): WsStatus {
   return status;
 }
@@ -87,7 +97,6 @@ export function send(payload: Record<string, unknown>): void {
     try {
       socket.send(JSON.stringify(payload));
     } catch {
-      /* 忽略 */
     }
   }
 }
@@ -97,6 +106,7 @@ export function resync(): void {
   send({ type: "resync" });
 }
 
+/** 安排一次指数退避重连（1s 起，上限 15s）。 */
 function scheduleReconnect(): void {
   if (retryTimer) return;
   console.warn(`[ws] ${retryMs}ms 后重连`);
@@ -107,11 +117,13 @@ function scheduleReconnect(): void {
   }, retryMs);
 }
 
+/** 启动 25s 心跳。 */
 function startPing(): void {
   stopPing();
   pingTimer = setInterval(() => send({ type: "ping" }), 25000);
 }
 
+/** 停止心跳。 */
 function stopPing(): void {
   if (pingTimer) {
     clearInterval(pingTimer);
@@ -120,9 +132,7 @@ function stopPing(): void {
 }
 
 /**
- * 建立连接（幂等）。
- *
- * @returns 连上或失败后都 resolve，调用方不必等
+ * 建立连接（幂等）；连上或失败后都 resolve，调用方不必等。
  */
 export async function connect(): Promise<void> {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
@@ -132,12 +142,10 @@ export async function connect(): Promise<void> {
   return new Promise((resolve) => {
     const proto = location.protocol === "https:" ? "wss" : "ws";
     let settled = false;
-    // 旧 socket 无论半死不活都先补一刀关掉，不留服务端挂着的僵尸连接。
     if (socket) {
       try {
         socket.close();
       } catch {
-        /* 忽略 */
       }
       socket = null;
     }
@@ -149,6 +157,7 @@ export async function connect(): Promise<void> {
       resolve();
       return;
     }
+    /** 连接就绪：复位退避、启动心跳、放行 await。 */
     socket.onopen = () => {
       console.info("[ws] 已连接");
       setStatus("open");
@@ -159,6 +168,7 @@ export async function connect(): Promise<void> {
         resolve();
       }
     };
+    /** 解析帧并分发；坏帧丢弃。 */
     socket.onmessage = (e) => {
       let msg: WsEnvelope | null = null;
       try {
@@ -168,6 +178,7 @@ export async function connect(): Promise<void> {
       }
       dispatch(msg);
     };
+    /** 统一处理断线：停心跳、置 down、安排重连。 */
     const down = (): void => {
       stopPing();
       setStatus("down");
@@ -177,15 +188,17 @@ export async function connect(): Promise<void> {
         resolve();
       }
     };
+    /** 连接出错按断线处理。 */
     socket.onerror = () => {
       console.warn("[ws] 连接出错");
       down();
     };
+    /** 关闭时记录 code/reason，再走断线流程。 */
     socket.onclose = (e) => {
-      // code/reason 是排查「反复重连」的关键现场：1006=异常断开，1000=正常关。
       console.warn(`[ws] 连接关闭 code=${e.code} reason=${e.reason || "-"}`);
       down();
     };
+    /** 超时兜底：最多等 3s 就 resolve。 */
     setTimeout(() => {
       if (!settled) {
         settled = true;
@@ -205,7 +218,6 @@ export function disconnect(): void {
   try {
     socket?.close();
   } catch {
-    /* 忽略 */
   }
   socket = null;
   setStatus("down");
@@ -222,4 +234,5 @@ export function __reset(): void {
   pingTimer = null;
 }
 
+/** 默认导出：按需取用的门面。 */
 export default { on, connect, disconnect, send, resync, getStatus };

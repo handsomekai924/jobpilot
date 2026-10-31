@@ -1,7 +1,4 @@
-"""筛选条件客户端：假会话单元测试 + 假服务端集成测试 + CLI。
-
-运行：`python -m pytest tests/test_filter_client.py -q`
-"""
+"""筛选条件客户端：假会话单元测试 + 假服务端集成测试 + CLI。"""
 
 from __future__ import annotations
 
@@ -66,11 +63,7 @@ class FakeHttp:
 
 
 def only_primary_endpoints() -> dict[str, str]:
-    """关掉条件接口的降级链，让每个用例只打一次请求（或失败一次）。
-
-    `fetch_conditions` 会按 conditions → recommend → search 逐个降级，
-    单点故障用例不希望它一路试到底。
-    """
+    """关掉条件接口的降级链，让每个用例只打一次请求（或失败一次）。"""
     return {"recommend_conditions": "", "search_condition": ""}
 
 
@@ -138,11 +131,7 @@ def make_client(responses, **kwargs) -> FilterClient:
 
 
 def json_from_output(text: str) -> dict:
-    """从 stdout 里抠出 JSON。
-
-    假服务端的访问日志也打到同一个 stdout（同进程线程），所以不能直接
-    `json.loads(整段输出)`——找到第一个 `{` 再解析。
-    """
+    """从 stdout 里抠出 JSON：找到第一个 `{` 再解析。"""
     start = text.find("{")
     assert start >= 0, f"输出里没有 JSON：{text[:200]!r}"
     return json.loads(text[start:])

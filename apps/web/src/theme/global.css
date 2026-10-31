@@ -16,8 +16,6 @@ body {
 
 html,
 body {
-  /* 外壳 100dvh 定死、整页不滚（layouts CONTENT_SX 的 overflow:hidden）；
-     滚动只发生在页面内部 ScrollArea，顺带压掉移动端滚动穿透 */
   overflow: hidden;
 }
 
@@ -99,8 +97,6 @@ body {
   font-family: "SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace;
   font-variant-numeric: tabular-nums;
 }
-
-/* ---------- 无障碍（三条独立响应） ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,

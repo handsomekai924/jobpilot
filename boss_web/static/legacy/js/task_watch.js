@@ -1,17 +1,7 @@
 /**
- * 任务观察器：把「1.5s 轮询 status」换成「统一 WS 事件驱动」。
+ * 任务观察器：用统一 WS 事件驱动替代 1.5s 轮询 status，断线时回落 5s 轮询。
  *
- * 用法（各业务页替换原 setInterval 轮询）：
- *
- *   const stop = watchTask(taskId, fetchStatus, {
- *     onStatus: (payload) => paint(payload),
- *     isDone: (payload) => ["done", "error", "cancelled"].includes(payload.status),
- *   });
- *   // 离开页面 / 任务结束时 stop()
- *
- * WS 任务帧自带业务快照（`data.raw` 与各页原 HTTP status 同形状），收帧直接画，
- * **不再回源打 HTTP**——事件密集时回源会在服务端日志里刷出一串 GET，和轮询没两样。
- * 只有首帧与 WS 断线兜底才走 `fetchStatus`；断线回落 5s 轮询，连上即停。
+ * 用法与帧协议见 `notes/boss_web/static/legacy/js/task_watch.md`。
  */
 
 import * as ws from "./ws.js";
@@ -167,6 +157,7 @@ export function watchTask(taskId, fetchStatus, { onStatus, isDone, taskType = ""
   });
   tick();
 
+  /** 停止观察：退订事件、清掉轮询与合帧定时器。 */
   function stop() {
     if (stopped) return;
     stopped = true;

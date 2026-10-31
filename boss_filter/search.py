@@ -5,6 +5,7 @@
 参数名来自职位页 chunk 的 `getFormData()`，明细见 `notes/boss_filter/search.md`。
 
 Attributes:
+    SITE_ID: 筛选条件归属的站点 id。
     FILTER_FILE_FIELDS: 配置文件里认的键 → `JobSearchFilter` 的字段。
     _SINGLE_FIELDS: 单选字段（其余按多选收）。
     _RAW_STR_FIELDS: 当成「纯字符串、不做 code 归一」处理的字段。
@@ -21,7 +22,6 @@ from typing import Any, Final, Iterable, Mapping
 
 import boss_db
 
-#: 筛选条件归属的站点 id（todo3 Stage 1：随 boss-platform-boss 一起搬）。
 SITE_ID: Final[str] = "boss"
 
 from .models import FilterConditions, normalize_code

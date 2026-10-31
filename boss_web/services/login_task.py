@@ -14,6 +14,7 @@ Attributes:
     ST_ERROR: 任务状态：失败。
     ST_CANCELLED: 任务状态：已取消。
     _TERMINAL: 终态集合。
+    SITE: 本模块服务的站点；用来拼站点作用域的 URL。
     login_tasks: 模块级单例，app 启动时直接用。
 """
 
@@ -68,10 +69,6 @@ ST_CANCELLED = "cancelled"
 
 _TERMINAL = {ST_DONE, ST_ERROR, ST_CANCELLED}
 
-#: 本模块服务的站点（todo3 Stage 1 随模块搬进 boss-platform-boss 时改由 adapter 自述）。
-#: 只用来拼**站点作用域**的 URL——别再往回吐 legacy 别名路径（`/api/auth/…`）：
-#: 别名一摘，滑块帮助页的 `post_url` 就断在半路。前端已经按站点作用域拼入口
-#: （`/api/sites/{site}/auth/slider/{id}`），后端自报的这几个 URL 得同一条口径。
 SITE = "boss"
 
 hub.register(
@@ -80,7 +77,7 @@ hub.register(
         title="登录",
         policy=POLICY_GLOBAL_SINGLE,
         title_fn=lambda req: f"登录（{req.get('kind') or 'sms'}）",
-        site=SITE,  # todo3 Stage 1：随本模块一起搬进 boss-platform-boss，届时由 adapter 自述
+        site=SITE,
     )
 )
 
@@ -90,32 +87,12 @@ class LoginTask:
     """一次网页登录的全部状态。
 
     Attributes:
-        task_id: 任务 id。
-        phone: 手机号（已抽成纯数字）。
-        dial_code: 区号。
         kind: 任务类型：`sms` 短信 / `qr` APP 扫码；前端必须按它分派界面。
         status: 任务状态。
-        created_at: 创建时间戳。
-        events: 事件流水。
-        error: 错误文案。
-        result: 成功结果。
         retry_after: 限频建议等待秒数。
-        attempts: 验证码尝试次数。
-        code_event: 验证码等待事件。
-        code_box: 验证码投递箱。
-        slider_event: 滑块票据等待事件。
-        slider_box: 滑块票据投递箱。
-        slider_challenge: 当前极验挑战。
-        slider_html: 帮助页 HTML。
-        slider_needed: 是否还欠滑块。
+        code_event: 验证码等待事件；`code_box` 是投递箱。
+        slider_event: 滑块票据等待事件；`slider_box` 是投递箱。
         slider_refresher: 重新拉一张滑块挑战的回调。
-        lock: 状态锁。
-        cancel_flag: 取消标记。
-        qr_payload: 二维码内容。
-        qr_head_img: 扫码人头像。
-        qr_scanned: 是否已扫。
-        qr_confirmed: 是否已在 App 确认。
-        qr_pk: 扫码登录 pk。
         qr_revision: 二维码重画版本号。
     """
 
@@ -263,16 +240,13 @@ class LoginTaskManager:
             return self._current
 
     def get(self, task_id: str) -> LoginTask:
-        """按 id 取任务。
+        """按 id 取任务；任务不存在时抛 `NotFoundError`。
 
         Args:
             task_id: 任务 id。
 
         Returns:
             登录任务。
-
-        Raises:
-            NotFoundError: 任务不存在。
         """
         task = self._tasks.get(task_id)
         if task is None:
@@ -326,7 +300,7 @@ class LoginTaskManager:
         }
 
     def start_send(self, phone: str, *, dial_code: str = "86") -> LoginTask:
-        """起短信登录线程。
+        """起短信登录线程；手机号位数不对抛 `ValidationWebError`，已有流程在跑抛 `ConflictError`。
 
         Args:
             phone: 手机号。
@@ -334,10 +308,6 @@ class LoginTaskManager:
 
         Returns:
             新建的登录任务。
-
-        Raises:
-            ValidationWebError: 手机号位数不对。
-            ConflictError: 已有登录流程在进行中。
         """
         digits = "".join(ch for ch in phone if ch.isdigit())
         if len(digits) < 11:
@@ -362,16 +332,13 @@ class LoginTaskManager:
         return task
 
     def start_qr(self, *, pk: str = "") -> LoginTask:
-        """起一条 APP 扫码登录：后台出二维码、等手机扫、等 App 确认。
+        """起一条 APP 扫码登录：后台出二维码、等手机扫、等 App 确认；已有流程在跑抛 `ConflictError`。
 
         Args:
             pk: 扫码登录 pk；空则用默认。
 
         Returns:
             新建的登录任务。
-
-        Raises:
-            ConflictError: 已有登录流程在进行中。
         """
         hub.occupy("login", request={"kind": "qr"})
         with self._lock:
@@ -391,17 +358,13 @@ class LoginTaskManager:
         return task
 
     def qr_png(self, task_id: str) -> bytes:
-        """把任务当前的二维码画成 PNG，给网页 `<img src>` 用。
+        """把任务当前的二维码画成 PNG，给网页 `<img src>` 用；没有二维码抛 `NotFoundError`，渲染失败抛 `UpstreamError`。
 
         Args:
             task_id: 任务 id。
 
         Returns:
             PNG 字节。
-
-        Raises:
-            NotFoundError: 本次登录还没有二维码。
-            UpstreamError: 渲染失败。
         """
         task = self.get(task_id)
         payload = task.qr_payload
@@ -413,7 +376,7 @@ class LoginTaskManager:
             raise UpstreamError(str(exc)) from exc
 
     def submit_code(self, task_id: str, code: str) -> LoginTask:
-        """把验证码塞给阻塞中的 `code_provider`。
+        """把验证码塞给阻塞中的 `code_provider`；空码抛 `ValidationWebError`，已结束抛 `ConflictError`。
 
         Args:
             task_id: 任务 id。
@@ -421,10 +384,6 @@ class LoginTaskManager:
 
         Returns:
             登录任务。
-
-        Raises:
-            ValidationWebError: 验证码为空。
-            ConflictError: 本次登录已结束。
         """
         task = self.get(task_id)
         code = (code or "").strip()
@@ -441,7 +400,7 @@ class LoginTaskManager:
         return task
 
     def solve_slider(self, task_id: str, payload: Mapping[str, Any]) -> LoginTask:
-        """把极验票据塞给阻塞中的 `slider_solver`。
+        """把极验票据塞给阻塞中的 `slider_solver`；已结束抛 `ConflictError`，票据不完整抛 `ValidationWebError`。
 
         Args:
             task_id: 任务 id。
@@ -449,10 +408,6 @@ class LoginTaskManager:
 
         Returns:
             登录任务。
-
-        Raises:
-            ConflictError: 本次登录已结束。
-            ValidationWebError: 滑块票据不完整。
         """
         task = self.get(task_id)
         if task.finished:
@@ -470,17 +425,13 @@ class LoginTaskManager:
         return task
 
     def refresh_slider(self, task_id: str) -> LoginTask:
-        """帮助页「重新加载」：换一张新的极验挑战，重建帮助页。
+        """帮助页「重新加载」：换一张新的极验挑战，重建帮助页；已结束或无待完成滑块抛 `ConflictError`，取不到新挑战抛 `UpstreamError`。
 
         Args:
             task_id: 任务 id。
 
         Returns:
             登录任务。
-
-        Raises:
-            ConflictError: 登录已结束或没有待完成的滑块。
-            UpstreamError: 没能取到新的滑块验证。
         """
         task = self.get(task_id)
         if task.finished:

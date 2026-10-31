@@ -1,3 +1,5 @@
+/** 主题模式上下文：深浅切换 + 持久化 + MUI 主题注入。 */
+
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode,
 } from "react";
@@ -8,6 +10,7 @@ import type { ThemeMode } from "./tokens";
 /** 与 legacy 前端共用的主题键：共存期两套 UI 主题同步。 */
 const STORAGE_KEY = "orbit-theme";
 
+/** 主题模式上下文值。 */
 interface ThemeModeContextValue {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
@@ -16,29 +19,31 @@ interface ThemeModeContextValue {
 
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 
+/** 读初始模式：持久化优先，其次系统偏好，兜底 dark。 */
 function readInitialMode(): ThemeMode {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark") return saved;
     if (window.matchMedia?.("(prefers-color-scheme: light)").matches) return "light";
   } catch {
-    /* localStorage 不可用时落 dark */
   }
   return "dark";
 }
 
+/** 提供主题模式与 MUI 主题。 */
 export function ThemeModeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>(readInitialMode);
 
+  /** 把模式写到文档根属性与 localStorage。 */
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
     try {
       localStorage.setItem(STORAGE_KEY, mode);
     } catch {
-      /* 忽略持久化失败 */
     }
   }, [mode]);
 
+  /** 在深浅之间切换。 */
   const toggle = useCallback(() => {
     setMode((prev) => (prev === "dark" ? "light" : "dark"));
   }, []);
@@ -59,6 +64,7 @@ export function ThemeModeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** 取主题模式上下文；不在 Provider 里用会直接抛。 */
 export function useThemeMode(): ThemeModeContextValue {
   const ctx = useContext(ThemeModeContext);
   if (!ctx) throw new Error("useThemeMode 必须在 ThemeModeProvider 内使用");

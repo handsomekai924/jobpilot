@@ -1,8 +1,11 @@
+/** Apple 风格分段控件：选中块弹簧滑动，支持键盘左右切换。 */
+
 import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { Box, useTheme } from "@mui/material";
 import { motion, useReducedMotion } from "motion/react";
 import { springs, typeScale } from "../../theme/tokens";
 
+/** 分段选项；`status` 是可选状态点。 */
 export interface SegmentedOption<T extends string = string> {
   value: T;
   label: string;
@@ -12,6 +15,7 @@ export interface SegmentedOption<T extends string = string> {
   disabled?: boolean;
 }
 
+/** 分段控件属性。 */
 export interface SegmentedControlProps<T extends string = string> {
   value: T;
   options: SegmentedOption<T>[];
@@ -21,10 +25,15 @@ export interface SegmentedControlProps<T extends string = string> {
   "aria-label"?: string;
 }
 
+/** 状态点颜色映射（ok / warn / danger / busy）。 */
 const statusColor: Record<string, string> = {
   ok: "var(--ok)", warn: "var(--warn)", danger: "var(--danger)", busy: "var(--accent)",
 };
 
+/**
+ * Apple 风格分段控件（平台切换器）：选中块弹簧滑动、可键盘左右切换。
+ * 动量交互用带轻微回弹的弹簧；reduced-motion 时改为瞬时切换。
+ */
 /**
  * Apple 风格分段控件（平台切换器）：选中块弹簧滑动、可键盘左右切换。
  * 动量交互用带轻微回弹的弹簧；reduced-motion 时改为瞬时切换。
@@ -38,6 +47,7 @@ export function SegmentedControl<T extends string = string>({
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const enabled = options.filter((o) => !o.disabled);
+  /** 在可用选项之间环形移动并回调。 */
   const move = (dir: 1 | -1) => {
     const idx = enabled.findIndex((o) => o.value === value);
     if (idx < 0 || enabled.length === 0) return;
@@ -45,6 +55,7 @@ export function SegmentedControl<T extends string = string>({
     onChange(next.value);
   };
 
+  /** 方向键切换上一项 / 下一项。 */
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();

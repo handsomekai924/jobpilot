@@ -176,14 +176,10 @@ class RevisionTaskManager:
             target_kind: jobs | crawl_task。
             target_json: 自包含岗位快照。
             crawl_task_id: 非空时来源是某个抓取批次。
-            revision_id: 复用既有草稿行的 id（重新生成用，原稿取已快照的
-                `original_md`）；省略则新建。
+            revision_id: 复用既有草稿行 id（重新生成用）；省略则新建。
             mode: 'targeted' (基于 JD) 或 'free' (自由优化)。
             selected_sections: 自由模式选择的章节列表。
             optimization_prompt: 自由模式的优化提示词。
-
-        Returns:
-            新建的任务。
         """
         reusing = bool(revision_id)
         if reusing:

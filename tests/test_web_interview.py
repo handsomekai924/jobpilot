@@ -729,10 +729,7 @@ def test_parallel_tasks_and_no_dup_submit(client, monkeypatch):
 
 
 def test_task_center_delete_retry(client, monkeypatch):
-    """失败任务保留展示，可删除 / 重试；单岗失败不拖垮，占用口径只算 running。
-
-    占位任务的岗位集要和提交的不同（同集会走幂等返回原任务）。
-    """
+    """失败任务保留展示，可删除 / 重试；单岗失败不拖垮，占用口径只算 running。"""
     _seed_analysis(job_ids=["j1", "j2"])
     from boss_web.services.llm_config_store import LLMConfig, save_config
 

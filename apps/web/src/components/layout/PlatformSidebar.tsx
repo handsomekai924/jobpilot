@@ -1,3 +1,5 @@
+/** 平台作用域侧栏：平台导航 + 会话状态点，仅 `/:siteId/*` 路由展示。 */
+
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { typeScale } from "../../theme/tokens";
@@ -6,6 +8,7 @@ import type { PlatformDescriptor } from "../../platform/types";
 import { PLATFORM_NAV, SHEET_MERGED_NAV } from "../../platform/types";
 import { StatusDot } from "../data/StatusDot";
 
+/** 侧栏属性。 */
 export interface PlatformSidebarProps {
   platform: PlatformDescriptor;
   /** 当前平台作用域路由 key */
@@ -18,7 +21,6 @@ export interface PlatformSidebarProps {
 export function PlatformSidebar({ platform, activeKey, onSelect, sx }: PlatformSidebarProps) {
   const items = [
     ...PLATFORM_NAV.map((n) => ({ key: n.key, label: n.label })),
-    // 已并入「采集条件」的私有入口（如求职期望）不再单开一栏
     ...platform.nav_extras.filter((n) => !SHEET_MERGED_NAV.has(n.key)).map((n) => ({ key: n.key, label: n.label })),
   ];
 
@@ -46,7 +48,6 @@ export function PlatformSidebar({ platform, activeKey, onSelect, sx }: PlatformS
         />
       </Box>
 
-      {/* 矮窗口时导航自己滚，侧栏整体不塌（整页固定 + 内部滚动） */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         {items.map((item) => {
           const active = item.key === activeKey;

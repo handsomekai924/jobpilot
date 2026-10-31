@@ -4,24 +4,17 @@
 
 Attributes:
     PROJECT_ROOT: 项目根目录，与 cwd 无关；打包成 exe 后指向 PyInstaller 解包目录。
-    DATA_DIR: 运行时数据目录（状态库 `boss.db` 所在处）；开发态仓库 `data/`，打包态 exe 同目录。
-    STATIC_DIR: 静态资源目录；dev = 仓库 `boss_web/static`，打包 = 解包目录同名路径。
+    DATA_DIR: 运行时数据目录（状态库 `boss.db` 所在处）。
+    STATIC_DIR: 静态资源目录。
     LOGIN_WAIT_TIMEOUT: 登录任务等验证码 / 滑块的人工上限（秒）。
     ANALYZE_INTERVAL: 简历分析时单次 LLM 调用之间的硬间隔（秒），压限流。
-    MATCH_CONCURRENCY: 匹配页并行度（同时在途的 LLM 调用数）；调小缓解限流，调大易撞 429。
+    MATCH_CONCURRENCY: 匹配页并行度；调小缓解限流，调大易撞 429。
     DEFAULT_ANALYZE_TOP_K: 分析批量默认看多少个职位。
-    DEFAULT_DELIVER_MIN_SCORE: 一键投递默认评分阈值；可在界面改，落 `doc('deliver_config')`。
-    LLM_TEMPERATURE: 采样温度。
-    LLM_MAX_TOKENS: 通用单次回复 token 上限（招呼语等）。
-    LLM_RESUME_PARSE_MAX_TOKENS: 简历结构化解析单次回复 token 上限。
+    DEFAULT_DELIVER_MIN_SCORE: 一键投递默认评分阈值，可在界面改。
     LLM_RESUME_PARSE_RETRY_MAX_TOKENS: 简历输出被截断时唯一一次重试的 token 上限。
-    LLM_MATCH_MAX_TOKENS: 人岗匹配单次回复 token 上限。
-    LLM_REVISE_MAX_TOKENS: 简历优化单次回复 token 上限（输出是整份简历）。
     LLM_REVISE_RETRY_MAX_TOKENS: 简历优化输出被截断时唯一一次重试的 token 上限。
-    LLM_INTERVIEW_MAX_TOKENS: 面试题生成单次回复 token 上限（一岗 10-15 道题）。
     INTERVIEW_QUESTION_MIN: 每个职位最少生成几道题。
     INTERVIEW_QUESTION_MAX: 每个职位最多生成几道题。
-    LLM_TIMEOUT: 单次请求超时（秒）。
 """
 
 from __future__ import annotations

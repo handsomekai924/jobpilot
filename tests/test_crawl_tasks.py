@@ -1,9 +1,4 @@
-"""历史抓取任务（`crawl_tasks` / `crawl_task_jobs`）与匹配范围的测试。
-
-覆盖：档案落库、任务↔岗位归属、`fetch_pages.task_id`、`last_greeted_at`
-不被重抓覆盖、`crawl_task_id` 匹配范围、以及 `/api/crawl/tasks…` 路由
-（`/tasks` 不能被 `/{task_id}` 吃掉）。
-"""
+"""历史抓取任务（`crawl_tasks` / `crawl_task_jobs`）与匹配范围的测试。"""
 
 from __future__ import annotations
 
@@ -363,9 +358,6 @@ def test_api_match_task_batch_requires_resume(client: TestClient):
     assert "简历" in r.json()["message"]
 
 
-# --- 站点归属（多平台）：批次账按站点分账 ---
-
-
 def test_create_crawl_task_站点归属落库():
     """`crawl_tasks.site` 是批次账的分账键，跟 `jobs.site` 同一套口径。"""
     with JobStore() as store:
@@ -374,7 +366,7 @@ def test_create_crawl_task_站点归属落库():
 
 
 def test_create_crawl_task_不传站点吃兜底():
-    """单站点旧账口径：没传就跟列默认同值，**不是空串**。"""
+    """单站点旧账口径：没传就跟列默认同值，不是空串。"""
     with JobStore() as store:
         store.create_crawl_task("tk_fallback")
     assert _task_site("tk_fallback") == DEFAULT_SITE == "boss"
@@ -404,11 +396,7 @@ def test_批次回包带site():
 
 
 def test_api_共用批次列表跨站点(client: TestClient):
-    """共用口**不切片**：匹配/出题/简历优化选批次要看得见所有来源。
-
-    这条也是别名的守门员——`/api/crawl/tasks` 一旦被 legacy 别名接走，
-    `resolve_site` 会给它套上 `site="boss"`，51job 的批次立刻从列表里消失。
-    """
+    """共用口不切片：匹配/出题/简历优化选批次要看得见所有来源。"""
     with JobStore() as store:
         store.create_crawl_task("tk_boss", created_at=1.0, site="boss")
         store.create_crawl_task("tk_51", created_at=2.0, site="51job")
@@ -431,10 +419,7 @@ def test_api_站点口批次列表只列本站(client: TestClient):
 
 
 def test_api_站点口批次详情照样可读(client: TestClient):
-    """详情是共用读法（跟 `jobs.py` 的 `get_job` 同一条先例）：路径只切列表。
-
-    平台页可能要跳去看一个跨站点批次的 JD，那里没有站点语义要守。
-    """
+    """详情是共用读法：路径里的站点只切列表，不挡跨站点批次详情。"""
     with JobStore() as store:
         store.create_crawl_task("tk_51", site="51job")
     assert client.get("/api/sites/boss/crawl/tasks/tk_51").status_code == 200

@@ -1,8 +1,7 @@
 /**
  * 简历解析：选中简历的原文摘要 + LLM 八段解析结果 / 解析进度。
  *
- * 从旧「简历库」下半截拆出来——清单和解析详情各占一段，首屏不再被详情顶掉半屏。
- * 解析任务轮询在页面壳（列表徽章也要用），这里只吃 `run` / `detail` 展示。
+ * 清单与详情节各占一段，首屏不再被详情顶掉半屏；解析轮询在页面壳，这里只吃 `run` / `detail` 展示。
  */
 
 import { Box, Typography } from "@mui/material";
@@ -15,6 +14,7 @@ import { fmtTime } from "../../../utils/format";
 import { ParsedChapters } from "./chapters";
 import { PARSE_TERMINAL, type ParseRun, type ResumeDetail, type ResumeListItem } from "./types";
 
+/** 解析段：一份简历的解析进度 / 八段结果，未解析时给发起入口。 */
 export function ParseSection({
   current, detail, run, loading, rawBusyId, parseBusyId, onRunParse, onViewRaw,
 }: {
@@ -44,7 +44,6 @@ export function ParseSection({
 
   return (
     <Box sx={pageRootSx}>
-      {/* 白底圆角容器撑满剩余高度，滚动条落在它内部：标题行固定，正文自滚 */}
       <Surface sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", flex: "0 0 auto" }}>
           <Typography sx={{ ...typeScale.l, fontWeight: 650, flex: 1, minWidth: 0 }}>

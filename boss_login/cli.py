@@ -1,4 +1,4 @@
-"""命令行入口。
+"""BOSS直聘登录命令行入口。
 
     python -m boss_login login  --phone 13800138000     # 完整流程（发码 → 交互式输入验证码 → 登录）
     python -m boss_login qr                             # APP 扫码登录（终端/文件出二维码，手机扫）

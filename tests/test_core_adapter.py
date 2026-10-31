@@ -55,9 +55,13 @@ def test_注册表_同名不同类报错():
     """验重复注册同名不同类抛 ValueError。"""
 
     class _A:
+        """假适配器：声明 site_id 为 x。"""
+
         site_id = "x"
 
     class _B:
+        """另一个假适配器：同样声明 site_id 为 x。"""
+
         site_id = "x"
 
     register("x")(_A)

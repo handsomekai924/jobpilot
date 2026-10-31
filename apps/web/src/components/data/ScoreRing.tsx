@@ -1,6 +1,9 @@
+/** 匹配度圆环（0–100）：≥80 绿 / ≥60 蓝 / ≥40 橙 / 其余红。 */
+
 import { Box, Typography, useTheme } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 
+/** 分数环属性。 */
 export interface ScoreRingProps {
   /** 0–100 */
   score: number;
@@ -8,6 +11,7 @@ export interface ScoreRingProps {
   size?: number;
 }
 
+/** 按分数段取语义色。 */
 function ringColor(score: number, theme: Theme): string {
   if (score >= 80) return theme.palette.success.main;
   if (score >= 60) return theme.palette.primary.main;

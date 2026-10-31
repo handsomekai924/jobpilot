@@ -147,7 +147,7 @@ class ParseTaskManager:
         return {"task_id": None, "status": "idle"}
 
     def start(self, *, resume_id: str, resume_title: str = "") -> ParseTask:
-        """启动一次解析并起后台线程。
+        """启动一次解析并起后台线程；简历不存在、解析中/并发已满或 LLM 未配置时抛错。
 
         Args:
             resume_id: 简历 id。
@@ -155,11 +155,6 @@ class ParseTaskManager:
 
         Returns:
             新建的解析任务。
-
-        Raises:
-            NotFoundError: 简历不存在。
-            ConflictError: 这份简历解析中 / 全局并发已满。
-            ValidationWebError: LLM 没配置。
         """
         from .llm_config_store import load_config
 

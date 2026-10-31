@@ -2,6 +2,9 @@
 
 每拿完一页就调 `JobStore.save_page`，清洗和入库是同一步；两张表
 （`jobs` 主表 + `fetch_pages` 抓取流水）DDL 在 `boss_db`。
+
+Attributes:
+    DEFAULT_SITE: 站点归属的兜底值（单站点旧账全归 BOSS）；多站点抓取请显式传 `site`。
 """
 
 from __future__ import annotations
@@ -20,9 +23,6 @@ from .models import Job, PageResult
 
 logger = logging.getLogger(__name__)
 
-#: 站点归属的兜底值：单站点旧账全归 BOSS，跟 `boss_db` 里 `jobs.site` /
-#: `fetch_pages.site` 的列默认同值。多站点抓取请**显式传** `save_page(site=…)`，
-#: 别指望列默认——列默认只是旧数据的归档口径，不是新数据的写入口。
 DEFAULT_SITE = "boss"
 
 
@@ -769,8 +769,6 @@ def _job_params(job: Job, fetched_at: str, site: str = "") -> dict[str, Any]:
     `DEFAULT_SITE`，已有行的归属由 SQL 保住不改写。
     """
     params = job.to_dict()
-    # 原样往下传（可以是空串），兜底交给 SQL：INSERT 时补 `DEFAULT_SITE`，
-    # UPSERT 时不改写已有归属。两件事语义不同，别在 Python 里先揉成一个值。
     params["site"] = site or job.site or ""
     params["site_default"] = DEFAULT_SITE
     params["job_labels"] = json.dumps(list(job.job_labels), ensure_ascii=False)
@@ -843,7 +841,7 @@ def _row_to_job(row: sqlite3.Row) -> Job:
 
 
 def _row_to_crawl_task(row: sqlite3.Row) -> dict[str, Any]:
-    """抓取任务行 → API 形状（JSON 列解开，时间保持 REAL）。"""
+    """抓取任务行 → API 形状（JSON 列解开，时间保持 REAL）；站点为空时补 `DEFAULT_SITE`。"""
     data = dict(row)
     for key in ("params_json", "stats_json"):
         raw = data.get(key) or "{}"
@@ -855,7 +853,6 @@ def _row_to_crawl_task(row: sqlite3.Row) -> dict[str, Any]:
     data["job_count"] = int(data.get("job_count") or 0)
     data["inserted_count"] = int(data.get("inserted_count") or 0)
     data["updated_count"] = int(data.get("updated_count") or 0)
-    # 站点归属：旧库补列带列默认，读出来不至于是 NULL；兜底还是跟写入口同一个值。
     data["site"] = str(data.get("site") or DEFAULT_SITE)
     return data
 

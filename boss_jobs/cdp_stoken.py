@@ -3,6 +3,7 @@
 只读自拉 Chrome 调试口里的 Cookie，不解密；滑块/风控不在此处理。细节见 `notes/boss_jobs/cdp_stoken.md`。
 
 Attributes:
+    SITE_ID: 令牌账本归属的站点 id。
     CHROME_PROFILE_ENV: 独立 user-data-dir；默认 profile 会被拒开调试口。
     CHROME_KEEP_ENV: 抓完是否留着 Chrome（`0`/`false` = 关掉）。
     CHROME_CLOSE_ON_EXIT_ENV: 进程退出时是否关掉自拉的 Chrome（`0`/`false` = 留着）。
@@ -10,7 +11,6 @@ Attributes:
     DEFAULT_CHROME_MODE: 默认 `hidden`；人工过滑块时改 `visible`。
     EXPIRY_MARGIN: 快过期就提前换新的余量（秒）。
     RENEW_COOLDOWN: 强制换新的冷却（秒），免得连环拉 Chrome 惹风控。
-    ACQUIRE_TIMEOUT: 等站点写出 token 的超时（秒）。
     TOKEN_PAGE: 要 token 就得跑站点 JS 的那个页面。
     _NON_COOKIE_KEYS: 登录态里不需要往 Chrome 灌的键。
     _OFFSCREEN_POS: `offscreen`/`hidden` 把窗口摆到这儿（别用 Win32 保留值 `-32000`）。
@@ -44,7 +44,6 @@ import boss_db
 from . import config as C
 from .stoken import STOKEN_MAX_AGE, StokenError
 
-#: 令牌账本归属的站点 id（todo3 Stage 1：随 boss-platform-boss 一起搬）。
 SITE_ID: Final[str] = "boss"
 
 logger = logging.getLogger(__name__)

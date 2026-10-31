@@ -1,13 +1,18 @@
+/** 行内告警：反馈里的警告与错误载体。 */
+
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
+/** 告警色调。 */
 export type InlineAlertTone = "ok" | "warn" | "danger" | "info";
 
+/** 行内告警属性。 */
 export interface InlineAlertProps {
   tone?: InlineAlertTone;
   children: ReactNode;
 }
 
+/** 各色调的图标与颜色。 */
 const toneStyle: Record<InlineAlertTone, { icon: string; color: string }> = {
   ok: { icon: "✓", color: "var(--ok)" },
   warn: { icon: "!", color: "var(--warn)" },

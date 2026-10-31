@@ -89,17 +89,13 @@ def test_slider_refresh_without_active_slider_conflicts(client: TestClient):
 
 
 def test_slider_urls_一律站点作用域(client: TestClient):
-    """滑块那三条 URL 全是站点作用域：快照自报的入口、刷新回的入口、票据回传。
-
-    前端开窗用 `/api/sites/boss/auth/slider/{id}`，后端自报的得是同一口径——
-    legacy 别名是给旧 SPA 的，摘了别名帮助页还得能提交票据。这条测试本身也走
-    站点作用域路径，别名摘掉后不用改。
-    """
+    """滑块三条 URL 全是站点作用域，后端自报的入口不得混进 legacy 别名。"""
     from boss_login.verify import SliderChallenge
 
     from boss_web.services import login_task as lt
 
     def refresher() -> SliderChallenge:
+        """换一张新 challenge 的刷新器。"""
         return SliderChallenge(
             captcha_type=1, captcha_name="极验验证", gt="gt-x", challenge="ch-scope"
         )

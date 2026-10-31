@@ -1,3 +1,5 @@
+/** 柱状图：离散序列量级比较，选择性柱帽标注 + 完整取数走表格孪生。 */
+
 import { useMemo } from "react";
 
 import { EmptyState } from "./EmptyState";
@@ -5,6 +7,7 @@ import { EChart, useChartColors, type ChartOption } from "./EChart";
 import { fmtCompact, fmtNumber } from "../../utils/format";
 import { fontFamily } from "../../theme/tokens";
 
+/** 一根柱：标签、数值与 tooltip 次要说明。 */
 export interface ColumnDatum {
   label: string;
   value: number;
@@ -12,6 +15,7 @@ export interface ColumnDatum {
   hint?: string;
 }
 
+/** 柱状图属性。 */
 export interface ColumnChartProps {
   data: ColumnDatum[];
   /** 跟在数值后的单位（「42 个」） */
@@ -28,9 +32,10 @@ const CAP_ROOM = 20;
 /** x 轴标签带（算在图里，容器随内容增高） */
 const X_LABEL_BAND = 22;
 
-/** y 刻度取整到 1/2/5×10^k：mid 之上再翻倍封顶，0/mid/top 三条 */
+/** y 轴刻度取整到 1/2/5×10^k，返回顶值与 0/mid/top 三条刻度。 */
 function niceScale(max: number): { top: number; ticks: number[] } {
   if (!Number.isFinite(max) || max <= 0) return { top: 1, ticks: [0, 0.5, 1] };
+  /** 向上取到 1/2/5×10^k。 */
   const ladderCeil = (x: number) => {
     const mag = 10 ** Math.floor(Math.log10(x));
     const norm = x / mag;
@@ -40,15 +45,7 @@ function niceScale(max: number): { top: number; ticks: number[] } {
   return { top: mid * 2, ticks: [0, mid, mid * 2] };
 }
 
-/**
- * 柱状图（离散序列的量级比较，如每页采集流水）。
- *
- * dataviz 规范：柱同用 slot-1 蓝（`--accent`），柱宽 ≤18px、柱帽 4px 圆角、
- * 基线端直角，柱间 2px 表面间隙（barCategoryGap）；柱帽直接标注只标极值
- * （选择性标注），其余数值靠悬停/聚焦 tooltip 与表格孪生；y 刻度取整到干净
- * 数字，网格线是 1px 实线、退到背景（零线稍强）；命中区是整条槽位（≥24px，
- * 也兜住 0 值——trigger=axis）。x 标签过密时隔一个显示，不硬塞不裁切。
- */
+/** 柱状图：细柱 + 选择性柱帽标注，悬停整槽位出 tooltip；空数据出空态。 */
 export function ColumnChart({
   data,
   unit = "",
@@ -67,7 +64,6 @@ export function ColumnChart({
     );
     return {
       textStyle: { fontFamily },
-      // 显式边距：左 36px 放 y 刻度，顶 20px 给柱帽标注，底 22px 是 x 标签带
       grid: { left: 36, right: 8, top: CAP_ROOM, bottom: X_LABEL_BAND },
       tooltip: {
         trigger: "axis",
@@ -76,6 +72,7 @@ export function ColumnChart({
         borderColor: colors.divider,
         textStyle: { color: colors.text1, fontSize: 12 },
         axisPointer: { type: "shadow", shadowStyle: { color: colors.surface2 } },
+        /** tooltip：值先行，hint 跟在行标签后。 */
         formatter: (params: unknown) => {
           const p = (Array.isArray(params) ? params[0] : params) as {
             value: number;
@@ -83,7 +80,6 @@ export function ColumnChart({
           };
           const d = data[p.dataIndex];
           if (!d) return "";
-          // 值先行；hint（页/原始/丢弃/新增/更新）跟在行标签后
           return (
             `<div style="font-weight:600">${formatValue(p.value)}${unit}</div>` +
             `<div style="color:${colors.text2}">${d.label}${d.hint ? ` · ${d.hint}` : ""}</div>`
@@ -100,7 +96,7 @@ export function ColumnChart({
           fontSize: 11,
           fontFamily,
           interval: 0,
-          hideOverlap: false, // 隔一个显示由 formatter 控制，不交给自动隐藏（不硬塞不裁切）
+          hideOverlap: false,
           formatter: (v: string, i: number) => (showAllLabels || i % 2 === 0 ? v : ""),
         },
       },
@@ -108,9 +104,7 @@ export function ColumnChart({
         type: "value",
         min: 0,
         max: top,
-        interval: ticks[1] - ticks[0], // 0/mid/top 三条
-        // 零线用分割线本色、稍强；网格 1px 实线退一档（canvas 画不了 tabular-nums，
-        // 等宽数字只落表格孪生的数值列）
+        interval: ticks[1] - ticks[0],
         axisLine: { show: true, lineStyle: { color: colors.divider, width: 1 } },
         axisTick: { show: false },
         axisLabel: {
@@ -126,11 +120,10 @@ export function ColumnChart({
           type: "bar",
           data: data.map((d, i) => ({
             value: d.value,
-            // 选择性标注：只给指定下标（默认最大值）开柱帽数字
             label: { show: marked.has(i) },
           })),
-          barCategoryGap: "2px", // 相邻柱 2px 表面间隙（barGap 是多系列间距，单系列用不到）
-          barMaxWidth: 18, // 细标记：柱宽 ≤18px（密集时随槽位收细，不重叠）
+          barCategoryGap: "2px",
+          barMaxWidth: 18,
           itemStyle: { color: colors.accent, borderRadius: [4, 4, 0, 0] },
           label: {
             show: false,
@@ -140,7 +133,6 @@ export function ColumnChart({
             fontSize: 11,
             fontFamily,
             fontWeight: 590,
-            // 柱帽只写数字不带单位（短促极值标注），完整数值在 tooltip 与表格孪生
             formatter: (p: { value: number }) => formatValue(p.value),
           },
         },

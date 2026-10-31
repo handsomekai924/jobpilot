@@ -5,11 +5,14 @@
  * 连不上时 `status` 为 `"down"`，各面板自行回落 HTTP 轮询。
  */
 
-const listeners = new Map(); // type -> Set<handler>
+/** 消息类型 → 订阅回调集合。 */
+const listeners = new Map();
+/** 通配（`*`）订阅回调集合。 */
 const anyListeners = new Set();
 
 let socket = null;
-let status = "connecting"; // connecting | open | down
+/** 连接状态：connecting / open / down。 */
+let status = "connecting";
 let retryMs = 1000;
 let retryTimer = null;
 let pingTimer = null;
@@ -66,7 +69,6 @@ export function send(payload) {
     try {
       socket.send(JSON.stringify(payload));
     } catch {
-      /* 忽略 */
     }
   }
 }
@@ -77,7 +79,7 @@ export function resync() {
 }
 
 /**
- * 建立连接（幂等）。
+ * 建立连接（幂等）；旧的半死连接先关掉，避免服务端留僵尸连接。
  *
  * @returns {Promise<void>} 连上或失败后都 resolve
  */
@@ -89,12 +91,10 @@ export function connect() {
   return new Promise((resolve) => {
     const url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/api/ws`;
     let settled = false;
-    // 旧 socket 无论半死不活都先补一刀关掉，不留服务端挂着的僵尸连接。
     if (socket) {
       try {
         socket.close();
       } catch {
-        /* 忽略 */
       }
       socket = null;
     }
@@ -139,8 +139,8 @@ export function connect() {
       console.warn("[ws] 连接出错");
       down();
     };
+    /** 连接关闭：记下 code/reason（1006 异常断开、1000 正常关闭）便于排查，再走降级重连。 */
     socket.onclose = (ev) => {
-      // code/reason 是排查「反复重连」的关键现场：1006=异常断开，1000=正常关。
       console.warn(`[ws] 连接关闭 code=${ev.code} reason=${ev.reason || "-"}`);
       down();
     };
@@ -163,17 +163,22 @@ export function disconnect() {
   try {
     socket && socket.close();
   } catch {
-    /* 忽略 */
   }
   socket = null;
   setStatus("down");
 }
 
+/**
+ * 分发一帧消息：跳过 pong，先给通配订阅、再给按 type 的订阅。
+ *
+ * hello 不管是首连还是重连收到，都当快照交给订阅方。
+ *
+ * @param {Object} data 解析后的消息体（含 type）
+ */
 function dispatch(data) {
   const type = data && data.type;
   if (type === "pong") return;
   if (type === "hello" && openedOnce) {
-    // 重连后的 hello 也是快照
   }
   for (const h of anyListeners) {
     try {
@@ -194,6 +199,7 @@ function dispatch(data) {
   }
 }
 
+/** 指数退避重连：1s 起步、每次翻倍、封顶 15s；已有排队就不再排。 */
 function scheduleReconnect() {
   if (retryTimer) return;
   console.warn(`[ws] ${retryMs}ms 后重连`);
@@ -204,11 +210,13 @@ function scheduleReconnect() {
   }, retryMs);
 }
 
+/** 每 25s 发一次 ping 保活，先清掉旧定时器避免重复。 */
 function startPing() {
   stopPing();
   pingTimer = setInterval(() => send({ type: "ping" }), 25000);
 }
 
+/** 停掉心跳定时器。 */
 function stopPing() {
   if (pingTimer) {
     clearInterval(pingTimer);

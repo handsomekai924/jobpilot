@@ -201,3 +201,8 @@ Geetest Inc. 的发行版一致（首行 "v0.5.0 Geetest Inc."），用镜像即
 `MAX_RESEND_WAIT_SECONDS`：重发验证码时，最多愿意等待服务端冷却多久（秒）。超过这个值直接失败，
 以免脚本静默地睡很久——这种情况通常意味着配额已耗尽或触发风控。
 `CN_PHONE_PREFIX_LENGTH`：本地校验用的手机号规则。
+
+### `CANDIDATE_ENDPOINTS` / `SMS_SCENES`
+
+- `CANDIDATE_ENDPOINTS`：`probe` 时依次尝试的候选地址；每个业务键给一组同义路径，命中哪条由探测结果写回 `ENDPOINTS`。
+- `SMS_SCENES`：前端场景名 → `smsType`（login=1 / register=2 / bind=7）；极验通道的 `send/smsCodeV2` 另有写死的 `SMS_TYPE_V2 = 7`。

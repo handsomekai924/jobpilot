@@ -9,6 +9,7 @@ Attributes:
     ST_ERROR: 任务状态：失败。
     ST_CANCELLED: 任务状态：已取消。
     PHASE_TEXT: `CrawlTask.phase` 内部阶段代号 → 人话（任务中心「当前」列、页面小标共用）。
+    SITE: 本模块服务的站点；任务中心按站点记账、`crawl_tasks.site` 也用它。
     BLANK_SEARCH_MSG: 搜索流条件全空时的报错。
 """
 
@@ -46,9 +47,6 @@ PHASE_TEXT = {
     "crawl": "翻页搜索",
 }
 
-#: 本模块服务的站点（todo3 Stage 1 随模块搬进 boss-platform-boss 时改由 adapter 自述）。
-#: 两处用途同源：任务中心按站点记账的自述值，以及 `crawl_tasks.site` 的归属写入口。
-#: 多站点抓取别改这里——`start()` 该从 adapter 拿站点，不是改常量。
 SITE = "boss"
 
 hub.register(
@@ -202,19 +200,10 @@ class CrawlTask:
     """内存里的抓取任务状态与事件流水。
 
     Attributes:
-        task_id: 任务 id。
         site: 站点归属（批次账按站点分账，跟 `crawl_tasks.site` 同源）。
-        params: 启动参数。
-        status: 任务状态。
         phase: 当前阶段。
-        created_at: 创建时间戳。
-        ended_at: 结束时间戳。
-        error: 错误文案。
         stopped_reason: 停止原因。
         progress: 累计进度计数。
-        events: 最近事件流水。
-        cancel_flag: 取消标记。
-        lock: 状态锁。
     """
 
     def __init__(self, params: dict[str, Any], *, site: str = "") -> None:
@@ -336,16 +325,13 @@ class CrawlTaskManager:
             return self._task
 
     def snapshot(self, task_id: str | None = None) -> dict[str, Any]:
-        """查询进度快照。
+        """查询进度快照；指定 task_id 不是当前任务时抛 `NotFoundError`。
 
         Args:
             task_id: 可选，校验是否就是当前任务。
 
         Returns:
             任务快照；空闲时为 idle。
-
-        Raises:
-            NotFoundError: 指定 task_id 不是当前任务。
         """
         task = self.current()
         if task is None:
@@ -365,7 +351,7 @@ class CrawlTaskManager:
         detail_interval: float | None = None,
         store_blacklisted: bool | None = None,
     ) -> CrawlTask:
-        """启动一次抓取并起后台线程。
+        """启动一次抓取并起后台线程；条件全空抛 `ValidationWebError`，已有任务在跑抛 `ConflictError`。
 
         Args:
             max_pages: 最大页数。
@@ -378,10 +364,6 @@ class CrawlTaskManager:
 
         Returns:
             新建的抓取任务。
-
-        Raises:
-            ValidationWebError: 搜索流条件全空。
-            ConflictError: 已有抓取任务在跑。
         """
         config_snapshot = load_snapshot(site=SITE)
         saved = config_snapshot.collection
@@ -443,16 +425,13 @@ class CrawlTaskManager:
         return task
 
     def cancel(self, task_id: str | None = None) -> CrawlTask:
-        """请求取消当前任务。
+        """请求取消当前任务；没有在跑的抓取任务时抛 `NotFoundError`。
 
         Args:
             task_id: 可选，校验是否就是当前任务。
 
         Returns:
             被取消的任务。
-
-        Raises:
-            NotFoundError: 没有在跑的抓取任务。
         """
         task = self.current()
         if task is None or (task_id and task.task_id != task_id):

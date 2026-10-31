@@ -1,7 +1,6 @@
-"""站点适配器注册表（工厂 + 注册表，todo3 2.2）。
+"""站点适配器注册表（工厂 + 注册表）。
 
-新增站点只加一个 adapter 包、server 装配点多一行 import；`get_adapter(site_id)`
-是唯一的取用口。注册表本身不知道任何站点细节。
+新增站点只加一个 adapter 包、server 装配点多一行 import；`get_adapter(site_id)` 是唯一的取用口。
 """
 
 from __future__ import annotations
@@ -25,19 +24,17 @@ def _ensure_loaded() -> None:
 
 
 def register(site_id: str):
-    """把适配器类挂进注册表的类装饰器。
+    """把适配器类挂进注册表的类装饰器；`site_id` 重复注册时抛 `ValueError`。
 
     Args:
         site_id: 站点标识（`"boss"` / `"51job"` / …），路由与数据行都用它。
 
     Returns:
         装饰器：原样返回类，顺手实例化并注册。
-
-    Raises:
-        ValueError: `site_id` 重复注册。
     """
 
     def deco(cls: type) -> type:
+        """实例化适配器并登记到注册表。"""
         existing = _REGISTRY.get(site_id)
         if existing is not None and type(existing) is not cls:
             raise ValueError(f"站点已注册：{site_id}")
@@ -50,16 +47,13 @@ def register(site_id: str):
 
 
 def get_adapter(site_id: str) -> SiteAdapter:
-    """按站点取适配器。
+    """按站点取适配器；没这个站点时抛 `KeyError`。
 
     Args:
         site_id: 站点标识。
 
     Returns:
         站点适配器。
-
-    Raises:
-        KeyError: 没这个站点。
     """
     _ensure_loaded()
     adapter = _REGISTRY.get(site_id)
@@ -85,7 +79,6 @@ def build_descriptor(
 ) -> dict[str, Any]:
     """把适配器的自述拼成 `GET /api/platforms` 的一条描述符。
 
-    与前端 `PlatformDescriptor`（apps/web/src/platform/types.ts）同构：
     能力降级、切换器、侧边栏全部吃这一个形状，前端不许写死平台清单。
 
     Args:

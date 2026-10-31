@@ -156,10 +156,7 @@ class _StubFilter:
 
 
 def run_crawl(tmp_path, responses, *, context=None, enrich_details=False, max_pages=1, events=None, expect_filter=None, search_filter=None):
-    """跑一轮 crawl，回 `(store, report, http)`。不关库——调用方自己收尾。
-
-    黑名单行为与路由无关；不显式给流就走最小搜索流桩。
-    """
+    """跑一轮 crawl，回 `(store, report, http)`；不关库，调用方自己收尾。"""
     http = FakeHttp(responses)
     client = JobClient(http=http, sleeper=lambda _s: None)
     store = JobStore(tmp_path / "jobs.db")

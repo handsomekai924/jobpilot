@@ -1,6 +1,9 @@
+/** 页面头：全站统一「大标题 + 右侧主操作」。 */
+
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
+/** 页面头属性。 */
 export interface PageHeaderProps {
   title: ReactNode;
   actions?: ReactNode;

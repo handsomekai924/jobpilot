@@ -9,9 +9,10 @@ import { Box, Typography } from "@mui/material";
 
 import { Button, ConfirmSheet, Surface, TextField, useToast } from "../../../components";
 import { fontFamilyMono, typeScale } from "../../../theme/tokens";
-import { systemApi } from "../repos";
+import { systemApi } from "../../../api/shared";
 import { errText, GREETING_MAX } from "./types";
 
+/** 招呼语段：编辑全局提示词，可恢复内置默认。 */
 export function GreetingSection() {
   const toast = useToast();
   const [promptCustom, setPromptCustom] = useState("");
@@ -23,9 +24,9 @@ export function GreetingSection() {
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
 
+  /** 读取招呼语提示词；失败弹 toast 并回 null。 */
   const loadPrompt = async () => {
     try {
-      // 后端回 `{requirement, custom, is_default, default}`，repos 类型写 `{prompt}`——按后端形状读
       const raw = (await systemApi.greetingPrompt()) as unknown as {
         prompt?: string;
         requirement?: string;
@@ -44,17 +45,18 @@ export function GreetingSection() {
     }
   };
 
+  /** 进段拉一次提示词（含内置默认）。 */
   useEffect(() => {
     void loadPrompt();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** 保存自定义提示词；保存后回读真实状态并提示是否生效。 */
   const savePrompt = async () => {
     setSaving(true);
     try {
       await systemApi.saveGreetingPrompt(promptCustom.trim());
       const raw = await loadPrompt();
-      // 保存后服务端仍报「内置默认」：大概率是 repos 的请求体键名没对上，别谎报成功
       if (promptCustom.trim() && raw?.is_default) {
         toast.toast("保存后仍是内置默认，没生效——看 MatchPage 文件头注释", "warn");
       } else {
@@ -67,6 +69,7 @@ export function GreetingSection() {
     }
   };
 
+  /** 恢复内置默认提示词。 */
   const resetPrompt = async () => {
     setResetting(true);
     try {
@@ -82,7 +85,6 @@ export function GreetingSection() {
 
   return (
     <Box>
-      {/* 表头对齐「历史分析」：左标题 + 右动作（缺陷清单「打招呼语缺左侧标题」） */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
         <Typography sx={{ ...typeScale.m, fontWeight: 600, flex: 1 }}>打招呼语</Typography>
         <Button size="small" variant="gray" disabled={resetting || saving} onClick={() => setConfirmReset(true)}>

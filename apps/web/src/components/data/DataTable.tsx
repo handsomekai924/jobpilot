@@ -1,3 +1,5 @@
+/** 数据表：三张业务表统一行样式，表头固定、滚动交给外层 ScrollArea。 */
+
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -6,6 +8,7 @@ import { mergeSx } from "../../theme/sx";
 import { EmptyState } from "./EmptyState";
 import { Skeleton } from "./Skeleton";
 
+/** 一列：渲染函数缺省时取 `row[key]`，`hideOnNarrow` 在窄屏隐藏。 */
 export interface Column<T> {
   key: string;
   header: ReactNode;
@@ -17,6 +20,7 @@ export interface Column<T> {
   hideOnNarrow?: boolean;
 }
 
+/** 数据表属性。 */
 export interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
@@ -54,8 +58,6 @@ export function DataTable<T>({
   }
 
   return (
-    // 不自带 overflow：让外层 ScrollArea 同时管纵向 + 横向滚动，
-    // 表头才能 sticky 钉在滚动区顶部（表头固定 + 表格内容区局部滚动）
     <Box sx={mergeSx({ minWidth: 0 }, sx)}>
       <Box component="table" sx={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, minWidth: 560 }}>
         <Box component="thead">
@@ -75,15 +77,10 @@ export function DataTable<T>({
                   borderBottom: "1px solid",
                   borderColor: "divider",
                   whiteSpace: "nowrap",
-                  // 表头固定：滚动时钉在表格内容区顶部，不随行滚走
-                  // （borderCollapse 用 separate：collapse 下 sticky 边线会丢）
                   position: "sticky",
                   top: 0,
                   zIndex: 1,
                   bgcolor: "background.default",
-                  // 表头与内容区无缝衔接：sticky 表头在分数滚动位置下，边线/边缘会
-                  // 抗锯齿出半透明缝，下方行从缝里透上来——用不透明背景色影子压住接缝
-                  // （影子画在边框盒之外，滚动中的行整段被遮住，不透出）
                   boxShadow: (t: Theme) => `0 2px 0 0 ${t.palette.background.default}`,
                   display: c.hideOnNarrow ? { xs: "none", md: "table-cell" } : "table-cell",
                 }}
@@ -102,7 +99,6 @@ export function DataTable<T>({
                   top: 0,
                   zIndex: 1,
                   bgcolor: "background.default",
-                  // 同上：不透明影子压住表头与内容区的接缝
                   boxShadow: (t: Theme) => `0 2px 0 0 ${t.palette.background.default}`,
                 }}
               />

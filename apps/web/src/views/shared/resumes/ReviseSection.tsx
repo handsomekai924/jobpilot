@@ -1,13 +1,8 @@
 /**
  * 简历优化：定向（岗位 / 批次 / 全库）与自由（章节 + 提示词）两种改稿向导。
  *
- * 目标范围（缺陷清单「目标范围」）：只留「爬取批次下拉 + 搜索框」同一行——
- * 不选批次 = 搜全部职位；勾具体岗位 = 只改这几个，不勾 = 范围内全部。
- * 不再有「全部职位 / 爬取批次」互斥分段。候选岗位列表走分页（上一页/下一页），
- * 不用「加载更多」追加（追加列表翻页状态难对齐，页码才是可回退的导航）。
- *
- * 优化任务轮询在页面壳（跨段共享，去「优化记录」看详情回来任务还在跑）；
- * 这层只管表单、启动 / 停止，以及任务完成后的「查看修改稿」跳转。
+ * 目标范围与启动参数口径见 `notes/apps/web/src/views/shared/resumes/ReviseSection.md`；
+ * 任务轮询在页面壳，这层只管表单、启动 / 停止与完成后的跳转。
  */
 
 import { useEffect, useState } from "react";
@@ -19,7 +14,7 @@ import {
 } from "../../../components";
 import { typeScale } from "../../../theme/tokens";
 import { fmtNumber, fmtTime } from "../../../utils/format";
-import { crawlBatchApi, interviewApi, resumeApi } from "../repos";
+import { crawlBatchApi, interviewApi, resumeApi } from "../../../api/shared";
 import { toTaskEvents } from "../taskEvents";
 import {
   JOB_PAGE_SIZE, MAX_TARGET, MODE_OPTIONS, msgOf, reviseTerminal,
@@ -27,6 +22,7 @@ import {
   type SectionItem,
 } from "./types";
 
+/** 优化段：选简历与模式，定向勾岗位或自由选章节，启动 / 停止任务。 */
 export function ReviseSection({
   resumes, currentId, task, onTaskChange, onViewRevision,
 }: {
@@ -40,8 +36,6 @@ export function ReviseSection({
   const [resumeId, setResumeId] = useState(currentId || resumes[0]?.resume_id || "");
   const [mode, setMode] = useState<ReviseMode>("targeted");
 
-  // 定向：批次下拉（空 = 全库搜）+ 职位搜索框 + 可选的岗位勾选；启动时按
-  // 勾了 → job_ids、选了批次没勾 → crawl_task_id、没批次没勾 → all_repo 收口
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [crawlTaskId, setCrawlTaskId] = useState("");
   const [jobs, setJobs] = useState<JobPickRow[]>([]);
@@ -52,7 +46,6 @@ export function ReviseSection({
   const [batches, setBatches] = useState<{ code: string; name: string }[]>([]);
   const [batchesLoading, setBatchesLoading] = useState(true);
 
-  // 自由：章节 + 提示词
   const [sections, setSections] = useState<SectionItem[]>([]);
   const [sectionsLoading, setSectionsLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
@@ -62,23 +55,23 @@ export function ReviseSection({
   const [presets, setPresets] = useState<Record<string, PresetItem[]>>({});
   const [presetsLoading, setPresetsLoading] = useState(true);
 
-  // 启动 / 停止在途标志（防连点；按钮同步上「…中」文案）
+  /** 启动 / 停止在途标志（防连点，按钮同步「…中」文案）。 */
   const [starting, setStarting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  // 列表异步到货后补选中
+  /** 列表异步到货后补选中第一份简历。 */
   useEffect(() => {
     if (!resumeId && resumes.length) setResumeId(resumes[0].resume_id);
   }, [resumes, resumeId]);
 
-  // 换简历清掉旧选择（与旧页 pick() 同语义）
+  /** 换简历清掉旧选择。 */
   useEffect(() => {
     setJobIds([]);
     setSelected([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeId]);
 
-  // 预设提示词库（全局，挂载取一次）；默认选中第一个分类，少一次点击
+  /** 拉预设提示词库（全局，挂载取一次），默认选中第一个分类。 */
   useEffect(() => {
     let alive = true;
     setPresetsLoading(true);
@@ -96,7 +89,7 @@ export function ReviseSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 批次下拉：共用批次账（`GET /api/crawl/tasks`，跨站点全量，不带 `{site}`）
+  /** 批次下拉：共用批次账（跨站点全量，不带 site）。 */
   useEffect(() => {
     let alive = true;
     setBatchesLoading(true);
@@ -108,13 +101,12 @@ export function ReviseSection({
           name: `${(t.params as { title?: string } | undefined)?.title ?? "抓取任务"} · ${fmtTime(t.created_at)}`,
         })));
       })
-      .catch(() => { /* 批次取不到就不给下拉，手动勾岗位/全库照样用 */ })
+      .catch(() => {})
       .finally(() => { if (alive) setBatchesLoading(false); });
     return () => { alive = false; };
   }, []);
 
-  // 候选岗位：查词 / 翻页 / 批次变化都重拉（本地接口，不需要防抖）；
-  // 不带 crawl_task_id = 全库搜，带了 = 批内搜；每页整页替换，不做「加载更多」追加
+  /** 候选岗位：搜索 / 翻页 / 批次变化都重拉，每页整页替换。 */
   useEffect(() => {
     if (mode !== "targeted") return;
     let alive = true;
@@ -136,13 +128,13 @@ export function ReviseSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, crawlTaskId, jobQuery, jobPage]);
 
-  // 批次一换就回到第一页，别把上个范围的翻页带给下个范围
+  /** 换批次就回到第一页，避免带上个范围的页码。 */
   const changeBatch = (v: string) => {
     setCrawlTaskId(v);
     setJobPage(0);
   };
 
-  // 自由模式：按简历取章节
+  /** 自由模式：按简历取章节标题。 */
   useEffect(() => {
     if (mode !== "free" || !resumeId) {
       setSections([]);
@@ -161,6 +153,7 @@ export function ReviseSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, resumeId]);
 
+  /** 勾选 / 取消岗位，超出上限时提示并不勾。 */
   const toggleJob = (id: string, checked: boolean) => {
     if (checked && !jobIds.includes(id) && jobIds.length >= MAX_TARGET) {
       toast.toast(`最多选 ${MAX_TARGET} 个`, "warn");
@@ -169,6 +162,7 @@ export function ReviseSection({
     setJobIds((prev) => (checked ? [...new Set([...prev, id])] : prev.filter((x) => x !== id)));
   };
 
+  /** 勾选 / 取消章节。 */
   const toggleSection = (title: string, checked: boolean) => {
     setSelected((prev) => (checked ? [...new Set([...prev, title])] : prev.filter((x) => x !== title)));
   };
@@ -198,7 +192,6 @@ export function ReviseSection({
           optimization_prompt: prompt.trim(),
         })) as unknown as ReviseSnapshot;
       } else {
-        // 勾了岗位 = 只改这几个；没勾 = 以搜索范围内的全部岗位为目标（空批次 = 全库）
         const wholeScope = jobIds.length === 0;
         snap = (await resumeApi.startRevise({
           resume_id: resumeId,
@@ -210,13 +203,13 @@ export function ReviseSection({
       onTaskChange({ ...snap, status: snap.status || "running" });
       toast.toast("已启动，正在生成…", "ok");
     } catch (e) {
-      // 重复提交等后端拒绝：把 message 原样弹出来
       toast.toast(msgOf(e), "danger");
     } finally {
       setStarting(false);
     }
   };
 
+  /** 请求停止当前优化任务。 */
   const cancel = async () => {
     if (!task?.task_id || cancelling) return;
     setCancelling(true);
@@ -257,7 +250,6 @@ export function ReviseSection({
         <Typography sx={{ ...typeScale.s, color: "text.secondary", flex: 1, minWidth: 180 }}>
           修改以这份【原文】为底稿，不是解析结果。原简历永不覆盖。
         </Typography>
-        {/* 优化入口并进顶部工具条（GenerateSection 筛选条同款范式），不再单独占底部一行 */}
         <Button
           variant="filled"
           sx={{ ml: "auto" }}
@@ -309,7 +301,6 @@ export function ReviseSection({
             overflow: "hidden",
           }}
         >
-          {/* 固定头部：目标范围一行 + 两行说明（容器头部信息，不随列表滚） */}
           <Box
             data-testid="revise-scope-row"
             sx={{ display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap", flex: "0 0 auto" }}
@@ -341,7 +332,6 @@ export function ReviseSection({
             已选 {jobIds.length}/{MAX_TARGET}（后端最多吃 {MAX_TARGET} 个）· 共 {fmtNumber(jobTotal)} 个候选
           </Typography>
 
-          {/* 候选岗位列表：内容区自滚（去掉 maxHeight），骨架同占这块 */}
           <ScrollArea>
             {jobsLoading ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -382,7 +372,6 @@ export function ReviseSection({
             )}
           </ScrollArea>
 
-          {/* 固定底：分页（缺陷清单「目标范围」）+ 清空勾选，不随列表滚 */}
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", flex: "0 0 auto" }}>
             <Button
               size="small"
@@ -407,7 +396,6 @@ export function ReviseSection({
           </Box>
         </Surface>
       ) : (
-        /* 自由模式没有分页器：整段自滚 */
         <ScrollArea sx={{ mb: 2.5 }}>
           <Surface sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Box>

@@ -1,9 +1,6 @@
 """共享夹具：给集成测试和 CLI 测试提供同一个假服务端。
 
-一条规矩：测试绝不碰真状态库、也绝不真拉 Chrome。`isolated_db` 把
-`BOSS_DB` 指到临时目录，整套 `load_*/save_*/clear_*` 自动跟着走（它们
-都是调用时才解析路径），顺手把 CDP 换新换成假令牌。要真跑端到端，用
-`tools/wire_search.py`。
+`isolated_db` 把 `BOSS_DB` 指到临时目录并替换 CDP 令牌；测试绝不碰真状态库、也绝不真拉 Chrome。
 """
 
 from __future__ import annotations
@@ -46,11 +43,7 @@ def clean_store():
 
 @pytest.fixture(autouse=True)
 def reset_task_hub():
-    """任务中心是进程内单例：用例之间清掉任务记录，免得旧任务的占用串场。
-
-    有些用例会把任务线程留着跑（模拟慢网络），不清记录的话下一个用例
-    提交同类型任务就会被 409 误拦。
-    """
+    """任务中心是进程内单例：用例之间清掉任务记录，免得旧任务的占用串场。"""
     from boss_web.services.task_runtime import hub
 
     hub.reset()
@@ -60,11 +53,7 @@ def reset_task_hub():
 
 @pytest.fixture(autouse=True)
 def isolated_db(monkeypatch, tmp_path):
-    """把状态库指到 `tmp_path/boss.db`，CDP 换新换成假令牌。
-
-    `fetch` 默认会为 `__zp_stoken__` 起一台带调试口的 Chrome。那条路要真
-    浏览器，所以统一把换新动作换成假令牌（落盘仍然走真 `StokenStore`）。
-    """
+    """把状态库指到 `tmp_path/boss.db`，CDP 换新换成假令牌。"""
     import boss_db
 
     monkeypatch.setenv(boss_db.DB_ENV, str(tmp_path / "boss.db"))

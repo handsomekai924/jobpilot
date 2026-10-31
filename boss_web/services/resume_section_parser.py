@@ -19,12 +19,9 @@ HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 
 _MD_HEADING_ANY = re.compile(r"^#{1,6}\s+\S", re.MULTILINE)
 
-# 行首编号 / 项目符号（「一、」「1.」「(2)」「◆」都算）——提升标题前剥掉
 _LINE_PREFIX = re.compile(r"^\s*(?:[一二三四五六七八九十]+、|\(?[0-9A-Za-z]{1,2}[.、)]\s*|[\-–—*·•●◆■◇■]+\s*)")
 
-# 常见简历章节名（比较前小写 + 去标点，见 `_section_core`）
 _KNOWN_SECTIONS = frozenset({
-    # 中文
     "基本信息", "个人信息", "联系方式", "求职意向", "求职状态", "职业目标",
     "教育背景", "教育经历", "教育情况",
     "工作经历", "工作经验", "工作简介", "实习经历", "实习经验", "实践经历",
@@ -34,7 +31,6 @@ _KNOWN_SECTIONS = frozenset({
     "自我评价", "个人评价", "自我介绍", "个人简介", "个人优势", "个人总结", "自我总结",
     "获奖经历", "所获荣誉", "荣誉奖项", "荣誉证书", "证书", "资格证书",
     "兴趣爱好", "其他", "其他说明", "附件",
-    # 英文
     "summary", "professional summary", "objective", "profile", "personal statement",
     "experience", "work experience", "professional experience", "employment",
     "education", "academic background",

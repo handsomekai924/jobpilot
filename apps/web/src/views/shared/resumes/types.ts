@@ -92,6 +92,7 @@ export interface RevisionRow {
   model?: string;
 }
 
+/** 一条变更点说明。 */
 export interface ChangeItem {
   section?: string;
   type?: string;
@@ -99,6 +100,7 @@ export interface ChangeItem {
   reason?: string;
 }
 
+/** diff 对齐块（`tag` 为 equal / insert / delete / replace）。 */
 export interface DiffBlock {
   tag: string;
   left?: string;
@@ -144,8 +146,10 @@ export const PARSE_TERMINAL = new Set(["done", "error", "cancelled"]);
 /** 定向模式最多勾几个岗位——后端 `_pick_target_jobs` 也只吃前 5 个。 */
 export const MAX_TARGET = 5;
 
+/** 定向模式候选岗位一页几个。 */
 export const JOB_PAGE_SIZE = 20;
 
+/** 优化记录一页几条。 */
 export const REV_PAGE_SIZE = 20;
 
 /** 变更点类型文案（legacy `CHANGE_TYPE_LABEL`）。 */
@@ -167,16 +171,19 @@ export const REV_STATUS_META: Record<string, { label: string; tone: PillTone }> 
   discarded: { label: "已放弃", tone: "static" },
 };
 
+/** 修改稿导出格式选项。 */
 export const FORMAT_OPTIONS = [
   { code: "md", name: "Markdown" },
   { code: "txt", name: "纯文本" },
 ];
 
+/** 优化模式选项（定向 / 自由）。 */
 export const MODE_OPTIONS = [
   { value: "targeted", label: "定向优化" },
   { value: "free", label: "自由优化" },
 ] as const;
 
+/** 优化模式取值。 */
 export type ReviseMode = (typeof MODE_OPTIONS)[number]["value"];
 
 /** 错误 → 给人看的一句话（ApiError.message 本来就是话术）。 */

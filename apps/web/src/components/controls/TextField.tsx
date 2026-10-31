@@ -1,5 +1,8 @@
+/** Apple 风格输入框入口：业务代码一律走本组件，不直接用 MuiTextField。 */
+
 import { TextField as MuiTextField, type TextFieldProps as MuiTextFieldProps } from "@mui/material";
 
+/** 输入框属性，直接沿用 MUI。 */
 export type TextFieldProps = MuiTextFieldProps;
 
 /**

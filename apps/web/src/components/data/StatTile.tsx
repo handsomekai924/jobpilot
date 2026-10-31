@@ -1,3 +1,5 @@
+/** KPI 数字牌：单个当前值 + 可选说明与同色系进度条。 */
+
 import type { ReactNode } from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -5,6 +7,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { typeScale } from "../../theme/tokens";
 import { mergeSx } from "../../theme/sx";
 
+/** 数字牌属性。 */
 export interface StatTileProps {
   /** 一句话标签（sentence case，不带冒号） */
   label: string;
@@ -17,7 +20,7 @@ export interface StatTileProps {
 }
 
 /**
- * KPI 数字牌（dataviz「stat tile」）：单个当前值 + 可选说明/同色系进度条。
+ * KPI 数字牌：单个当前值 + 可选说明/同色系进度条。
  * 大数字不做展示字体、不加 tabular-nums（后者只留给表格列与坐标轴刻度）。
  */
 export function StatTile({ label, value, caption, meter, sx }: StatTileProps) {
@@ -35,7 +38,6 @@ export function StatTile({ label, value, caption, meter, sx }: StatTileProps) {
           sx={{
             mt: 1,
             bgcolor: "color-mix(in srgb, var(--accent) 16%, transparent)",
-            // 强制高对比模式下背景会被剥掉，填充退化成系统前景色实心
             "@media (forced-colors: active)": {
               bgcolor: "Canvas",
               "& .MuiLinearProgress-bar": { bgcolor: "CanvasText" },

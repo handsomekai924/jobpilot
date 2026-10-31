@@ -4,6 +4,9 @@
 环境变量 `BOSS_DB` → `data/boss.db`；用户点名的 JSON 文件读写不走这里。
 
 Attributes:
+    SITE_SHARED: 共用 doc 键的站点值；不带站点语义（LLM / 应用设置这类全局配置）。
+    LEGACY_SITE: 旧账本的归属站点；单站点时代整库都是 BOSS 的。
+    DOC_SITE_SCOPED: 随站点走的 doc 键；登录态一族按 `(site, key)` 隔离。
     SCHEMA_DOC: `doc` 表里存迁移闸门的行名。
     _MIGRATED_FLAG: 迁移闸门字段。
     _DEPRECATED_ENV: 已废弃的环境变量，设了只提醒、不认。
@@ -45,13 +48,10 @@ DOC_DELIVER_CONFIG: Final[str] = "deliver_config"
 DOC_APP_SETTINGS: Final[str] = "app_settings"
 DOC_COLLECTION_CONFIG: Final[str] = "collection_config"
 
-#: 共用 doc 键的站点值：不带站点语义（LLM / 应用设置这类全局配置）。
 SITE_SHARED: Final[str] = ""
 
-#: 旧账本的归属站点：单站点时代整库都是 BOSS 的，登录态一族迁入这个站点名下。
 LEGACY_SITE: Final[str] = "boss"
 
-#: 随站点走的 doc 键：登录态一族，按 `(site, key)` 隔离，换站点不清别家登录态。
 DOC_SITE_SCOPED: Final[frozenset[str]] = frozenset({DOC_SESSION, DOC_SEARCH_FILTER, DOC_STOKEN})
 
 _MIGRATED_FLAG: Final[str] = "legacy_imported"
@@ -588,11 +588,6 @@ def _decode_payload(raw: Any) -> dict[str, Any] | None:
         logger.warning("doc.payload 不是合法 JSON，按没有处理")
         return None
     return data if isinstance(data, dict) else None
-
-
-# ---------------------------------------------------------------------------
-# 站点限速/配额（`site_settings`）：限速是站点属性不是全局常量（todo3 第四节）
-# ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)

@@ -101,7 +101,6 @@ export function PlatformLayout() {
         platform={platform}
         activeKey={routePlatformKey ?? ""}
         onSelect={(key) => {
-          // 换页不换站点：#/boss/jobs → #/boss/deliver
           const seg = routeSegmentForKey(key, platform);
           if (seg) navigate(`/${siteId}/${seg}`);
         }}

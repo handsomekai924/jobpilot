@@ -20,10 +20,7 @@ from boss_web import runtime
 
 @pytest.fixture(autouse=True)
 def _env_copy(monkeypatch):
-    """用环境副本跑，免得污染别的测试。
-
-    `bootstrap()` 直接写 `os.environ`（不走 monkeypatch），收尾由 monkeypatch 换回原对象。
-    """
+    """用环境副本跑，免得污染别的测试。"""
     monkeypatch.setattr(os, "environ", os.environ.copy())
 
 
@@ -89,10 +86,7 @@ def test_ensure_writable_uses_folder_when_ok(tmp_path):
 
 
 def test_ensure_writable_falls_back_to_user_dir(monkeypatch, tmp_path):
-    """exe 放在只读位置（Program Files）时退到 %LOCALAPPDATA%。
-
-    目标用文件占住，mkdir 必炸。
-    """
+    """exe 放在只读位置（Program Files）时退到 %LOCALAPPDATA%。"""
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
     monkeypatch.setattr(tempfile, "gettempdir", lambda: str(tmp_path / "tmp"))
 
@@ -160,10 +154,7 @@ def test_bootstrap_respects_existing_env(monkeypatch, tmp_path):
 
 
 def test_bootstrap_marks_non_portable_when_falling_back(monkeypatch, tmp_path):
-    """退到用户目录时要如实报告，界面得告诉用户「东西存哪了」。
-
-    exe 目录用文件占住，让它写不了。
-    """
+    """退到用户目录时要如实报告，界面得告诉用户「东西存哪了」。"""
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
     exe_dir = tmp_path / "ProgramFiles"
     exe_dir.mkdir()

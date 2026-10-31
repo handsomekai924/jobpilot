@@ -1,7 +1,4 @@
-"""APP 扫码登录流程的离线单测：假会话覆盖 `boss_login.qrcode` 状态机。
-
-运行：`python -m pytest tests/test_qrcode.py -q`
-"""
+"""APP 扫码登录流程的离线单测：假会话覆盖 `boss_login.qrcode` 状态机。"""
 
 from __future__ import annotations
 

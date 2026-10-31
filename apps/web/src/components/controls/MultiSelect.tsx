@@ -1,3 +1,5 @@
+/** 多选下拉（行业等）：弹层勾选列表 + 清空，勾选即回调。 */
+
 import { useMemo, useRef, useState } from "react";
 import { Box, Checkbox, Popover, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -5,11 +7,13 @@ import { typeScale } from "../../theme/tokens";
 import { mergeSx } from "../../theme/sx";
 import { Button } from "./Button";
 
+/** 下拉选项：code 为提交值，name 为显示名。 */
 export interface SelectOption {
   code: string;
   name: string;
 }
 
+/** 多选下拉属性。 */
 export interface MultiSelectProps {
   options: SelectOption[];
   values: string[];
@@ -28,11 +32,7 @@ function summarize(options: SelectOption[], values: string[], placeholder: strin
   return names.length <= 2 ? names.join("、") : `${names[0]} 等 ${names.length} 项`;
 }
 
-/** 多选下拉（行业等）：popover 材质弹层 + 勾选列表 + 清空。
- *
- * 与 Select 同一条体验硬约束（缺陷清单「下拉框」）：鼠标收起后不把焦点留在
- * 触发器上（restore-focus 会把聚焦蓝框又带回来），Esc 键盘收起保留焦点。
- */
+/** 多选下拉：弹层勾选列表 + 清空；收起时鼠标不保留焦点、Esc 保留焦点（详见 notes）。 */
 export function MultiSelect({
   options, values, onChange, placeholder = "不限", label, disabled = false, sx,
 }: MultiSelectProps) {
@@ -64,7 +64,6 @@ export function MultiSelect({
           height: 36,
           px: 1.5,
           border: "1px solid transparent",
-          // 边框跟随展开态而非 :focus：点开后 Popover 会把焦点抢走，:focus 边框会一闪而过
           borderColor: open ? "primary.main" : "transparent",
           borderRadius: "12px",
           bgcolor: "surface2",
@@ -74,7 +73,6 @@ export function MultiSelect({
           opacity: disabled ? 0.5 : 1,
           transition: "border-color 120ms ease",
           "&:focus": { outline: "none" },
-          // 键盘 Tab 聚焦（未展开）时也保留焦点边框
           "&:focus-visible": { borderColor: "primary.main" },
           "&::after": { content: '"▾"', color: "text.secondary", fontSize: 11 },
         }}
@@ -89,7 +87,6 @@ export function MultiSelect({
         anchorEl={anchor}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         onClose={(_event, reason) => {
-          // Esc 键盘收起保留焦点；鼠标收起（点外面）立刻失焦，不把蓝框带回来
           if (reason === "escapeKeyDown") triggerRef.current?.focus();
           else triggerRef.current?.blur();
           setAnchor(null);
@@ -107,7 +104,6 @@ export function MultiSelect({
           },
         }}
       >
-        {/* 最多露 5 项（行高约 32px + 列表上下各 8px），超出列表内滚动，底栏常驻 */}
         <Box role="listbox" aria-multiselectable="true" sx={{ py: 1, maxHeight: 176, overflowY: "auto" }}>
           {options.length === 0 && (
             <Typography sx={{ ...typeScale.bodySm, color: "text.secondary", px: 2, py: 1 }}>暂无选项</Typography>

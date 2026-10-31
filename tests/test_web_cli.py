@@ -153,10 +153,7 @@ def test_self_check_does_not_start_server(monkeypatch):
 
 
 def test_横幅先打版本对比占位_测完再补真结果(monkeypatch, capsys):
-    """启动不能卡在网络检测上，所以横幅先占位，后台测完再打一行结果。
-
-    同步跑 on_done 方便断言（真跑在守护线程里）。
-    """
+    """启动不能卡在网络检测上，所以横幅先占位，后台测完再打一行结果。"""
     monkeypatch.setattr(cli, "_setup_logging", lambda *_a, **_k: None)
     monkeypatch.setattr("uvicorn.Server.run", lambda self: None, raising=False)
     monkeypatch.setattr(cli, "pick_port", lambda *_a, **_k: 8799)

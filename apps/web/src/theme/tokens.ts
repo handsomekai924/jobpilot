@@ -3,6 +3,7 @@
  * MUI theme 与 CSS 变量同源于此，禁止两处各写一份。
  */
 
+/** 主题模式。 */
 export type ThemeMode = "light" | "dark";
 
 /** 4pt 节奏刻度（--sp-1..8），间距一律 rem 友好的 px 基准。 */
@@ -19,12 +20,15 @@ export const radius = {
   xs: "8px", s: "12px", m: "16px", l: "20px", pill: "999px",
 } as const;
 
+/** 层级刻度：页面、吸顶、下拉、顶栏、遮罩、弹窗、Toast。 */
 export const zIndex = {
   page: 1, sticky: 40, dropdown: 50, topbar: 60, overlay: 100, modal: 110, toast: 130,
 } as const;
 
+/** 正文字体栈（系统字体优先）。 */
 export const fontFamily =
   '-apple-system, "SF Pro Text", "SF Pro Display", "PingFang SC", "HarmonyOS Sans", "Microsoft YaHei", sans-serif';
+/** 等宽字体栈（ID / 时间 / 计数）。 */
 export const fontFamilyMono =
   '"SF Mono", "JetBrains Mono", "Cascadia Code", Consolas, monospace';
 
@@ -51,6 +55,7 @@ export const springs = {
   momentum: { type: "spring", bounce: 0.2, duration: 0.4 },
 } as const;
 
+/** 按压与过渡动效参数。 */
 export const microMotion = {
   ease: "cubic-bezier(0.16, 1, 0.3, 1)",
   duration: { fast: 140, base: 220, slow: 320 },
@@ -59,6 +64,7 @@ export const microMotion = {
   pressDuration: 100,
 } as const;
 
+/** 语义色板字段。 */
 export interface SemanticPalette {
   bg0: string; bg1: string; bg2: string;
   surface: string; surface2: string;
@@ -88,6 +94,7 @@ export const palette: Record<ThemeMode, SemanticPalette> = {
   },
 };
 
+/** 玻璃材质样式字段。 */
 export interface MaterialSpec {
   background: string;
   backdropFilter: string;

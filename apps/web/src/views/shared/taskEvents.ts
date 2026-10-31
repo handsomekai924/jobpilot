@@ -1,9 +1,7 @@
 /**
- * 任务事件流归一（legacy `ui.js renderEvents` 的 TS 版）。
+ * 任务事件流归一：收口各业务任务不一的 `events` 形状，拼成 `EventStream` 认的 `TaskEvent`。
  *
- * 后端各业务任务的 `events` 形状不完全一致（有的带 `payload`、有的字段叫
- * `event`/`type`），这里收口成 `EventStream` 认的 `TaskEvent`，顺手把
- * 「第 N 页 · 入库 +N」这类可读行拼出来。
+ * 兼容 `event` / `type` / `payload` 等变体，并把「第 N 页 · 入库 +N」这类可读行拼出来。
  */
 
 import type { EventKind, TaskEvent } from "../../components";
@@ -24,6 +22,7 @@ const ERROR_RE = /error|fail|bad|stopped/i;
 const OK_RE = /ok|done|finish|success|sent/i;
 const WARN_RE = /skip|cancel|warn/i;
 
+/** 按事件名猜语义色调（错 / 成 / 警 / 常）。 */
 function kindOf(name: string): EventKind {
   if (ERROR_RE.test(name)) return "error";
   if (OK_RE.test(name)) return "ok";

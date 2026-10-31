@@ -82,15 +82,9 @@ function markNotified(version) {
 }
 
 /**
- * 后台轻提示：吃统一 WS 的版本推送，发现没提醒过的新版就 toast 一下。
+ * 后台轻提示：吃统一 WS 的版本推送，发现没提醒过的新版就 toast 一下（绝不弹窗）。
  *
- * 跟首屏弹窗的分工：弹窗只在打开页面时出现一次；挂机靠这里。绝不弹窗，
- * 也不重复 toast 同一版。忽略水位线由 `should_prompt` 天然压住——被
- * 忽略的版本连 toast 都不会有。
- *
- * 推送源：服务端周期检测 / 手动刷新测到新版推 `update.available`；
- * 连接建立的 `hello` 帧带 `version` 结论，断线重连漏掉的推送靠它补。
- * 每次拿到状态都会广播 `boss:update`，系统设置的「版本更新」页签跟着刷。
+ * 推送源与去重规则见 `notes/boss_web/static/legacy/js/update.md`。
  */
 export function startUpdateWatcher() {
   /**

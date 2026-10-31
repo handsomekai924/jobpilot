@@ -1,3 +1,5 @@
+/** 职位详情右侧 Sheet：基础信息、命中规则、技能/福利与职位描述。 */
+
 import { Box, Typography } from "@mui/material";
 import type { JobDetail, JdStatus, MatchedRule } from "../../api/dto";
 import { JD_STATUS_LABEL } from "../../api/dto";
@@ -6,6 +8,7 @@ import { Button } from "../controls/Button";
 import { Pill, type PillTone } from "./Pill";
 import { Sheet } from "../feedback/Sheet";
 
+/** 职位详情 Sheet 属性。 */
 export interface JobDetailDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -15,12 +18,14 @@ export interface JobDetailDrawerProps {
   footer?: React.ReactNode;
 }
 
+/** JD 状态 → 胶囊色调。 */
 function jdTone(status: JdStatus | string | null | undefined): PillTone {
   if (status === "failed") return "warn";
   if (status === "completed") return "ok";
   return "static";
 }
 
+/** 一条命中规则：规则类型、模式与命中内容。 */
 function RuleCard({ rule }: { rule: MatchedRule }) {
   return (
     <Box sx={{ p: 1.5, bgcolor: "surface2", borderRadius: "12px", display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -112,7 +117,6 @@ export function JobDetailDrawer({ open, onClose, job, onDelete, footer }: JobDet
           <Box>
             <Typography sx={{ ...typeScale.s, color: "text.secondary", mb: 0.75 }}>职位描述</Typography>
             {job.job_desc ? (
-              /* 职位描述不限高（缺陷清单「岗位详情」）：整段铺开，滚动交给 Sheet 内容区 */
               <Box
                 sx={{
                   ...typeScale.bodySm,

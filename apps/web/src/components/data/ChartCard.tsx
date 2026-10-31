@@ -1,3 +1,5 @@
+/** 图表容器：标题/说明 + 图·表切换，表格孪生保证非悬停也能取数。 */
+
 import { useState, type ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
@@ -13,6 +15,7 @@ export interface ChartTable {
   rows: ReactNode[][];
 }
 
+/** 图表属性；`table` 是每张图必带的表格孪生。 */
 export interface ChartCardProps {
   title: string;
   caption?: string;
@@ -23,8 +26,8 @@ export interface ChartCardProps {
 }
 
 /**
- * 图表容器（card div）：标题/说明 + 图·表切换，内容自适应增高（不做固定高度，
- * 避免卡内出滚动条；x 轴标签带算在图里，不算在容器外）。
+ * 图表容器：标题/说明 + 图·表切换；内容自适应增高，不做固定高度，
+ * 避免卡内出滚动条（x 轴标签带算在图里）。
  */
 export function ChartCard({ title, caption, table, children, sx }: ChartCardProps) {
   const [view, setView] = useState<"chart" | "table">("chart");

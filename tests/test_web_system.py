@@ -64,10 +64,7 @@ def test_humanize_is_case_sensitive_for_env_names():
 
 
 def test_humanize_本地没登录态指向登录页():
-    """`http_from_session` 的原文末尾叫人「先跑 python -m boss_login login」。
-
-    那是命令行的说法。网页用户该被指到「登录」页，而不是被支去开终端。
-    """
+    """`http_from_session` 的原文叫人跑命令行，网页用户该被指到「登录」页。"""
     raw = (
         "本地没有登录态：状态库 F:\\boss\\data\\boss.db 里没有，"
         "或 token/Cookie 都没有。先跑 `python -m boss_login login` 落一份。"
@@ -193,12 +190,7 @@ def test_stoken_error_becomes_friendly_503(client, monkeypatch):
 
 
 def test_unhandled_exception_does_not_leak_traceback(client, monkeypatch):
-    """兜底处理器：任何没预料到的异常都回中文，不把 traceback 甩给用户。
-
-    注意不能自己往 app 上挂 `/api/boom` 去测——`app.py` 的 SPA 兜底路由
-    `/{full_path:path}` 注册在后面却匹配一切，会把新路由吃掉、返回 200 空壳。
-    所以在既有路由上引爆。
-    """
+    """兜底处理器：任何没预料到的异常都回中文，不把 traceback 甩给用户。"""
 
     def boom(*_args, **_kwargs):
         """抛预置异常，供测试验证翻译出口。"""

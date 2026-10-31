@@ -83,7 +83,6 @@ def test_ws_hello_带_sessions(client: TestClient):
     sessions = hello["data"]["sessions"]
     assert set(sessions) == {"boss"}
     assert set(sessions["boss"]) == {"logged_in", "phone_masked", "busy"}
-    # 旧壳（legacy）认的单站摘要继续给，M3 随 legacy 一起删
     assert set(hello["data"]["session"]) >= {"logged_in", "phone_masked"}
 
 
@@ -102,6 +101,7 @@ def test_任务列表按站点过滤(client: TestClient, hub_spec):
     hub.track(FakeTask("p1"), task_type="parse")
 
     def ids(qs: str) -> set[str]:
+        """返回按查询串筛出的任务 id 集合。"""
         body = client.get(f"/api/tasks{qs}").json()
         return {t["task_id"] for t in body["tasks"]}
 

@@ -449,12 +449,7 @@ def test_crawl_task_detail_done_counts_empty():
 
 
 def test_crawl_task_snapshot_feeds_task_center():
-    """任务中心卡片的「当前/进度」直接读 snapshot：阶段给中文，进度按页数算。
-
-    页面上不再画采集进度条，任务中心要能自己读懂跑在哪一步——`current`
-    必须是人话（不是内部代号），`done/total` 给页数好画确定态进度条；
-    空参数建任务不炸，`total` 给 0 供前端回落不确定态。
-    """
+    """任务中心卡片的「当前/进度」直接读 snapshot：阶段给中文，进度按页数算。"""
     from boss_web.services.crawl_task import CrawlTask
 
     task = CrawlTask({"max_pages": 5})
@@ -490,9 +485,6 @@ def test_match_includes_safety_snapshot():
         assert key in snap
 
 
-# --- 站点归属（todo3 第四节）：规则有的是站点语义，`site=''` = 全站生效 ---
-
-
 def test_create_rule_默认全站生效():
     """不指定站点 = 全站规则（空串），跟单站点旧账同形状——不是落成 `'boss'`。"""
     rule = blacklist.create_rule(
@@ -510,17 +502,18 @@ def test_create_rule_可指定站点归属():
 
 
 def test_list_rules_按站点生效切片():
-    """传 `site` = 该站点**生效**的规则：全站（`''`）+ 本站专属，别家的不串进来。"""
+    """传 `site` = 该站点生效的规则：全站（`''`）+ 本站专属，别家的不串进来。"""
     blacklist.create_rule({"rule_type": "company", "pattern": "全站", "match_mode": "exact"})
     blacklist.create_rule({"rule_type": "company", "pattern": "BOSS专属", "match_mode": "exact", "site": "boss"})
     blacklist.create_rule({"rule_type": "company", "pattern": "别家专属", "match_mode": "exact", "site": "51job"})
 
     def patterns(site):
+        """列出该站点生效规则的 pattern，排序后返回。"""
         return sorted(r["pattern"] for r in blacklist.list_rules(site=site))
 
     assert patterns("boss") == ["BOSS专属", "全站"]
     assert patterns("51job") == ["全站", "别家专属"]
-    assert len(blacklist.list_rules()) == 3  # 不传 = 全部
+    assert len(blacklist.list_rules()) == 3
 
 
 def test_update_rule_不传站点不改归属():

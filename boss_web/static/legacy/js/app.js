@@ -79,10 +79,9 @@ function paintStages(path) {
   });
 }
 
-/** 按 hash 渲染当前视图，换页前先调用上一视图的 dispose。 */
+/** 按 hash 渲染当前视图；迁到新壳的旧路径整页跳转，换页前先调用上一视图的 dispose。 */
 export async function navigate() {
   const path = currentPath();
-  // 迁走的页面不再本地渲染，直接把旧书签/旧入口送进新壳对应页
   const migrated = MIGRATED[path];
   if (migrated) {
     window.location.replace(newShellHref(migrated));

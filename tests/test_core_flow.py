@@ -67,46 +67,50 @@ class RecordingAdapter:
         self.messenger = self
         self.applier = self
 
-    # --- Catalog ---
     def to_search_params(self, criteria: SearchCriteria) -> SearchParams:
+        """记录调用并返回最小检索参数。"""
         self.calls.append("to_search_params")
         return {"q": criteria.keyword}
 
-    # --- JobSource ---
     def iter_pages(self, params: SearchParams):
+        """记录调用并产出一页两个假职位。"""
         self.calls.append("iter_pages")
         yield PageResult(items=(FakeJob("j1"), FakeJob("j2")), page=1, has_more=False)
 
     def fetch_detail(self, ref: JobRef) -> Any:
+        """记录调用并返回最小详情字典。"""
         self.calls.append("fetch_detail")
         return {"job_id": ref.job_id}
 
-    # --- Messenger ---
     def open_session(self, ref: JobRef) -> SessionRef:
+        """记录调用；可配置为抛出发送异常，否则返回会话引用。"""
         self.calls.append("open_session")
         if self._send_error is not None:
             raise self._send_error
         return SessionRef(site_id=self.site_id, session_id=f"s-{ref.job_id}")
 
     def send_text(self, session: SessionRef, text: str) -> SendReceipt:
+        """记录调用并返回成功回执。"""
         self.calls.append("send_text")
         return SendReceipt(ok=True)
 
     def conversation_state(self, session: SessionRef) -> ConversationState:
+        """记录调用并返回预设会话阶段。"""
         self.calls.append("conversation_state")
         return self._state
 
-    # --- 故障归类（站点只管归类，判不判停是共享层的事） ---
     def classify_fault(self, err: Exception) -> DeliverFault:
+        """记录调用并返回预设故障类别。"""
         self.calls.append("classify_fault")
         return self._fault
 
-    # --- Applier ---
     def caps(self) -> DeliveryCaps:
+        """记录调用并返回预设投递能力。"""
         self.calls.append("caps")
         return DeliveryCaps(apply_gate=self._gate, apply_channel="fake")
 
     def apply(self, session: SessionRef, resume: ResumeRef) -> ApplyReceipt:
+        """记录调用；可配置抛错，否则返回成功回执。"""
         self.calls.append("apply")
         if self._apply_raises:
             raise RuntimeError("投递通道没接上")
@@ -126,6 +130,7 @@ class CollectingHooks:
         self.cooldowns = 0
 
     def crawl(self) -> CrawlHooks:
+        """组装抓取钩子：j2 视为黑名单、skip 不补详情，动作记进自身账本。"""
         return CrawlHooks(
             blocked=lambda ref, detail: ref.job_id == "j2",
             needs_detail=lambda ref: ref.job_id != "skip",
@@ -134,6 +139,7 @@ class CollectingHooks:
         )
 
     def deliver(self) -> DeliverHooks:
+        """组装投递钩子：发送、投递、跳过分别记进自身账本。"""
         return DeliverHooks(
             throttle=self._tick,
             cooldown=self._cool,
@@ -143,9 +149,11 @@ class CollectingHooks:
         )
 
     def _tick(self) -> None:
+        """记录一次节流。"""
         self.throttles += 1
 
     def _cool(self) -> None:
+        """记录一次退避。"""
         self.cooldowns += 1
 
 
@@ -153,17 +161,15 @@ CRITERIA = SearchCriteria(keyword="python")
 
 
 def targets(*job_ids: str, greeting: str = "你好") -> list[DeliverTarget]:
+    """按职位 id 造一组投递目标，共用同一句招呼语。"""
     return [DeliverTarget(ref=JobRef(site_id="fake", job_id=j), greeting=greeting) for j in job_ids]
 
 
 RESUME = ResumeRef(site_resume_id="sr-1")
 
 
-# --- todo3 成功标准 #5：投递门槛是共享规则 ---
-
-
 def test_默认门槛_对方没回话就不调_apply():
-    """默认路径（AFTER_MUTUAL_CONVERSATION）不满足 REPLIED → **不调** applier.apply。"""
+    """默认路径（AFTER_MUTUAL_CONVERSATION）不满足 REPLIED 时不调 applier.apply。"""
     adapter = RecordingAdapter(state=ConversationState.WAITING_REPLY)
     hooks = CollectingHooks()
 
@@ -209,9 +215,6 @@ def test_after_greeting_发完对话就投_不问会话阶段():
     assert report.outcomes["j1"] == GateOutcome.APPLIED
 
 
-# --- todo3 成功标准 #4：模板方法洞数固定 ---
-
-
 def test_run_deliver_站点调用点恰好三个():
     """deliver 的洞 = open_session / send_text / apply；caps 是共享规则的输入。"""
     adapter = RecordingAdapter(gate=ApplyGate.AFTER_GREETING)
@@ -219,7 +222,6 @@ def test_run_deliver_站点调用点恰好三个():
 
     holes = [c for c in adapter.calls if c in {"open_session", "send_text", "apply"}]
     assert holes == ["open_session", "send_text", "apply"]
-    # 门槛路径多一次会话阶段探测，但那不是洞，是共享规则的判据
     adapter2 = RecordingAdapter(state=ConversationState.REPLIED)
     run_deliver(adapter2, targets("j1"), RESUME, CollectingHooks().deliver())
     assert "conversation_state" in adapter2.calls
@@ -236,9 +238,6 @@ def test_run_crawl_站点调用点恰好三个():
     assert adapter.calls == ["to_search_params", "iter_pages", "fetch_detail", "fetch_detail"]
     assert report.seen == 2
     assert report.pages == 1
-
-
-# --- 骨架的共享步骤 ---
 
 
 def test_run_crawl_空检索拦在站点调用之前():
@@ -265,7 +264,10 @@ def test_run_crawl_到页数上限就停():
     """max_pages 是共享侧的兜底，不该让站点翻到底。"""
 
     class ManyPages(RecordingAdapter):
+        """假适配器：翻页永远有下一页，用来验页数上限。"""
+
         def iter_pages(self, params):
+            """连续产出 5 页，每页 `has_more=True`。"""
             self.calls.append("iter_pages")
             for i in range(1, 6):
                 yield PageResult(items=(FakeJob(f"j{i}"),), page=i, has_more=True)
@@ -281,7 +283,10 @@ def test_run_deliver_单条失败不拖垮整批():
     """发对话抛异常只废这一条，后面的照发。"""
 
     class OneBad(RecordingAdapter):
+        """假适配器：对 j1 建会话必失败，用来验单条失败不拖垮整批。"""
+
         def open_session(self, ref):
+            """记录调用；j1 抛错，其它职位返回会话引用。"""
             self.calls.append("open_session")
             if ref.job_id == "j1":
                 raise RuntimeError("会话建不起来")
@@ -319,9 +324,6 @@ def test_run_deliver_投递失败记跳过():
     assert report.greeted == 1
     assert report.applied == 0
     assert report.outcomes["j1"] == GateOutcome.SKIPPED_BY_GATE
-
-
-# --- site_settings 的共享执行规则（docs 6.5） ---
 
 
 def test_没开投递_只发对话不投简历():
@@ -406,9 +408,6 @@ def test_配额不限时_不限制条数():
         sent_today=99,
     )
     assert report.greeted == 3
-
-
-# --- 熔断（classify_fault 驱动）：站点只归类，共享层判停 ---
 
 
 def test_熔断_账号异常一发就停整批():

@@ -1,3 +1,5 @@
+/** SegmentedControl 测试：点击切换、方向键移动与受控回写。 */
+
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -5,6 +7,7 @@ import { useState } from "react";
 import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
 import { SegmentedControl } from "../controls/SegmentedControl";
 
+/** 受控包装：把内部选中值回传给调用方。 */
 function Harness({ onChange }: { onChange: (v: string) => void }) {
   const [value, setValue] = useState("boss");
   return (
@@ -23,7 +26,9 @@ function Harness({ onChange }: { onChange: (v: string) => void }) {
   );
 }
 
+/** SegmentedControl 组件。 */
 describe("SegmentedControl", () => {
+  /** 点击切换选中项并回调。 */
   it("点击切换选中项并回调", async () => {
     const onChange = vi.fn();
     render(
@@ -37,6 +42,7 @@ describe("SegmentedControl", () => {
     expect(screen.getByRole("radio", { name: /BOSS直聘/ })).toHaveAttribute("aria-checked", "false");
   });
 
+  /** 方向键在选项间移动。 */
   it("方向键在选项间移动", async () => {
     const onChange = vi.fn();
     render(

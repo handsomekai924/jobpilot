@@ -35,11 +35,7 @@ from boss_web.services.resume_store import load_analysis, save_analysis
 
 
 class FakeGreetClient:
-    """假的 `JobClient`：按序回脚本化结果，异常实例直接抛，并记下每次调的参数。
-
-    按的是 `boss_web.services.deliver_task` 真正调的那个方法（`deliver_greeting`，
-    建会话 + 把正文投出去那步）；响应池空了就一律成功——多数用例只关心前几条怎么排。
-    """
+    """假的 `JobClient`：按序回脚本化结果，异常实例直接抛，并记下每次调的参数。"""
 
     def __init__(self, results=()) -> None:
         """初始化。"""

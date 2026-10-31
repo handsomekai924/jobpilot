@@ -27,6 +27,7 @@ export interface TaskSnapshot {
   raw?: Record<string, unknown>;
 }
 
+/** 任务快照 store 形状。 */
 interface TaskStore {
   /** task_id → 快照；用对象不用数组，`task.progress` 高频 upsert 才不 O(n) */
   tasks: Record<string, TaskSnapshot>;
@@ -36,14 +37,17 @@ interface TaskStore {
   clear: () => void;
 }
 
+/** 空表（store 初始值与清空后的稳定引用）。 */
 const EMPTY: Record<string, TaskSnapshot> = {};
 
+/** 任务快照 store。 */
 export const useTaskStore = create<TaskStore>((set) => ({
   tasks: EMPTY,
 
   upsert: (snap) =>
     set((s) => ({ tasks: { ...s.tasks, [snap.task_id]: { ...s.tasks[snap.task_id], ...snap } } })),
 
+  /** 用全量快照替换（重连 `hello` 用）。 */
   replaceAll: (snaps) =>
     set(() => {
       const next: Record<string, TaskSnapshot> = {};
@@ -51,6 +55,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
       return { tasks: next };
     }),
 
+  /** 摘掉单个任务；没有就原样返回。 */
   remove: (taskId) =>
     set((s) => {
       if (!(taskId in s.tasks)) return s;

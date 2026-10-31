@@ -63,10 +63,12 @@ export function debounce<A extends unknown[]>(
   ms = 300,
 ): ((...args: A) => void) & { cancel: () => void } {
   let t: ReturnType<typeof setTimeout> | undefined;
+  /** 延迟执行；重复调用只留最后一次。 */
   const wrapped = (...args: A) => {
     if (t !== undefined) clearTimeout(t);
     t = setTimeout(() => fn(...args), ms);
   };
+  /** 取消尚未触发的调用。 */
   wrapped.cancel = () => {
     if (t !== undefined) clearTimeout(t);
     t = undefined;

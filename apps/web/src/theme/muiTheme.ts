@@ -1,3 +1,5 @@
+/** Apple 风格 MUI 主题：token → 组件 overrides + CSS 变量。 */
+
 import { createTheme, type Components, type Shadows, type Theme, type CSSObject } from "@mui/material/styles";
 import type { ThemeMode } from "./tokens";
 import {
@@ -89,7 +91,6 @@ export function createAppleTheme(mode: ThemeMode): Theme {
           fontWeight: 590,
           letterSpacing: "-0.1px",
           transition: `transform ${microMotion.pressDuration}ms ease-out, background-color ${microMotion.duration.fast}ms ${microMotion.ease}, color ${microMotion.duration.fast}ms ${microMotion.ease}`,
-          // pointer-down 即反馈，不等 click（DESIGN.md 硬约束 #1）
           "&:active:not(:disabled)": { transform: `scale(${microMotion.pressScale})` },
           "&:disabled": { opacity: 0.4 },
         },
@@ -155,7 +156,6 @@ export function createAppleTheme(mode: ThemeMode): Theme {
         root: {
           background: m.thin.background,
           backdropFilter: m.thin.backdropFilter,
-          // 亮边 = 光打在材质上（docs/DESIGN.md Materials）
           boxShadow: `inset 0 -1px 0 ${m.edge}, inset 0 1px 0 ${m.edge}`,
         },
       },
@@ -201,7 +201,6 @@ export function createAppleTheme(mode: ThemeMode): Theme {
       },
     },
 
-    // iOS 风格开关：40×24 轨道、20 圆钮（对齐 small 输入框的紧凑密度）
     MuiSwitch: {
       styleOverrides: {
         root: { width: 40, height: 24, padding: 0 },
@@ -227,7 +226,6 @@ export function createAppleTheme(mode: ThemeMode): Theme {
     },
 
     MuiTextField: {
-      // margin="dense" 在 MUI v5+ 不再缩小填充输入框，紧凑尺寸改由 size=small 统一控制
       defaultProps: { variant: "filled", margin: "dense", size: "small" },
       styleOverrides: {
         root: {

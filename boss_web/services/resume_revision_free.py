@@ -260,7 +260,7 @@ def generate_free_revision(
     optimization_prompt: str,
     llm: LLMClient | None = None,
 ) -> dict[str, Any]:
-    """跑一次简历自由优化：按用户选择的章节和提示词优化。
+    """跑一次简历自由优化：按用户选择的章节和提示词优化；LLM 未配置、简历不存在或输出非法/截断时抛错。
 
     Args:
         resume_id: 底稿简历 id。
@@ -270,11 +270,6 @@ def generate_free_revision(
 
     Returns:
         含 `revised_md` / `changes` / `original_md` 等字段的生成结果。
-
-    Raises:
-        ValidationWebError: LLM 未配置。
-        FileNotFoundError: 简历不存在。
-        ValueError: LLM 输出非法或长度截断。
     """
     if llm is None:
         cfg: LLMConfig = load_config()
@@ -287,7 +282,6 @@ def generate_free_revision(
         client = llm
 
     resume = load_resume(resume_id)
-    # 分析用 md 规范化文本（任意格式章节名都能对齐）；original_md 仍存原文本供展示
     content, truncated = _truncate_resume(to_markdown(resume.raw or ""))
     truncate_note = "（原文已截断，后段未参与改写）\n\n" if truncated else ""
 

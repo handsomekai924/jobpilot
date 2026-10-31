@@ -126,21 +126,7 @@ class MatchTask:
     """内存里的匹配任务状态与事件流水。
 
     Attributes:
-        task_id: 任务 id。
-        resume_id: 简历 id。
-        job_ids: 指定职位 id。
         crawl_task_id: 非空 = 只跑该抓取任务的岗位（优先级高于 job_ids）。
-        status: 任务状态。
-        created_at: 创建时间戳。
-        ended_at: 结束时间戳。
-        error: 错误文案。
-        done: 已匹配条数。
-        total: 本批总条数。
-        current_job: 当前职位名。
-        matches: 逐条匹配结果。
-        events: 最近事件流水。
-        cancel_flag: 取消标记。
-        lock: 状态锁。
         analysis_id: 落盘用的分析 id（与 task_id 同值）。
     """
 
@@ -266,16 +252,13 @@ class MatchTaskManager:
         return task
 
     def snapshot(self, task_id: str | None = None) -> dict[str, Any]:
-        """查询进度快照。
+        """查询进度快照；指定 task_id 不存在抛 `NotFoundError`。
 
         Args:
             task_id: 可选，指定任务；省略回最近一个。
 
         Returns:
             任务快照；空闲时为 idle。
-
-        Raises:
-            NotFoundError: 指定 task_id 不存在。
         """
         if task_id:
             return self.get(task_id).snapshot()
@@ -353,16 +336,13 @@ class MatchTaskManager:
         return task
 
     def cancel(self, task_id: str | None = None) -> MatchTask:
-        """请求取消某个任务；不给 id 则取消最近一个。
+        """请求取消某个任务；不给 id 则取消最近一个，找不到任务抛 `NotFoundError`。
 
         Args:
             task_id: 可选任务 id。
 
         Returns:
             被取消的任务。
-
-        Raises:
-            NotFoundError: 找不到任务。
         """
         if task_id:
             task = self.get(task_id)
@@ -671,7 +651,7 @@ def _job_desc_block(job: Job) -> str:
 
 
 def _match_one(llm: LLMClient, resume_brief: str, job: Job) -> dict[str, Any]:
-    """单条职位跑一次 LLM 匹配。
+    """单条职位跑一次 LLM 匹配；LLM 没回合法 JSON 时抛 `ValueError`。
 
     Args:
         llm: LLM 客户端。
@@ -680,9 +660,6 @@ def _match_one(llm: LLMClient, resume_brief: str, job: Job) -> dict[str, Any]:
 
     Returns:
         模板形状的匹配结果。
-
-    Raises:
-        ValueError: LLM 没回合法 JSON。
     """
     user = USER_TEMPLATE.format(
         resume_brief=resume_brief,
@@ -737,7 +714,7 @@ def regenerate_greeting(
     encrypt_job_id: str,
     llm: LLMClient | None = None,
 ) -> str:
-    """重打一条招呼语草稿，只回文案、不落库。
+    """重打一条招呼语草稿，只回文案、不落库；分析/职位/简历缺失、LLM 未配置或 AI 无可用输出时抛错。
 
     Args:
         analysis_id: 分析 id。
@@ -746,13 +723,6 @@ def regenerate_greeting(
 
     Returns:
         招呼语文案。
-
-    Raises:
-        FileNotFoundError: 找不到 analysis。
-        KeyError: 分析里没有这条职位。
-        ValidationWebError: LLM 未配置。
-        NotFoundError: 简历不存在。
-        UpstreamError: AI 没返回能用的招呼语。
     """
     resume_id, item, _payload = _match_context(analysis_id, encrypt_job_id)
 
@@ -813,7 +783,7 @@ def rematch_job(
     encrypt_job_id: str,
     llm: LLMClient | None = None,
 ) -> dict[str, Any]:
-    """对一条 match 重跑人岗匹配，结果原地回写（只改不增）。
+    """对一条 match 重跑人岗匹配，结果原地回写（只改不增）；分析/职位/简历缺失或 LLM 未配置时抛错。
 
     Args:
         analysis_id: 分析 id。
@@ -822,12 +792,6 @@ def rematch_job(
 
     Returns:
         回改后的那条 match。
-
-    Raises:
-        FileNotFoundError: 找不到 analysis。
-        KeyError: 没有这条 match。
-        ValidationWebError: LLM 未配置。
-        NotFoundError: 简历不存在。
     """
     resume_id, item, payload = _match_context(analysis_id, encrypt_job_id)
 

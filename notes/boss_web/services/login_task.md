@@ -20,6 +20,13 @@ APP 扫码登录是另一条：`start_qr` 起线程跑 `AppScanLogin`，网页�
 
 滑块只是**人机协作管道**：官方组件渲染、人拖、票据回传。不认缺口、不伪造轨迹。
 
+### `SITE`
+
+本模块服务的站点（todo3 Stage 1 随模块搬进 boss-platform-boss 时改由 adapter 自述）。
+只用来拼**站点作用域**的 URL——别再往回吐 legacy 别名路径（`/api/auth/…`）：
+别名一摘，滑块帮助页的 `post_url` 就断在半路。前端已经按站点作用域拼入口
+（`/api/sites/{site}/auth/slider/{id}`），后端自报的这几个 URL 得同一条口径。
+
 ### `LoginTask.kind`
 
 任务类型：`sms` 短信验证码 / `qr` APP 扫码。两条流的状态机长得像

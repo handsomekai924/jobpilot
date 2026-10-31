@@ -1,8 +1,11 @@
+/** 二次确认弹窗：居中 Sheet + 取消/确认，破坏性操作专用。 */
+
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { Button } from "../controls/Button";
 import { Sheet } from "./Sheet";
 
+/** 确认弹窗属性。 */
 export interface ConfirmSheetProps {
   open: boolean;
   title: ReactNode;
@@ -19,7 +22,7 @@ export interface ConfirmSheetProps {
 
 /**
  * 二次确认弹窗（删除等破坏性操作专用）：居中 Sheet + 取消/确认。
- * 替代 `window.confirm`——所有破坏性操作都走这里（缺陷清单「破坏性操作」）。
+ * 替代 `window.confirm`——所有破坏性操作都走这里。
  */
 export function ConfirmSheet({
   open, title, description,

@@ -50,8 +50,7 @@ class Rule:
         last_error: 最近一次运行期匹配错误。
         created_at: 创建时间文本。
         updated_at: 最近更新时间文本。
-        site: 站点归属；**空串 = 全站生效**（todo3 第四节）。公司名/JD 规则有的是
-            站点语义，靠这一列分账；默认空串，单站点旧账不用迁移。
+        site: 站点归属；空串 = 全站生效。
     """
 
     rule_id: str
@@ -288,8 +287,6 @@ def update_rule(rule_id: str, payload: Mapping[str, Any], path: Path | str | Non
     mode = str(merged.get("match_mode") or merged.get("mode") or "")
     scope = str(merged.get("scope") or ("" if rule_type == COMPANY else "both"))
     enabled = bool(merged.get("enabled", True))
-    # 站点归属：`None` = 这次不动（别让「只改个备注」顺手把规则收成全站）；
-    # 显式给值才改，空串 = 收成全站生效。
     site = old["site"] if payload.get("site") is None else str(payload.get("site") or "")
     if enabled:
         validate_rule_payload(rule_type, pattern, mode, scope)

@@ -2,41 +2,6 @@
 
 路径与表单形状的核实状态、协议细节见 `notes/boss_login/config.md`。
 线上变更时用 `probe` 或命令行参数覆盖。
-
-Attributes:
-    ENDPOINTS: 短信登录相关接口；V2 才认滑块票据。
-    ENDPOINTS["login_suggest"]: 登录前置检查，每次登录都会打。
-    QR_ENDPOINTS: APP 扫码登录接口。
-    QR_ENDPOINTS["qr_randkey"]: POST 无参，取 `qrId`。
-    QR_ENDPOINTS["qr_scan"]: 长轮询等手机扫。
-    QR_ENDPOINTS["qr_second_key"]: 扫过之后换发第二把钥匙。
-    QR_ENDPOINTS["qr_scan_second"]: 长轮询等 App 端二次确认。
-    QR_ENDPOINTS["qr_head_img"]: 拿扫码账号头像。
-    QR_ENDPOINTS["qr_scan_login"]: 长轮询等确认 / 取消。
-    QR_ENDPOINTS["qr_dispatcher"]: 换登录态，`Set-Cookie` 在这一发上。
-    CANDIDATE_ENDPOINTS: probe 时依次尝试的候选地址。
-    SMS_SCENES: smsType 取值；极验通道下另有写死的 `SMS_TYPE_V2`。
-    QR_EXPIRE_SECONDS: 二维码展示层存活秒数。
-    QR_POLL_TIMEOUT: 扫码三个长轮询接口的单次超时（秒）。
-    QR_CONFIRM_DELAY_SECONDS: 扫码成功后等 App 确认的固定延迟（秒）。
-    QR_CONFIRM_TIMEOUT_SECONDS: 本地对「扫码成功 → 确认」的兜底等待（秒）。
-    QR_CONTENT_PREFER_SECOND: 二维码内容优先用第二把钥匙。
-    QR_LOGIN_LIMIT_CODES: 登录限额 / 风控码，命中别再重试。
-    QR_LOGIN_LIMIT_RANGE: 限额码区间。
-    CODE_MESSAGES: 业务失败码 → 提示语。
-    RISK_CODE_*: 风控码（passport 内部码 + wapi 网关码两个码空间）。
-    RISK_MESSAGE_KEYWORDS: 按文案判定风控的兜底关键字。
-    SLIDER_MESSAGE_KEYWORDS: 其中真正指「滑块」的话术。
-    TOKEN_FIELDS: 登录响应体里 token 可能出现的字段；真实站点通常没有。
-    SMS_TOKEN_FIELD: 发码响应里的 smsToken 字段名，不是登录态。
-    AUTH_COOKIES: 登录成功后通常会下发的鉴权 Cookie 名。
-    VERIFY_ENDPOINTS: 验证接口；zppassport / zpsecureflow 两族不能混用。
-    SLIDER_CHALLENGE_ENDPOINT_KEY: 业务请求滑块挑战默认取的 key，须与业务接口同族。
-    GEETEST_LOADER_URL: 极验加载器镜像地址。
-    GEETEST_API_SERVERS: initGeetest 的 api_server_v3。
-    CAPTCHA_HEADER_*: 求解成功后随 validate 带上的请求头名。
-    SLIDER_HELPER_HOST: 本地求解帮助页监听地址。
-    SLIDER_HELPER_TIMEOUT: 等人工拖完滑块的上限（秒）。
 """
 
 from __future__ import annotations

@@ -1,6 +1,9 @@
+/** 空态：统一「图标 + 标题 + 说明 + 可选动作」。 */
+
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
+/** 空态属性。 */
 export interface EmptyStateProps {
   /** 图标/字符（如 ◌） */
   icon?: ReactNode;

@@ -1,9 +1,4 @@
-"""跨站点职位库视图：`jobs.site` 的过滤与切片（todo3 Stage 3 第三条）。
-
-多平台之后 `jobs` 表是所有站点共用的一张表，站点维度靠 `jobs.site` 分账：
-列表/统计/清空按站点切片，别家站点的职位不串进来。这里的规矩是**查询层过滤**，
-不是把库拆成 N 张表。
-"""
+"""跨站点职位库视图：`jobs.site` 的查询层过滤与接口切片。"""
 
 from __future__ import annotations
 
@@ -23,11 +18,7 @@ def _clean_cache():
 
 
 def _seed(rows: list[tuple[str, str, str]]) -> None:
-    """按 `(encrypt_job_id, site, job_name)` 直接落几行职位。
-
-    `_INSERT_JOB` 故意不写 `site`（沿用列默认，单站点旧账全归 BOSS），
-    测试要造多站点行就得显式写。
-    """
+    """按 `(encrypt_job_id, site, job_name)` 直接落几行职位。"""
     conn = boss_db.connect(boss_db.resolve_db_path(), migrate=False)
     try:
         for jid, site, name in rows:
@@ -39,9 +30,6 @@ def _seed(rows: list[tuple[str, str, str]]) -> None:
         conn.commit()
     finally:
         conn.close()
-
-
-# --- 查询层过滤 ---
 
 
 def test_list_jobs_按站点切片():
@@ -70,6 +58,7 @@ def test_count_jobs_matching_与列表同款切片():
 
 
 def test_count_jobs_按站点数():
+    """`count_jobs` 传了站点就只数本站，不传则数全部。"""
     _seed([("j1", "boss", "前端"), ("j2", "51job", "后端")])
     with JobStore() as store:
         assert store.count_jobs(site="boss") == 1
@@ -96,9 +85,6 @@ def test_clear_jobs_只清本站点():
         assert store.clear_jobs(site="boss") == 1
         assert store.count_jobs() == 1
         assert [j.job_name for j in store.list_jobs()] == ["后端"]
-
-
-# --- 抓取落库：站点归属要写进去，别只吃列默认 ---
 
 
 def _job(jid: str, site: str = "") -> Job:
@@ -140,10 +126,7 @@ def test_save_page_站点归属写进两张表():
 
 
 def test_save_page_不传站点吃兜底():
-    """单站点旧账口径：没传站点就跟列默认同值，**不是空串**。
-
-    空串会让这条职位从 `/api/sites/boss/jobs` 里消失——`site = ?` 是精确匹配。
-    """
+    """单站点旧账口径：没传站点时落列默认 `boss`，不是空串。"""
     with JobStore() as store:
         store.save_page(PageResult(page=1, jobs=(_job("p2"),)))
     assert _site_of("p2") == DEFAULT_SITE == "boss"
@@ -153,7 +136,7 @@ def test_save_page_重抓不改站点归属():
     """来了空值就留原值——归属不是重抓能随便改的（跟 `last_greeted_at` 同一条道理）。"""
     with JobStore() as store:
         store.save_page(PageResult(page=1, jobs=(_job("p3"),)), site="51job")
-        store.save_page(PageResult(page=1, jobs=(_job("p3"),)))  # 空站点重抓
+        store.save_page(PageResult(page=1, jobs=(_job("p3"),)))
     assert _site_of("p3") == "51job"
 
 
@@ -184,9 +167,6 @@ def test_summary_翻页账也按站点汇():
     assert (theirs["pages"], theirs["raw_seen"]) == (1, 5)
 
 
-# --- 模型带得动站点 ---
-
-
 def test_job_to_dict_带site():
     """跨站点视图要能标出每条是哪儿来的，`site` 得出门。"""
     _seed([("j1", "51job", "后端")])
@@ -201,9 +181,6 @@ def test_清洗出来的职位还没落库时_site为空():
     assert Job(job_name="n", brand_name="b", location="", salary_desc="",
                job_experience="", job_degree="", brand_industry="",
                brand_scale_name="", encrypt_job_id="x").site == ""
-
-
-# --- 接口层：路径里的 {site} 是切片口 ---
 
 
 @pytest.fixture
@@ -226,6 +203,7 @@ def test_api_list_只回本站点(client):
 
 
 def test_api_stats_只汇本站点(client):
+    """`/api/sites/{site}/jobs/stats` 的统计只算本站点职位。"""
     _seed([("j1", "boss", "前端"), ("j2", "51job", "后端"), ("j3", "boss", "测试")])
     body = client.get("/api/sites/boss/jobs/stats").json()
     assert body["jobs"] == 2

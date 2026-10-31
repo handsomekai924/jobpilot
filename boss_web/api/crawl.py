@@ -1,21 +1,10 @@
 """抓取任务：启动 / 进度 / 取消 + 历史任务档案。
 
-这里拆两个面（docs/console-migration-parity.md 三.7），挂法不同：
+执行路由走站点作用域，批次账路由共用；批次账必须先挂，免得被 `/{task_id}` 吃掉。
 
-- `batch_router`（`/tasks…`）= **批次账**。「这批带回了哪些职位」是库账，跨站点可读，
-  共用页（匹配 / 出题 / 简历优化）拿它当**职位来源选择器**。挂共用口时**不带**
-  站点作用域；挂 `/api/sites/{site}/crawl` 时按 `{site}` 切列表。
-- `router`（`/start` `/status` `/{task_id}` `/{task_id}/cancel`）= **抓取执行**。
-  限速与并发通道都在站点上，必须平台作用域。
-
-历史档案路由（`/tasks…`）必须注册在 `/{task_id}` 之前——动态段会把 `tasks`
-当成 task_id 吃掉（与 `jobs.py` 里 `fetch-descriptions` 同款坑）。两个 router
-分开挂时这条退化成「`batch_router` 先挂」，见 `boss_web/api/__init__.py`。
-
-切片只认**路径作用域**：`/api/sites/{site}/crawl/tasks` 切到那个站点，
-`/api/crawl/tasks` 不切（跨站点全量）。故意不加 `?site=` 查询过滤——同一个
-handler 挂两遍时，`{site}` 既是路径段又是查询名会撞车；共用页要看全量、
-平台页看自己，这两种需求路径已经覆盖了，真要按站点挑再单开路由。
+Attributes:
+    router: 抓取执行（平台作用域）。
+    batch_router: 批次账（共用；站点口只切列表）。
 """
 
 from __future__ import annotations
@@ -31,10 +20,8 @@ from ..errors import NotFoundError, ValidationWebError
 from ..services.crawl_task import crawl_tasks
 from ..services.match_task import match_tasks
 
-#: 抓取执行（平台作用域）。
 router = APIRouter()
 
-#: 批次账（共用；站点口只切列表）。
 batch_router = APIRouter()
 
 
@@ -72,8 +59,7 @@ def list_tasks(
 ) -> dict[str, Any]:
     """批次账分页列表。进行中任务置顶并附实时进度（内存快照优先）。
 
-    切片只认路径作用域：站点口（`/api/sites/{site}/crawl/tasks`）只列本站点批次，
-    共用口（`/api/crawl/tasks`）跨站点全量。
+    切片只认路径作用域：站点口只列本站点批次，共用口跨站点全量。
     """
     scope = str(getattr(request.state, "site", "") or "")
     sliced = scope or None

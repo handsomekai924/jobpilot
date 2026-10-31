@@ -1,3 +1,5 @@
+/** 统一长任务面板：状态机 → 外观映射表（>2s 操作一律走它）。 */
+
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { typeScale } from "../../theme/tokens";
@@ -9,6 +11,7 @@ import { Surface } from "../surfaces/Surface";
 import { ProgressBar } from "./ProgressBar";
 import { EventStream, type TaskEvent } from "./EventStream";
 
+/** 任务面板属性。 */
 export interface TaskPanelProps {
   title: string;
   /** 后端原始 status（走 taskStateOf 归一）或已归一状态 */

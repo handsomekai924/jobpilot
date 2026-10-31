@@ -154,7 +154,6 @@ def _self_check(info: dict[str, str]) -> int:
     static = C.STATIC_DIR
     dist_index = static / "dist" / "index.html"
     legacy_index = static / "legacy" / "index.html"
-    # 新壳（React）在 static/dist/，旧 SPA 在 static/legacy/；两者有其一就能开页面。
     frontend_ok = dist_index.is_file() or legacy_index.is_file()
     frontend_note = (
         "正常"

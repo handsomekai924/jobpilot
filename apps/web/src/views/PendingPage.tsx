@@ -8,6 +8,7 @@
 import { Box } from "@mui/material";
 import { Button, EmptyState, PageHeader, ScrollArea, Surface, pageRootSx } from "../components";
 
+/** 未迁移占位页的参数。 */
 export interface PendingPageProps {
   title: string;
   /** 旧壳 hash 路径（如 `#/resume`）；不给就只是占位，不出直达按钮 */
@@ -19,6 +20,7 @@ export function legacyHref(hash: string): string {
   return `/legacy/#${hash.startsWith("/") ? hash : `/${hash}`}`;
 }
 
+/** 未迁移页面占位：给出旧壳直达入口。 */
 export function PendingPage({ title, legacyHash }: PendingPageProps) {
   return (
     <Box sx={pageRootSx}>

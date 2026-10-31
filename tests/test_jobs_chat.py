@@ -1,8 +1,6 @@
 """聊天通道：protobuf 帧 / 推送里扒 `mid` / MQTT 发送编排。
 
-不打真实网关：paho 客户端用假的替身注入，只验本模块自己的两点——
-① 帧编得跟站点逐字节对齐（`from.source` 必须在、`mid`/`time` 分开）；
-② 发送判据是「帧发出去了」，不是等 PUBACK。
+paho 客户端用假替身注入，只验帧编得与站点逐字节对齐、发送判据是「帧发出去了」。
 """
 
 from __future__ import annotations
@@ -36,13 +34,7 @@ class _Info:
 
 
 class FakePahoClient:
-    """够 `ChatSocket` 用的一版 paho 替身。
-
-    `connect` 只记参数；`loop_start` 里回调 CONNACK（rc 可指定），
-    对齐真实 paho「connect 之后回调 on_connect」的时序。
-    `publish` 默认回 PUBACK（`puback=True`）；把它关掉就模拟这条网关
-    的真实行为——帧收下、不回执。
-    """
+    """够 `ChatSocket` 用的一版 paho 替身，按真实时序回调 CONNACK 与 PUBACK。"""
 
     def __init__(
         self,

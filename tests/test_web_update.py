@@ -723,10 +723,7 @@ def test_没新版或已忽略都不广播(monkeypatch):
 
 
 def test_旧_更新进度_ws_已下线():
-    """独立的 `/api/system/update/ws` 已删；进度只走统一 WS `/api/ws`。
-
-    SPA 兜底会把没匹配的 HTTP GET 变成 200，删没删只能看子 router 的路由表。
-    """
+    """独立的 `/api/system/update/ws` 已删；进度只走统一 WS `/api/ws`。"""
     from boss_web.api import system, tasks
 
     system_paths = {getattr(r, "path", "") for r in system.router.routes}

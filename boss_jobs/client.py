@@ -248,13 +248,7 @@ class JobClient:
         sleeper: 可替换的 sleep（测试里注入 no-op）。
         page_interval: 翻页硬间隔（秒），防风控。
         stoken_provider: `__zp_stoken__` 自动获取器（见 `boss_jobs.cdp_stoken`）。
-        chat_host: 聊天 MQTT 网关主机。
-        chat_port: 聊天 MQTT 网关端口。
-        chat_path: 聊天 WebSocket path。
-        chat_timeout: 聊天通道等 CONNACK 的超时（秒）。
-        chat_push_wait: 等会话同步（`mid` 基数）的超时（秒）。
-        chat_puback_wait: 发完顺带等 PUBACK 的超时（秒）；等不到是常态。
-        chat_flush_wait: 正文发完再停多久才断（秒）。
+        chat_*: 聊天通道的连接参数，透传给 `ChatSocket`。
     """
 
     def __init__(
@@ -309,10 +303,8 @@ class JobClient:
     def fetch_search_page(self, search_filter: Any, *, page: int | None = None) -> PageResult:
         """按搜索条件抓一页搜索结果并清洗。
 
-        走 `search/joblist.json`；每次先补 `__zp_stoken__`，
-        撞 code 37 时自动换新重试。条件页码可被 `page` 覆盖。
-
-        注：6 位区级代码会被自动提升到市级代码搜索（API 不接受区级代码）。
+        走 `search/joblist.json`；每次先补 `__zp_stoken__`，撞 code 37 时自动换新重试。
+        条件页码可被 `page` 覆盖；6 位区级代码会被自动提升到市级代码（API 不接受区级代码）。
         """
         if page is not None:
             search_filter = search_filter.for_page(page)
@@ -761,7 +753,7 @@ class JobClient:
         blacklist_context: CrawlBlacklistContext | None = None,
         task_id: str = "",
     ) -> CrawlReport:
-        """分页抓取职位，每页即时清洗入库，页与页之间硬睡一会。
+        """分页抓取职位，每页即时清洗入库，页与页之间硬睡一会；两条流都没给时抛 `ValueError`。
 
         Args:
             store: 已打开的职位库；不传则按 `db_path` 现开。
@@ -780,9 +772,6 @@ class JobClient:
 
         Returns:
             `CrawlReport`（统计 + 每页明细）。
-
-        两条流二选一（expect 优先），两个都不给抛 `ValueError`。
-        收手判据：空页，或不满页且 `hasMore=false`。
         """
         interval = self.page_interval if page_interval is None else max(0.0, page_interval)
         detail_gap = (

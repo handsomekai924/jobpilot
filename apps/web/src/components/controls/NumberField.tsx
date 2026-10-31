@@ -1,9 +1,12 @@
+/** 数值输入：编辑中保留原始文本，失焦 / Enter 时解析、取整并夹到边界。 */
+
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Box, type TextFieldProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { TextField } from "./TextField";
 import { mergeSx } from "../../theme/sx";
 
+/** 数值输入属性：步进量决定提交的小数位。 */
 export interface NumberFieldProps extends Omit<TextFieldProps, "type" | "value" | "onChange" | "inputProps"> {
   value: number;
   /** 提交时机：失焦 / Enter / 步进按钮 / 上下键；输入过程中不打断 */
@@ -20,14 +23,15 @@ export interface NumberFieldProps extends Omit<TextFieldProps, "type" | "value" 
   controlsPosition?: "" | "right";
 }
 
+/** 按 step 推断提交时保留的小数位（0.5 → 1，1 → 0）。 */
 function decimalsOf(step: number): number {
   const text = String(step);
   return text.includes(".") ? text.split(".")[1].length : 0;
 }
 
 /**
- * 数值输入（采集参数这类表单散件）：编辑中保留原始文本（允许清空、逐字输入），
- * 失焦 / Enter 时再解析、按小数位取整并夹到 [min, max]，空值回退到上次提交值。
+ * 数值输入：编辑中保留原始文本（允许清空、逐字输入），失焦 / Enter 时再解析、
+ * 按小数位取整并夹到 [min, max]，空值回退到上次提交值。
  */
 export function NumberField({
   value, onChange, min, max, step = 1, disabled, label, controlsPosition = "",
@@ -52,6 +56,7 @@ export function NumberField({
     return text !== "" && !Number.isNaN(n) ? n : committed.current;
   }
 
+  /** 取整、夹到边界并回写草稿；值有变化才回调。 */
   function commit(next: number) {
     const rounded = decimals > 0 ? Number(next.toFixed(decimals)) : Math.round(next);
     const bounded = Math.min(max ?? Infinity, Math.max(min ?? -Infinity, rounded));
@@ -60,6 +65,7 @@ export function NumberField({
     if (bounded !== value) onChange(bounded);
   }
 
+  /** 在当前值上加减一个步进量并提交。 */
   const nudge = (dir: 1 | -1) => commit(currentValue() + dir * step);
   const atMin = min !== undefined && currentValue() <= min;
   const atMax = max !== undefined && currentValue() >= max;
@@ -122,7 +128,6 @@ export function NumberField({
 
   const mergedSlotProps = {
     ...slotProps,
-    // 无 label 时用 hiddenLabel 收掉为浮动 label 预留的上方内边距
     root: {
       hiddenLabel: !hasLabel,
       ...(slotProps?.root as Record<string, unknown> | undefined),
@@ -161,10 +166,6 @@ export function NumberField({
     );
   }
 
-  /*
-   * 默认布局：按钮绝对定位压在输入框左右边缘（Element Plus 的做法），不进 startAdornment——
-   * 否则 MUI 会因 adornedStart 强制 label 常驻左上角，且 start adornment 会被下推 16px。
-   */
   return (
     <Box sx={mergeSx({ position: "relative", display: "inline-flex", minWidth: 0 }, sx)}>
       <Box sx={{ position: "absolute", left: 4, top: "50%", transform: "translateY(-50%)", display: "flex" }}>
@@ -187,6 +188,7 @@ export function NumberField({
   );
 }
 
+/** 步进按钮：不抢输入框焦点，点了保持编辑态。 */
 function StepButton({
   label, disabled, onClick, children, sx,
 }: {
@@ -202,7 +204,6 @@ function StepButton({
       type="button"
       aria-label={label}
       disabled={disabled}
-      // 不抢输入框焦点，点步进时保持编辑态
       onMouseDown={(e: MouseEvent) => e.preventDefault()}
       onClick={onClick}
       sx={mergeSx({
@@ -228,6 +229,7 @@ function StepButton({
   );
 }
 
+/** 上下箭头（right 布局的步进图标）。 */
 function Chevron({ dir }: { dir: "up" | "down" }) {
   return (
     <Box
@@ -248,6 +250,7 @@ function Chevron({ dir }: { dir: "up" | "down" }) {
   );
 }
 
+/** 加减号图标（默认布局的步进图标）。 */
 function Sign({ kind }: { kind: "minus" | "plus" }) {
   return (
     <Box

@@ -11,11 +11,12 @@ import {
   Button, CellTitle, DataTable, ScrollArea, Surface, TextField, pageRootSx, useToast, type Column,
 } from "../../../components";
 import { fmtNumber, fmtTime } from "../../../utils/format";
-import { interviewApi } from "../repos";
+import { interviewApi } from "../../../api/shared";
 import { errMsg, PAGE_SIZE, type PrepTarget, type RecordRow } from "./types";
 import { Pager } from "./bits";
 import { PrepSheet } from "./PrepSheet";
 
+/** 生成记录段：一岗一套题的归档列表，可开题目侧栏或重新生成。 */
 export function RecordsSection({
   busy, onTaskStarted,
 }: {
@@ -51,10 +52,12 @@ export function RecordsSection({
     }
   }, [title, recsPage, toast]);
 
+  /** 首屏拉生成记录。 */
   useEffect(() => {
     void loadRecords();
   }, [loadRecords]);
 
+  /** 重新生成一套题并刷新记录。 */
   const startGenerate = async (ids: string[]) => {
     if (regenId) return;
     setRegenId(ids[0] ?? "");
@@ -124,7 +127,6 @@ export function RecordsSection({
           emptyText="还没有生成记录"
           rowActions={(r) => (
             <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
-              {/* 没题可看就禁用（与出题页「查看」同规则） */}
               <Button
                 size="small"
                 variant="plain"

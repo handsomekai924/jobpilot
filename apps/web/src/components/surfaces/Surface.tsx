@@ -1,8 +1,11 @@
+/** 卡片面：实底 + 圆角 + 阴影；可点击时提供按压或悬浮反馈。 */
+
 import { Box, type BoxProps } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { mergeSx } from "../../theme/sx";
 
+/** 卡片面属性：`interactive` 带按压缩放，`hoverable` 只悬浮高亮。 */
 export interface SurfaceProps extends Omit<BoxProps, "children"> {
   /** 默认带内距 */
   padded?: boolean;
@@ -17,7 +20,6 @@ export interface SurfaceProps extends Omit<BoxProps, "children"> {
 export function Surface({
   padded = true, interactive = false, hoverable = false, sx, children, ...rest
 }: SurfaceProps) {
-  // 悬浮高亮（无按压缩放）：列表项整卡可点但带内部控件时用，避免误触感
   const hoverSx = hoverable
     ? {
         transition: "box-shadow 140ms ease, background-color 140ms ease",

@@ -8,6 +8,7 @@ export type CriteriaKey =
   | "keyword" | "city" | "industry" | "experience" | "degree"
   | "salary" | "job_type" | "scale" | "stage";
 
+/** 平台能力开关：UI 按 caps 决定出不出入口、哪些维度置灰。 */
 export interface PlatformCaps {
   auth: {
     sms: boolean;
@@ -31,12 +32,14 @@ export interface PlatformCaps {
   };
 }
 
+/** 会话摘要。 */
 export interface PlatformSession {
   logged_in: boolean;
   phone_masked?: string;
   busy?: boolean;
 }
 
+/** 平台私有导航入口。 */
 export interface NavExtra {
   key: string;
   label: string;
@@ -44,6 +47,7 @@ export interface NavExtra {
   route: string;
 }
 
+/** 平台描述符（`GET /api/platforms` 的一项）。 */
 export interface PlatformDescriptor {
   site_id: string;
   display_name: string;
@@ -54,6 +58,7 @@ export interface PlatformDescriptor {
   nav_extras: NavExtra[];
 }
 
+/** 平台作用域基础导航（各平台都有；nav_extras 追加私有入口） */
 /** 平台作用域基础导航（各平台都有；nav_extras 追加私有入口） */
 export const PLATFORM_NAV = [
   { key: "login", label: "登录", route: "login" },

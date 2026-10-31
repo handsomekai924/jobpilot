@@ -7,6 +7,7 @@
 import { api } from "../api/client";
 import type { PlatformDescriptor } from "./types";
 
+/** `GET /api/platforms` 的回包。 */
 interface PlatformsResponse {
   platforms: PlatformDescriptor[];
 }

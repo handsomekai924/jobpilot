@@ -723,7 +723,7 @@ class CaptureSession:
 
 
     def _on_request(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.requestWillBeSent`。"""
+        """处理 `Network.requestWillBeSent` 事件。"""
         rid = str(params.get("requestId") or "")
         key = (sid, rid)
         request = params.get("request") or {}
@@ -826,7 +826,7 @@ class CaptureSession:
             rec.timings.setdefault("associated_cookies", cookies)
 
     def _on_request_extra(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.requestWillBeSentExtraInfo`。"""
+        """处理 `Network.requestWillBeSentExtraInfo` 事件。"""
         key = (sid, str(params.get("requestId") or ""))
         rec = self._active(key)
         if rec is None:
@@ -836,7 +836,7 @@ class CaptureSession:
 
 
     def _on_response(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.responseReceived`。"""
+        """处理 `Network.responseReceived` 事件。"""
         rec = self._active((sid, str(params.get("requestId") or "")))
         if rec is None:
             return
@@ -865,7 +865,7 @@ class CaptureSession:
             rec.timings["response_ts"] = ts
 
     def _on_response_extra(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.responseReceivedExtraInfo`。"""
+        """处理 `Network.responseReceivedExtraInfo` 事件。"""
         key = (sid, str(params.get("requestId") or ""))
         rec = self._active(key)
         if rec is None:
@@ -888,7 +888,7 @@ class CaptureSession:
 
 
     def _on_finished(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.loadingFinished`。"""
+        """处理 `Network.loadingFinished` 事件。"""
         rec = self._active((sid, str(params.get("requestId") or "")))
         if rec is None:
             return
@@ -900,7 +900,7 @@ class CaptureSession:
         self._finish(rec, status="complete")
 
     def _on_failed(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.loadingFailed`。"""
+        """处理 `Network.loadingFailed` 事件。"""
         rec = self._active((sid, str(params.get("requestId") or "")))
         if rec is None:
             return
@@ -948,7 +948,7 @@ class CaptureSession:
         return rec
 
     def _on_ws_created(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketCreated`。"""
+        """处理 `Network.webSocketCreated` 事件。"""
         rec = self._ws_record(sid, params)
         if rec is None:
             return
@@ -962,7 +962,7 @@ class CaptureSession:
         )
 
     def _on_ws_handshake_request(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketWillSendHandshakeRequest`。"""
+        """处理 `Network.webSocketWillSendHandshakeRequest` 事件。"""
         rec = self._ws_record(sid, params)
         if rec is None or rec.ws is None:
             return
@@ -983,7 +983,7 @@ class CaptureSession:
         )
 
     def _on_ws_handshake_response(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketHandshakeResponseReceived`。"""
+        """处理 `Network.webSocketHandshakeResponseReceived` 事件。"""
         rec = self._ws_record(sid, params)
         if rec is None or rec.ws is None:
             return
@@ -1033,15 +1033,15 @@ class CaptureSession:
         )
 
     def _on_ws_frame_sent(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketFrameSent`。"""
+        """处理 `Network.webSocketFrameSent` 事件。"""
         self._on_ws_frame(sid, params, "sent")
 
     def _on_ws_frame_recv(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketFrameReceived`。"""
+        """处理 `Network.webSocketFrameReceived` 事件。"""
         self._on_ws_frame(sid, params, "recv")
 
     def _on_ws_error(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketFrameError`。"""
+        """处理 `Network.webSocketFrameError` 事件。"""
         rec = self._active((sid, str(params.get("requestId") or "")))
         if rec is None or rec.ws is None:
             return
@@ -1052,7 +1052,7 @@ class CaptureSession:
         )
 
     def _on_ws_closed(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Network.webSocketClosed`。"""
+        """处理 `Network.webSocketClosed` 事件。"""
         rec = self._active((sid, str(params.get("requestId") or "")))
         if rec is None or rec.ws is None:
             return
@@ -1074,7 +1074,7 @@ class CaptureSession:
 
 
     def _on_attached(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Target.attachedToTarget`。"""
+        """处理 `Target.attachedToTarget` 事件。"""
         new_sid = str(params.get("sessionId") or "")
         info = params.get("targetInfo") or {}
         self.note_target(new_sid, info)
@@ -1082,11 +1082,11 @@ class CaptureSession:
             self._on_attach_cb(new_sid, info, bool(params.get("waitingForDebugger")))
 
     def _on_detached(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Target.detachedFromTarget`。"""
+        """处理 `Target.detachedFromTarget` 事件。"""
         self.drop_session(str(params.get("sessionId") or ""))
 
     def _on_target_info_changed(self, sid: str, params: Mapping[str, Any]) -> None:
-        """`Target.targetInfoChanged`。"""
+        """处理 `Target.targetInfoChanged` 事件。"""
         info = params.get("targetInfo") or {}
         tid = str(info.get("targetId") or "")
         target_sid = self._target_sessions.get(tid)

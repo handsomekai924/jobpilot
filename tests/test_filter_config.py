@@ -1,9 +1,6 @@
-"""搜索条件的读写：状态库 `doc('search_filter')` + 用户点名的 JSON 文件。
+"""搜索条件的读写：状态库 `doc('search_filter')` 与用户点名的 JSON 文件。
 
-规矩就一条——库里没有就留空（= 全部「不限」），不报错。有就按那行装配，
-缺的键、空值都算「不限」。`page`/`scene` 是运行期的，不进配置。
-
-用户点名的 `--filter my.json` 走 `search_filter_from_file`，只读不写库。
+库里没有就留空（全部「不限」）；`--filter my.json` 走 `search_filter_from_file`，只读不写库。
 """
 
 from __future__ import annotations

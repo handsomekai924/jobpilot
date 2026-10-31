@@ -1,8 +1,11 @@
+/** 任务状态归一与外观映射。 */
+
 import type { StatusTone } from "../components/data/StatusDot";
 
 /** 长任务状态机视图（5.3 TaskPanel 行：状态 → 外观映射表）。 */
 export type TaskState = "idle" | "running" | "done" | "error" | "cancelled";
 
+/** 任务状态外观字段。 */
 export interface TaskStateMeta {
   label: string;
   tone: StatusTone;
@@ -10,6 +13,7 @@ export interface TaskStateMeta {
   active: boolean;
 }
 
+/** 状态 → 外观映射表。 */
 export const TASK_STATE_META: Record<TaskState, TaskStateMeta> = {
   idle: { label: "待命", tone: "idle", active: false },
   running: { label: "进行中", tone: "busy", active: true },

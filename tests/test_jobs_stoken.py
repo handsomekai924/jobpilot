@@ -1,8 +1,6 @@
 """`__zp_stoken__` 全自动获取单测：挑战解析 / 脚本缓存 / 算令牌 / 自动重试。
 
-令牌算法见 `boss_jobs.stoken`。真 Node 冒烟用例单独一个，没装 Node 就跳过。
-
-运行：`python -m pytest tests/test_jobs_stoken.py -q`
+令牌算法见 `boss_jobs.stoken`；真 Node 冒烟用例没装 Node 就跳过。
 """
 
 from __future__ import annotations

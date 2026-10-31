@@ -1,7 +1,5 @@
 """兜底表与已保存 HTML 的解析。
 
-运行：`python -m pytest tests/test_filter_fallback.py -q`
-
 HTML 用例两套：内联小片段（离线可跑）+ 项目里那份真实存盘页（在就顺手校对）。
 
 Attributes:

@@ -1,12 +1,6 @@
 """平台设置：每站点的节流/每日配额/并发/投递开关（`site_settings`）。
 
-限速是**站点属性**，所以这条路由是平台作用域的：`/api/sites/{site}/settings`
-（legacy 别名 `/api/settings` 归 `site="boss"`）。前端 `#/:siteId/settings`
-页读写的就是它；任务中心「今天还能发几条」也从这儿出（`quota_left`），
-口径见 `boss_web.services.site_settings_store`。
-
-`apply_enabled` 管的是**门槛过了之后要不要真投简历**，不是要不要发对话——
-发对话照发，投递由 `run_deliver` 按这个开关收口。
+`apply_enabled` 只管门槛过了之后要不要真投简历，发对话照发。
 """
 
 from __future__ import annotations

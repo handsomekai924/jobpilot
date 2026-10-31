@@ -1,10 +1,14 @@
+/** Apple 风格按钮：语义变体 + 胶囊圆角，按压反馈由主题统一注入。 */
+
 import { Button as MuiButton, type ButtonProps as MuiButtonProps, type SxProps, type Theme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { mergeSx } from "../../theme/sx";
 
+/** 按钮语义：主操作 / 次操作 / 弱调 / 纯文字 / 破坏。 */
 export type ButtonVariant = "filled" | "gray" | "tinted" | "plain" | "danger";
 
+/** 按钮属性；`href` 等链接属性用于 `component="a"`。 */
 export interface ButtonProps extends Omit<MuiButtonProps, "variant" | "color"> {
   /** Apple 按钮语义：filled 主操作 / gray 次操作 / tinted 弱调 / plain 纯文字 / danger 破坏 */
   variant?: ButtonVariant;
@@ -15,6 +19,7 @@ export interface ButtonProps extends Omit<MuiButtonProps, "variant" | "color"> {
   rel?: string;
 }
 
+/** 各变体的背景/前景与 hover、active 亮度。 */
 const variantSx: Record<ButtonVariant, SxProps<Theme>> = {
   filled: (t) => ({
     backgroundColor: t.palette.primary.main,

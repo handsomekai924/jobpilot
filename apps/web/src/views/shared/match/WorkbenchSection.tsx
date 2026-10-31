@@ -1,15 +1,8 @@
 /**
  * 匹配工作台：发起匹配（搜索范围 + 可选勾选）+ 任务进度 + 匹配结果。
  *
- * 布局（缺陷清单「匹配工作台布局」）：左栏搜索/配置（固定宽），右栏任务进度 + 结果（flex 1），
- * 窄屏（xs）才落回上下堆叠。
- *
- * 搜索范围（缺陷清单「搜索范围」）：只留「爬取批次下拉 + 搜索框」同一行——
- * 不选批次 = 搜全部职位；勾具体岗位 = 只匹配这几个，不勾 = 范围内全部。
- * 不再有「全部岗位 / 抓取批次」互斥分段。
- *
- * 结果/任务状态是页面级的（切到历史、招呼语再回来还在），这层只管发起与展示；
- * 保存招呼语 / 重打草稿 / 单条重跑的动作也在这层（跟结果卡走）。
+ * 左栏配置、右栏结果，窄屏堆叠；布局与搜索范围细节见
+ * `notes/apps/web/src/views/shared/match/WorkbenchSection.md`。
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -25,7 +18,7 @@ import {
   errText, rank, PAGE_SIZE, TASK_TERMINAL, type CrawlPick, type JobPick, type MatchItem, type MatchTaskSnap,
 } from "./types";
 import { MatchCard } from "./MatchCard";
-import { crawlBatchApi, interviewApi, matchApi } from "../repos";
+import { crawlBatchApi, interviewApi, matchApi } from "../../../api/shared";
 import { toTaskEvents } from "../taskEvents";
 
 /** 结果卡骨架：几何对齐 MatchCard（圆环 + 两行文案 + 招呼语框 + 按钮行），预占最终空间免得回弹。 */
@@ -50,6 +43,7 @@ function MatchCardSkeleton() {
   );
 }
 
+/** 匹配工作台段：左栏发起匹配，右栏任务进度与结果卡。 */
 export function WorkbenchSection({
   resumes, resumeId, onResumeId,
   taskSnap, liveTask, activeTaskId, resultsLoading,
@@ -80,20 +74,16 @@ export function WorkbenchSection({
   const toast = useToast();
 
   const [starting, setStarting] = useState(false);
-  // 候选岗位面板（搜索范围内的勾选，随时可用）
   const [jobs, setJobs] = useState<JobPick[]>([]);
   const [jobsTotal, setJobsTotal] = useState(0);
   const [jobPage, setJobPage] = useState(0);
   const [jobQuery, setJobQuery] = useState("");
   const [jobApplied, setJobApplied] = useState("");
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  // 抓取批次下拉：空 = 全部职位
   const [crawls, setCrawls] = useState<CrawlPick[]>([]);
   const [crawlId, setCrawlId] = useState("");
 
-  /* ---------------- 发起匹配 ---------------- */
-
-  // 搜索词防抖：每敲一个字都打后端会把职位表翻烂，静默 300ms 再查
+  /** 搜索词防抖 300ms 后才作为查询条件。 */
   useEffect(() => {
     const t = setTimeout(() => {
       setJobApplied((prev) => {
@@ -105,7 +95,7 @@ export function WorkbenchSection({
     return () => clearTimeout(t);
   }, [jobQuery]);
 
-  // 候选岗位：查词 / 翻页 / 批次变化都重拉；不带 crawl_task_id = 全库搜
+  /** 按批次 / 分页 / 搜索词拉候选岗位。 */
   useEffect(() => {
     let dead = false;
     void (async () => {
@@ -127,7 +117,7 @@ export function WorkbenchSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crawlId, jobPage, jobApplied]);
 
-  // 抓取批次下拉：进工作台就拉（空选项 = 全部职位，所以列表随时要备着）
+  /** 拉抓取批次供下拉。 */
   useEffect(() => {
     let dead = false;
     void (async () => {
@@ -150,6 +140,7 @@ export function WorkbenchSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** 发起匹配：勾了岗位只匹配这些，没勾按搜索范围（批次 / 全库）。 */
   const startMatch = async () => {
     if (!resumeId) {
       toast.toast("先选择一份简历", "warn");
@@ -158,10 +149,8 @@ export function WorkbenchSection({
     setStarting(true);
     try {
       const body: { resume_id: string; job_ids?: string[]; crawl_task_id?: string } = { resume_id: resumeId };
-      // 勾了岗位 = 只匹配这几个；没勾 = 搜索范围内全部（空批次 = 全库）
       if (selected.size) body.job_ids = [...selected];
       else if (crawlId) body.crawl_task_id = crawlId;
-      // repos 把回包收窄成 `{task_id}`，实际是整份 MatchTask.snapshot()（boss_web/api/match.py start_match）
       const snap = (await matchApi.analyze(body)) as unknown as MatchTaskSnap;
       onAdoptTask(snap);
       toast.toast("匹配已启动", "ok");
@@ -172,6 +161,7 @@ export function WorkbenchSection({
     }
   };
 
+  /** 请求停止当前匹配任务。 */
   const cancelTask = async () => {
     const id = activeTaskId || taskSnap?.task_id;
     if (!id) return;
@@ -183,6 +173,7 @@ export function WorkbenchSection({
     }
   };
 
+  /** 勾选 / 取消勾选一个候选岗位。 */
   const toggleSelected = (jid: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
@@ -191,10 +182,6 @@ export function WorkbenchSection({
       return next;
     });
 
-  /* ---------------- 单条操作：保存招呼语 / 重打草稿 / 重跑（只改不增） ---------------- */
-
-  // 这几个动作要读「当下」的草稿/结果快照：走 ref 读最新值，回调就不绑 state 依赖、引用全程稳定，
-  // MatchCard 的 memo 才拦得住（缺陷「展开收起卡顿」：状态一变全部卡片跟着重渲染）。
   const latestRef = useRef({ analysisId, drafts, matches });
   latestRef.current = { analysisId, drafts, matches };
 
@@ -208,6 +195,7 @@ export function WorkbenchSection({
     onSetExpandedJid((prev) => (prev === jid ? null : jid));
   }, [onSetExpandedJid]);
 
+  /** 保存某条结果的招呼语并清掉草稿。 */
   const saveGreeting = useCallback(async (jid: string) => {
     const cur = latestRef.current;
     if (!cur.analysisId) return;
@@ -229,12 +217,12 @@ export function WorkbenchSection({
     }
   }, [onSetBusyJid, onSetDrafts, onSetMatches, toast]);
 
+  /** 重打某条招呼语草稿，只回草稿不落库。 */
   const regenGreeting = useCallback(async (jid: string) => {
     const cur = latestRef.current;
     if (!cur.analysisId) return;
     onSetBusyJid(jid);
     try {
-      // 只回草稿不落库：先放草稿框里，确认后再点保存（legacy 语义）
       const r = await matchApi.regenGreeting(cur.analysisId, jid);
       onSetDrafts((prev) => ({ ...prev, [jid]: r.greeting }));
       toast.toast("已生成新草稿，确认后记得保存", "ok");
@@ -245,12 +233,12 @@ export function WorkbenchSection({
     }
   }, [onSetBusyJid, onSetDrafts, toast]);
 
+  /** 单条重跑：原地替换这一条，不往列表塞新行。 */
   const rematchOne = useCallback(async (jid: string) => {
     const cur = latestRef.current;
     if (!cur.analysisId) return;
     onSetBusyJid(jid);
     try {
-      // 只改不增：后端原地改库里那条 match，这里也只替换这一条，不往列表塞新行
       const r = (await matchApi.rematch(cur.analysisId, jid)) as { item?: MatchItem };
       if (r.item) onSetMatches((prev) => rank(prev.map((m) => (m.encrypt_job_id === jid ? r.item! : m))));
       toast.toast("已重跑这一条", "ok");
@@ -261,9 +249,6 @@ export function WorkbenchSection({
     }
   }, [onSetBusyJid, onSetMatches, toast]);
 
-  /* ---------------- 派生展示 ---------------- */
-
-  // 任务进度：WS 统一快照优先（推得快），轮询业务快照兜底
   const panelStatus = liveTask?.status ?? taskSnap?.status ?? "running";
   const panelDone = liveTask?.done ?? taskSnap?.done ?? 0;
   const panelTotal = liveTask?.total ?? taskSnap?.total ?? 0;
@@ -279,7 +264,6 @@ export function WorkbenchSection({
         : undefined;
   const taskRunning = !!activeTaskId && !TASK_TERMINAL.has(panelStatus);
   const pageCount = Math.max(1, Math.ceil(jobsTotal / PAGE_SIZE));
-  // 结果在途（历史详情拉取 / 匹配任务还没吐行）→ 骨架屏预占空间，别用空态让布局塌一下又弹回
   const showResultSkeletons = resultsLoading || (taskRunning && matches.length === 0);
 
   return (
@@ -295,7 +279,6 @@ export function WorkbenchSection({
         overflowY: { xs: "auto", md: "hidden" },
       }}
     >
-      {/* ---------------- 左栏：搜索 / 配置 ---------------- */}
       <Box
         role="region"
         aria-label="匹配设置"
@@ -330,7 +313,6 @@ export function WorkbenchSection({
             </Button>
           </Box>
 
-          {/* 搜索范围一行：批次下拉 + 搜索框（不选批次 = 全部职位） */}
           <Box
             data-testid="match-scope-row"
             sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center", mt: 1.5 }}
@@ -438,7 +420,6 @@ export function WorkbenchSection({
         </ScrollArea>
       </Box>
 
-      {/* ---------------- 右栏：任务进度 + 匹配结果 ---------------- */}
       <Box
         role="region"
         aria-label="匹配结果区"
@@ -453,7 +434,6 @@ export function WorkbenchSection({
           overflowY: { xs: "visible", md: "hidden" },
         }}
       >
-        {/* 容器头部标题固定在栏顶，不随结果滚 */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flex: "0 0 auto" }}>
           <Typography sx={{ ...typeScale.m, fontWeight: 600, flex: 1 }}>匹配结果</Typography>
           {matches.length > 0 && (
@@ -465,7 +445,6 @@ export function WorkbenchSection({
         </Box>
 
         <ScrollArea sx={{ flex: { xs: "0 0 auto", md: 1 }, minHeight: { xs: "auto", md: 0 }, overflowY: { xs: "visible", md: "auto" } }}>
-        {/* ---------------- 任务进度 ---------------- */}
         {(taskSnap || liveTask) && (
           <Box sx={{ mb: 2.5 }}>
             <TaskPanel
@@ -486,7 +465,6 @@ export function WorkbenchSection({
         )}
 
         {showResultSkeletons ? (
-          // 骨架屏预占最终卡位：历史详情在途 / 任务刚起步还没吐行时先撑住高度
           <Box role="status" aria-label="匹配结果加载中" data-testid="match-results-skeleton">
             <MatchCardSkeleton />
             <MatchCardSkeleton />

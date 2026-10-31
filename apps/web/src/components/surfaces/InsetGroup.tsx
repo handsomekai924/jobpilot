@@ -1,7 +1,10 @@
+/** inset-grouped 分组卡与行：iOS 设置风格。 */
+
 import { Box, Typography, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
 import { mergeSx } from "../../theme/sx";
 
+/** 分组卡属性。 */
 export interface InsetGroupProps {
   header?: ReactNode;
   footer?: ReactNode;
@@ -9,6 +12,7 @@ export interface InsetGroupProps {
   sx?: SxProps<Theme>;
 }
 
+/** 分组行属性：给 onClick 则整行可点。 */
 export interface InsetRowProps {
   label: ReactNode;
   detail?: ReactNode;

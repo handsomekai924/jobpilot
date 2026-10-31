@@ -1,3 +1,5 @@
+/** sx 合并工具：收口 MUI 递归 SxProps 的类型断言。 */
+
 import type { SxProps, Theme } from "@mui/material/styles";
 
 /**

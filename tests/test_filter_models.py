@@ -1,7 +1,4 @@
-"""筛选条件的模型与写死表校验。
-
-运行：`python -m pytest tests/test_filter_models.py -q`
-"""
+"""筛选条件的模型与写死表校验。"""
 
 from __future__ import annotations
 

@@ -1,7 +1,10 @@
+/** 任务进度条：宽度过渡 80ms，reduce-motion 也保留。 */
+
 import { Box } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { microMotion, palette, type ThemeMode } from "../../theme/tokens";
 
+/** 进度条属性。 */
 export interface ProgressBarProps {
   /** 0–100；undefined = 不确定态（活动条） */
   value?: number;
@@ -11,6 +14,7 @@ export interface ProgressBarProps {
   active?: boolean;
 }
 
+/** 色调 → 主题色。 */
 const barColor: Record<NonNullable<ProgressBarProps["tone"]>, (m: ThemeMode) => string> = {
   accent: (m) => palette[m].accent,
   ok: (m) => palette[m].ok,

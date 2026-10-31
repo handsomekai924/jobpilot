@@ -1,8 +1,7 @@
 /**
- * 简历库：上传 + 简历清单。
+ * 简历库：上传 + 简历清单（行内带解析状态徽章、查看原文 / 解析 / 删除）。
  *
- * 清单行带解析状态徽章、查看原文 / 解析 / 删除；解析进度的任务卡在「简历解析」段，
- * 这里只保留徽章（解析中 / 已解析 / 未解析），避免清单和详情挤一屏。
+ * 解析进度的任务卡在「简历解析」段，这里只保留徽章，避免清单和详情挤一屏。
  */
 
 import { useRef, useState } from "react";
@@ -11,9 +10,10 @@ import { Box, Typography } from "@mui/material";
 import { Button, ConfirmSheet, EmptyState, Pill, Skeleton, Surface, useToast } from "../../../components";
 import { typeScale } from "../../../theme/tokens";
 import { fmtTime } from "../../../utils/format";
-import { resumeApi } from "../repos";
+import { resumeApi } from "../../../api/shared";
 import { PARSE_TERMINAL, msgOf, type ParseRun, type ResumeListItem } from "./types";
 
+/** 简历库段：上传入口与简历清单，删除走二次确认。 */
 export function LibrarySection({
   resumes, currentId, runs, loading, rawBusyId, parseBusyId, onSelect, onChanged, onRunParse, onViewRaw,
 }: {
@@ -54,6 +54,7 @@ export function LibrarySection({
     }
   };
 
+  /** 文件选择变化：取第一份文件上传，并重置 input 以便重选同名文件。 */
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) void upload(f);
@@ -63,6 +64,7 @@ export function LibrarySection({
   /** 删除简历：先弹窗二次确认（`removeTarget`），确认后才真删；弹窗等删除回包再关。 */
   const remove = (item: ResumeListItem) => setRemoveTarget(item);
 
+  /** 确认后真删；删的是当前选中项就清空选中。 */
   const runRemove = async () => {
     const item = removeTarget;
     if (!item || removing) return;
@@ -86,7 +88,6 @@ export function LibrarySection({
         <Button variant="filled" disabled={uploading} onClick={() => fileRef.current?.click()}>
           {uploading ? "上传中…" : "上传简历"}
         </Button>
-        {/* 隐藏 input 收口文件选择；拖拽上传不迁（见文件头） */}
         <input
           ref={fileRef}
           type="file"

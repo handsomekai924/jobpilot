@@ -1,9 +1,4 @@
-"""站点限速/配额（`site_settings`）：仓储口 + 共享执行规则 + 投递队列落地。
-
-限速是站点属性、执行是共享规则——这里验三层各自守好自己那段：
-`boss_db` 只管存取，`boss_web.core.limits` 只管形状与熔断判据，
-`deliver_task` 才是把它们落到发送循环上的地方。
-"""
+"""站点限速/配额（`site_settings`）：仓储口、共享执行规则与投递队列落地。"""
 
 from __future__ import annotations
 
@@ -29,11 +24,6 @@ def _clean_cache():
     boss_db.close_all()
     yield
     boss_db.close_all()
-
-
-# ---------------------------------------------------------------------------
-# boss_db：site_settings 的仓储口
-# ---------------------------------------------------------------------------
 
 
 def test_get_没写过这一行_回全默认(tmp_path):
@@ -113,11 +103,6 @@ def test_count_greeted_today_只数今天且只数本站(tmp_path):
     assert boss_db.count_greeted_today("51job", path=p) == 1
 
 
-# ---------------------------------------------------------------------------
-# boss_web.core.limits：形状 + 熔断判据
-# ---------------------------------------------------------------------------
-
-
 def test_from_mapping_认仓储行也认dict():
     """`boss_db.SiteSettings`、裸 dict、`None` 都收得住。"""
     row = boss_db.SiteSettings(site="boss", throttle_ms=700, daily_quota=5, apply_enabled=True)
@@ -172,6 +157,7 @@ def test_breaker_成功一次清零():
 
 
 def test_breaker_默认阈值是三():
+    """默认阈值是 3，且与 `BREAKER_TRIP` 一致。"""
     assert Breaker().trip == BREAKER_TRIP == 3
 
 
@@ -190,11 +176,6 @@ def test_throttle_hook_按站点节流():
     tick()
     tick()
     assert slept == [1.5, 1.5]
-
-
-# ---------------------------------------------------------------------------
-# deliver_task：把 site_settings 落到发送循环上
-# ---------------------------------------------------------------------------
 
 
 def _safe(jid: str, **overrides) -> dict:
@@ -275,7 +256,6 @@ def test_节流间隔_站点配了就盖掉全局默认():
     snap, fake, slept = _run_deliver([_safe("j1"), _safe("j2"), _safe("j3")])
     assert snap["status"] == "done"
     assert len(fake.calls) == 3
-    # 3 条 → 条间 2 次节流（最后一条不再睡）
     assert slept == [0.9, 0.9]
     assert snap["limits"]["throttle_ms"] == 900
     assert snap["limits"]["interval"] == 0.9
@@ -324,11 +304,6 @@ def test_每日配额_算上今天已经发过的():
     assert snap["limits"]["quota_left"] == 1
     assert len(fake.calls) == 1
     assert snap["skipped"] == 2
-
-
-# ---------------------------------------------------------------------------
-# 平台设置接口：`/api/sites/{site}/settings`
-# ---------------------------------------------------------------------------
 
 
 @pytest.fixture

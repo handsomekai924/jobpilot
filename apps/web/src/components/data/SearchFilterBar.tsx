@@ -1,9 +1,12 @@
+/** 搜索 + 快速筛选一行收纳：搜索框 + 单选 chip 组 + 右侧动作。 */
+
 import type { ReactNode } from "react";
 import { Box, Chip, TextField, InputAdornment } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { typeScale } from "../../theme/tokens";
 import { mergeSx } from "../../theme/sx";
 
+/** 一个快速筛选项。 */
 export interface FilterOption {
   value: string;
   label: string;
@@ -11,6 +14,7 @@ export interface FilterOption {
   tone?: string;
 }
 
+/** 搜索筛选栏属性。 */
 export interface SearchFilterBarProps {
   /** 搜索词（受控） */
   query: string;

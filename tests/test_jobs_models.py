@@ -55,8 +55,8 @@ def ok_payload(items, *, has_more: bool = True, lid: str = "") -> dict:
 
     Args:
         items (list): jobList 元素列表。
-        has_more (bool): 是否还有下一页。
-        lid (str): 分页追踪标识。
+        has_more: 是否还有下一页。
+        lid: 分页追踪标识。
 
     Returns:
         带 `code` / `zpData` 的完整响应 dict。

@@ -1,7 +1,6 @@
 """站点适配器包：装配点——`load()` 把各站点挂进注册表。
 
-server 取适配器前会调一次（`registry._ensure_loaded`），测试 `reset_registry()`
-之后重调即可原样挂回。新增站点 = 加一个 `xxx.py` + 这里多一行。
+新增站点 = 加一个 `xxx.py` + 这里多一行。
 """
 
 from __future__ import annotations

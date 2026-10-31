@@ -12,12 +12,13 @@ import {
   Button, EmptyState, NumberField, Pill, SegmentedControl, Select, Sheet, Skeleton, Surface, useToast,
 } from "../../../components";
 import { radius, springs, typeScale } from "../../../theme/tokens";
-import { interviewApi } from "../repos";
+import { interviewApi } from "../../../api/shared";
 import {
   errMsg, QUESTION_TYPES, SUPPLEMENT_MAX,
   type CtxInfo, type PrepTarget, type QuestionItem, type InterviewTaskSnap,
 } from "./types";
 
+/** 题目侧栏：上下文与摘要、导出、补题、按题型浏览。 */
 export function PrepSheet({
   target, onClose, onChanged, onTaskStarted,
 }: {
@@ -69,11 +70,11 @@ export function PrepSheet({
     } catch (e) {
       toast.toast(`读面试题失败：${errMsg(e)}`, "danger");
     } finally {
-      // 失败也收骨架（空态 + toast 说清），别一直转
       setLoadedFor(jobId);
     }
   }, [jobId, toast]);
 
+  /** 换岗位时重置题型 / 补题 / 轮询状态并重拉题目。 */
   useEffect(() => {
     if (!jobId) return;
     setTypeFilter("");
@@ -83,12 +84,12 @@ export function PrepSheet({
     void load();
   }, [jobId, load]);
 
-  // 换题型筛选回到第一题
+  /** 换题型回到第一题。 */
   useEffect(() => {
     setQIndex(0);
   }, [typeFilter]);
 
-  // 生成是异步任务：轮询盯到终态再刷题（WS 也会推进度，这里保证断线照样收尾）
+  /** 盯生成任务：终态时提示结果并刷新题目。 */
   useEffect(() => {
     if (!watchId) return undefined;
     const timer = setInterval(() => {
@@ -102,9 +103,7 @@ export function PrepSheet({
           else if (st === "error") toast.toast(String(snap.error || "生成失败"), "danger");
           await load();
           onChanged();
-        } catch {
-          /* 这一轮拉不到就等下一轮 */
-        }
+        } catch {}
       })();
     }, 2000);
     return () => clearInterval(timer);
@@ -142,6 +141,7 @@ export function PrepSheet({
     }
   };
 
+  /** 提交补题：校验题型与条数后发起追加。 */
   const submitSupplement = () => {
     const n = supCount;
     if (!supType) {
@@ -164,7 +164,6 @@ export function PrepSheet({
     [questions, typeFilter],
   );
 
-  // 列表缩短（换筛选 / 重生成）时把 index 夹回范围内
   const safeIndex = visible.length ? Math.min(qIndex, visible.length - 1) : 0;
   const q = visible[safeIndex];
 
@@ -176,7 +175,6 @@ export function PrepSheet({
       title={target ? `面试题 · ${[target.jobName, target.brandName].filter(Boolean).join(" · ")}` : ""}
     >
       {target && loading && (
-        /* 题目/摘要拉取窗口：摘要块 + 题卡两块骨架占位，数据到了整块替换不跳版 */
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Skeleton height={72} sx={{ borderRadius: radius.s }} />
           <Skeleton height={40} sx={{ borderRadius: radius.s }} />
@@ -185,7 +183,6 @@ export function PrepSheet({
       )}
       {target && !loading && (
         <>
-          {/* 上下文与摘要：题数 / 匹配度 / 归属分析（旧弹窗的摘要区） */}
           <Surface sx={{ mb: 2 }}>
             <Typography sx={{ ...typeScale.s, fontWeight: 590, color: "text.secondary", mb: 1 }}>
               上下文与摘要
@@ -208,8 +205,6 @@ export function PrepSheet({
           </Surface>
 
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2, alignItems: "center" }}>
-            {/* 导出必须是真链接（新窗口拿附件），不发 fetch 拿二进制；
-                用 Button component="a"——尺寸和其它按钮一致（缺陷清单「导出按钮大小」）。 */}
             <Button
               variant="gray"
               component="a"
@@ -304,7 +299,6 @@ export function PrepSheet({
                 </Button>
               </Box>
 
-              {/* 换题走短交叉淡入（reduced-motion 友好）；题卡只渲染当前这道 */}
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={q.id}

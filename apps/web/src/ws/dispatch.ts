@@ -10,12 +10,14 @@ import { projectSession, useSessionStore, type AuthFeedKind } from "../stores/se
 import type { PlatformSession } from "../platform/types";
 import type { WsEnvelope } from "./client";
 
+/** 待喂料事件 type → 喂料种类。 */
 const FEED_KIND: Record<string, AuthFeedKind> = {
   "auth.need_code": "code",
   "auth.need_slider": "slider",
   "auth.need_scan": "scan",
 };
 
+/** 非对象一律当空对象。 */
 function asRecord(v: unknown): Record<string, unknown> {
   return v && typeof v === "object" ? (v as Record<string, unknown>) : {};
 }
@@ -87,7 +89,6 @@ export function applyWsEvent(msg: WsEnvelope): void {
       return;
     }
     case "auth.state": {
-      // done / error / cancelled 都落这一帧：喂料结束，收起表单。
       if (taskId) useSessionStore.getState().clearFeed(taskId);
       return;
     }

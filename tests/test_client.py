@@ -1,7 +1,4 @@
-"""离线单测：用假会话替换网络层，覆盖完整登录流程与各类异常分支。
-
-运行： python -m pytest tests/ -q
-"""
+"""离线单测：用假会话替换网络层，覆盖完整登录流程与各类异常分支。"""
 
 from __future__ import annotations
 
@@ -117,10 +114,7 @@ class FakeHttp:
         return self.calls[-1]
 
     def form_of(self, index: int = -1) -> dict[str, str]:
-        """取出某次请求的表单字典。
-
-        `keep_blank_values` 让 `token=` 这类空值不被丢掉。
-        """
+        """取出某次请求的表单字典，保留 `token=` 这类空值。"""
         from urllib.parse import parse_qs
 
         body = self.calls[index].get("data") or ""

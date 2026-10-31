@@ -96,14 +96,9 @@ export async function renderSettings(root) {
   }
 
   /**
-   * 有新版且没被忽略才在「版本更新」页签上点小圆点；不弹窗（弹窗归首屏/update.js）。
+   * 有新版且没被忽略才在「版本更新」页签上点小圆点；不弹窗（弹窗归首屏 / update.js）。
    *
-   * 后端 `should_prompt = has_update && !suppressed`——`ignored` 是忽略水位线，
-   * 新版比水位高时照亮，所以判断只看 `should_prompt`，不能再拿 `!ignored` 卡一道。
-   *
-   * 圆点要一直挂着：关掉弹窗 ≠ 忽略，只要还有没被忽略的新版就不灭。因此进页面
-   * 得先按缓存画上，不能只等 WS 推送——关完弹窗进设置页那会儿正好没推送，
-   * 圆点会是灭的，看着就像「关掉就没提示了」。
+   * 缓存与忽略水位线的细节见 `notes/boss_web/static/legacy/js/settings.md`。
    *
    * @param {Event} e `boss:update` 事件，`detail` 为检测结果
    */

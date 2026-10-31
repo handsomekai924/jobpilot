@@ -1,23 +1,12 @@
 """统一任务运行时：任务模型、并发策略、事件总线（WS 广播）。
 
-九套长任务骨架收敛到这一份：各业务 Manager 只负责执行体与落库，
-任务登记 / 占用判定 / 进度广播 / 任务中心快照都从这里走。
-设计见 `docs/task-center-and-unified-ws.md`。
-
-注意：`track()` 会把业务任务的 `push()` / `set_status()` 包一层，改完立刻
-调 `snapshot()` 广播。所以**任务对象自己的锁必须是 `threading.RLock`**——
-业务代码常常持锁调 `push()`，包一层后会同线程再进 `snapshot()`；`Lock`
-会当场死锁（`LoginTask` 一开始就用的 `RLock`，其余任务对象已对齐）。
+九套长任务骨架收敛到这一份：各业务 Manager 只负责执行体与落库，任务登记 /
+占用判定 / 进度广播 / 任务中心快照都从这里走。设计与锁约定见
+`notes/boss_web/services/task_runtime.md`。
 
 Attributes:
-    STATUS_PENDING: 已提交未开跑。
-    STATUS_RUNNING: 运行中。
     STATUS_WAITING_HUMAN: 等人工喂料（登录滑块/验证码）。
-    STATUS_DONE: 正常结束。
-    STATUS_ERROR: 出错结束。
-    STATUS_CANCELLED: 已取消。
     UNFINISHED: 未结束状态集合（含登录人机流的中间态）——占用判定只看这几个。
-    DEFAULT_KEEP: 任务中心历史保留条数。
     POLICY_GLOBAL_SINGLE: 并发策略。
     hub: 进程内唯一 Hub。
 """
@@ -109,12 +98,7 @@ def spec_keys(spec: TaskTypeSpec, request: dict[str, Any]) -> list[str]:
 
 
 def site_of(spec: TaskTypeSpec, request: dict[str, Any]) -> str:
-    """算这次启动走哪个站点的通道；与 `track()` 的站点解析同一条规则。
-
-    占用一律按 `(site, key)` 记账：站点是通道边界，同型任务按站点排队
-    （docs/multiplatform-console-redesign.md 6.5）。站点为空 = 共用任务，
-    退化成原来的全局语义，所以简历解析这类不碰站点的行为不变。
-    """
+    """算这次启动走哪个站点的通道；与 `track()` 的站点解析同一条规则。"""
     return str(request.get("site") or "") or spec.site
 
 
@@ -194,14 +178,8 @@ class TaskHub:
     def occupy(self, task_type: str, *, request: dict[str, Any] | None = None) -> list[str]:
         """提交前的占用检查；冲突抛 `ConflictError`，通过则回占用 key 列表。
 
-        占用按 `(site, key)` 记账——站点是通道边界，同型任务按站点排队
-        （docs 6.5）；站点为空的共用任务退化成原来的全局语义。
-
-        - `GLOBAL_SINGLE`：同站点该类型已有未结束任务就拒；
-        - `PER_KEY_SINGLE`：同站点同 key 未结束就拒；
-        - `UNLIMITED`：只看 `max_parallel`（按站点计）；
-        - 互斥组：同站点同 `mutual_group` 里其它类型有未结束任务也拒
-          （抓取/补抓共用**站点**通道，跨站点互不干扰）。
+        占用按 `(site, key)` 记账，站点是通道边界；各并发策略与互斥组的具体判定
+        见 `notes/boss_web/services/task_runtime.md`。
 
         Args:
             task_type: 任务类型键。
@@ -209,9 +187,6 @@ class TaskHub:
 
         Returns:
             本次占用的 key 列表。
-
-        Raises:
-            ConflictError: 并发冲突。
         """
         spec = self.spec(task_type)
         req = dict(request or {})
@@ -228,7 +203,7 @@ class TaskHub:
                 if status not in UNFINISHED:
                     continue
                 if rec.site != site:
-                    continue  # 别的站点的通道，不归这里管
+                    continue
                 if rec.task_type != task_type:
                     if other.mutual_group == group:
                         raise ConflictError(

@@ -91,7 +91,6 @@ async def ws_endpoint(ws: WebSocket) -> None:
             "data": {
                 "tasks": hub.hello_payload(),
                 "sessions": _sessions_payload(),
-                # `session` 是旧壳（legacy）认的单站摘要，M3 随 legacy 一起删，只留 `sessions`。
                 "session": _session_payload(),
                 "update": _update_payload(),
                 "version": _version_payload(),

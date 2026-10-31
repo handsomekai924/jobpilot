@@ -1,14 +1,19 @@
+/** 设计 token 与 MUI 主题的单测。 */
+
 import { describe, expect, it } from "vitest";
 import { materials, palette, springs, typeScale, radius } from "../tokens";
 import { createAppleTheme } from "../muiTheme";
 
+/** 验设计 token 的数值约束与主题产出。 */
 describe("设计 token（docs/DESIGN.md 的数值形态）", () => {
+  /** 验字距随字号：大字收紧、小字放松。 */
   it("字距随字号：大字收紧、小字放松（禁止全站固定字距）", () => {
     expect(parseFloat(typeScale.hero.letterSpacing)).toBeLessThan(0);
     expect(typeScale.body.letterSpacing).toBe("0");
     expect(parseFloat(typeScale.xs.letterSpacing)).toBeGreaterThan(0);
   });
 
+  /** 验深浅两套语义色齐全且强调色不同。 */
   it("深浅两套语义色齐全且强调色不同", () => {
     for (const mode of ["dark", "light"] as const) {
       const c = palette[mode];
@@ -19,6 +24,7 @@ describe("设计 token（docs/DESIGN.md 的数值形态）", () => {
     expect(palette.dark.accent).not.toBe(palette.light.accent);
   });
 
+  /** 验材质分轻重两层且带 blur。 */
   it("材质分轻重两层且带 blur", () => {
     for (const mode of ["dark", "light"] as const) {
       expect(materials[mode].thin.backdropFilter).toContain("blur");
@@ -26,12 +32,14 @@ describe("设计 token（docs/DESIGN.md 的数值形态）", () => {
     }
   });
 
+  /** 验弹簧参数：默认临界阻尼不回弹，动量才带回弹。 */
   it("弹簧参数：默认临界阻尼不回弹，动量才带回弹", () => {
     expect(springs.ui.bounce).toBe(0);
     expect(springs.momentum.bounce).toBeGreaterThan(0);
     expect(springs.ui.type).toBe("spring");
   });
 
+  /** 验 createAppleTheme 产出双主题且按钮根样式含按压反馈。 */
   it("createAppleTheme 产出双主题且按钮根样式含按压反馈", () => {
     const dark = createAppleTheme("dark");
     const light = createAppleTheme("light");

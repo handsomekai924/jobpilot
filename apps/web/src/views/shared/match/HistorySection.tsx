@@ -1,10 +1,7 @@
 /**
  * 分析历史：跑过的匹配归档列表，可载回工作台 / 删除（带确认）。
  *
- * 载入会把结果写回页面级状态并切去工作台——历史是归档，工作台才是改招呼语的地方。
- *
- * 布局（缺陷「分析历史顶部栏随内容滚动」）：根 fill，「历史分析 + 刷新」标题行固定不滚，
- * 只有下方历史项列表在 ScrollArea 里滚（与全站「容器头部固定 + 列表局部滚动」一致）。
+ * 载入会把结果写回页面级状态并切去工作台；标题固定、列表局部滚动。
  */
 
 import { useEffect, useState } from "react";
@@ -13,11 +10,12 @@ import { Box, Typography } from "@mui/material";
 import { Button, EmptyState, pageRootSx, Pill, ScrollArea, Sheet, Surface, useToast } from "../../../components";
 import { typeScale } from "../../../theme/tokens";
 import { fmtNumber, fmtTime } from "../../../utils/format";
-import { matchApi } from "../repos";
+import { matchApi } from "../../../api/shared";
 import {
   analysisStatusLabel, errText, type AnalysisRow,
 } from "./types";
 
+/** 分析历史段：归档列表，可载入工作台或删除。 */
 export function HistorySection({
   rows, setRows, onLoadAnalysis, onDelete,
 }: {
@@ -32,7 +30,7 @@ export function HistorySection({
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  // 进这层才拉一次（懒加载，与设置页各段同款）；壳层跑完任务也会刷 rows，这里跟着显示最新
+  /** 首屏拉历史分析列表。 */
   useEffect(() => {
     void (async () => {
       try {
@@ -45,6 +43,7 @@ export function HistorySection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** 载入一份历史分析并提示结果。 */
   const loadAnalysis = async (id: string) => {
     setLoadingId(id);
     try {
@@ -57,6 +56,7 @@ export function HistorySection({
     }
   };
 
+  /** 删除一份历史分析并同步壳层。 */
   const removeAnalysis = async (id: string) => {
     try {
       await matchApi.removeAnalysis(id);
@@ -72,7 +72,6 @@ export function HistorySection({
 
   return (
     <Box sx={pageRootSx}>
-      {/* 头部标题固定在顶，不随列表滚 */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5, flex: "0 0 auto" }}>
         <Typography sx={{ ...typeScale.m, fontWeight: 600, flex: 1 }}>历史分析</Typography>
         <Button
@@ -92,7 +91,6 @@ export function HistorySection({
         </Button>
       </Box>
 
-      {/* 只有历史项列表局部滚动 */}
       <ScrollArea>
         {rows.length === 0 ? (
           <EmptyState title="还没有历史分析" />
@@ -130,7 +128,6 @@ export function HistorySection({
         )}
       </ScrollArea>
 
-      {/* 删除确认留在滚动区外 */}
       <Sheet
         open={confirmDeleteId !== null}
         onClose={() => setConfirmDeleteId(null)}

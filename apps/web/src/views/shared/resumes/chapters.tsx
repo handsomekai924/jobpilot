@@ -152,7 +152,6 @@ export function DiffView({ blocks }: { blocks: DiffBlock[] }) {
     } else if (b.tag === "delete") {
       rows.push({ mark: "−", text: left, color: "error.main" });
     } else {
-      // replace：先删后增
       if (left) rows.push({ mark: "−", text: left, color: "error.main" });
       if (right) rows.push({ mark: "+", text: right, color: "success.main" });
     }

@@ -88,11 +88,7 @@ def test_建表_doc_是_site_加_name_复合键(tmp_path):
 
 
 def test_旧库补_site_列(tmp_path):
-    """验旧库（没 site 列）走 `_migrate_columns` 无痛升级，旧行落默认 'boss'。
-
-    旧库 DDL 由现行 `_SCHEMA` 抹掉 site 列与两张新表生成——比手写 DDL 更耐改。
-    `doc` 另算：它换了主键，改列改不动，所以旧形态 DDL 先建（后建的 IF NOT EXISTS 是空操作）。
-    """
+    """验旧库（没 site 列）走 `_migrate_columns` 无痛升级，旧行落默认 'boss'。"""
     import re
     import sqlite3
 

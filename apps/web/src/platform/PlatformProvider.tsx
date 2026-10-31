@@ -14,8 +14,10 @@ import { fetchPlatforms, byId, siteIdFromPath } from "./registry";
 import { platformKeyFromPath, sharedKeyFromPath, routeSegmentForKey } from "../routes/match";
 import { PLATFORM_NAV, type PlatformDescriptor } from "./types";
 
+/** 共用路由下记住的当前平台。 */
 const STORAGE_KEY = "console.siteId";
 
+/** 平台上下文：描述符 + 路由分支 + 当前平台。 */
 export interface PlatformContextValue {
   /** 全量描述符（`GET /api/platforms`） */
   platforms: PlatformDescriptor[];
@@ -37,6 +39,7 @@ export interface PlatformContextValue {
 
 const PlatformContext = createContext<PlatformContextValue | null>(null);
 
+/** 读持久化的上下文站点；不可用回空串。 */
 function readStored(): string {
   try {
     return localStorage.getItem(STORAGE_KEY) ?? "";
@@ -45,14 +48,15 @@ function readStored(): string {
   }
 }
 
+/** 持久化上下文站点；失败静默。 */
 function store(siteId: string): void {
   try {
     localStorage.setItem(STORAGE_KEY, siteId);
   } catch {
-    /* 隐私模式等：上下文只在本次会话有效，不拦主流程 */
   }
 }
 
+/** 提供平台上下文；路由参数优先，共用路由落到持久化站点。 */
 export function PlatformProvider({ children }: { children: ReactNode }) {
   const [platforms, setPlatforms] = useState<PlatformDescriptor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +65,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  /** 重新拉全量描述符。 */
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
@@ -74,6 +79,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  /** 首屏拉一次描述符。 */
   useEffect(() => {
     void refresh();
   }, [refresh]);
@@ -91,19 +97,19 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     [location.pathname, platforms],
   );
 
+  /** 当前平台：平台路由看路由，否则看持久化站点，再回落到首个站点。 */
   const activeSiteId = useMemo(() => {
     if (routeSiteId) return routeSiteId;
     if (contextSiteId && byId(platforms, contextSiteId)) return contextSiteId;
     return platforms[0]?.site_id ?? "";
   }, [routeSiteId, contextSiteId, platforms]);
 
+  /** 切平台：平台路由原地换站点，共用路由只换上下文。 */
   const selectPlatform = useCallback(
     (siteId: string) => {
       const target = byId(platforms, siteId);
       if (!target) return;
       if (routeSiteId) {
-        // 平台作用域路由：原地换站点（#/boss/jobs 切 51job → #/51job/jobs）；
-        // 目标站点没有这一项就落回它的第一个入口，不给「点了报错」。
         const seg = routeSegmentForKey(routePlatformKey ?? "", target) ?? PLATFORM_NAV[0].route;
         navigate(`/${siteId}/${seg}`);
         return;

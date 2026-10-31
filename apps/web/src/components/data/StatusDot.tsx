@@ -1,9 +1,13 @@
+/** 会话/任务状态信号点；busy 可脉动，reduced-motion 下自动停。 */
+
 import { Box, Typography } from "@mui/material";
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
+/** 状态色调。 */
 export type StatusTone = "ok" | "warn" | "danger" | "accent" | "idle" | "busy";
 
+/** 状态点属性。 */
 export interface StatusDotProps {
   tone?: StatusTone;
   /** 状态文字（状态不只靠颜色，pill/dot 必带文字——DESIGN.md Accessibility） */
@@ -13,6 +17,7 @@ export interface StatusDotProps {
   pulse?: boolean;
 }
 
+/** 状态色调 → CSS 变量。 */
 const toneColor: Record<StatusTone, string> = {
   ok: "var(--ok)",
   warn: "var(--warn)",

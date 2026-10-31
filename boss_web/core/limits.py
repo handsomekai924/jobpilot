@@ -1,12 +1,9 @@
-"""站点限速/配额与投递熔断（docs 6.5：`site_settings` 节流 + 每日配额 + 熔断）。
+"""站点限速/配额与投递熔断。
 
-限速是**站点属性**、执行是**共享规则**：`SiteLimits` 只是形状，怎么停怎么走由
-`run_deliver` 与投递队列照着它办，站点不许自己另写一套限速逻辑。故障分类到
-动作的映射也定在这儿——站点只负责 `classify_fault` 如实归类（BOSS 的
-code 36 / 开聊提醒这类语义留在站点侧），判不判停是共享层的事。
+限速是站点属性、执行是共享规则；本模块不碰 SQLite，只认 `site_settings` 的形状。
 
-`boss_db.get_site_settings()` 是这张表的仓储口；本模块不碰 SQLite，
-`SiteLimits.from_mapping()` 认它的返回值，也认任何同名字段的 Mapping。
+Attributes:
+    BREAKER_TRIP: 退避类故障连续多少次就整批停。
 """
 
 from __future__ import annotations
@@ -93,14 +90,19 @@ class SiteLimits:
 
 
 class FaultAction:
-    """故障分类之后的三种动作（熔断的判据，挂在队列与报告上）。"""
+    """故障分类之后的三种动作（熔断的判据，挂在队列与报告上）。
 
-    STOP = "stop"  # 整批停住：账号异常 / 配额耗尽 / 登录态失效
-    COOLOFF = "cooloff"  # 退避一次再试下一条：限频 / 安全网关
-    CONTINUE = "continue"  # 只废这一条，后面的照发
+    Attributes:
+        STOP: 整批停住：账号异常 / 配额耗尽 / 登录态失效。
+        COOLOFF: 退避一次再试下一条：限频 / 安全网关。
+        CONTINUE: 只废这一条，后面的照发。
+    """
+
+    STOP = "stop"
+    COOLOFF = "cooloff"
+    CONTINUE = "continue"
 
 
-#: 退避类故障连续多少次就整批停——退避也没用，说明不是偶发限频。
 BREAKER_TRIP = 3
 
 
@@ -161,6 +163,7 @@ class Breaker:
         return FaultAction.CONTINUE
 
     def _trip(self, reason: str) -> None:
+        """记一次熔断并留下原因。"""
         self.tripped = True
         self.reason = reason
 

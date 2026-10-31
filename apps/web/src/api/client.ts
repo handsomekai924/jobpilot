@@ -10,6 +10,7 @@ export class ApiError extends Error {
   readonly status: number;
   readonly data: unknown;
 
+  /** 初始化。 */
   constructor(message: string, code = "error", status = 0, data: unknown = null) {
     super(message);
     this.name = "ApiError";
@@ -23,6 +24,7 @@ export class ApiError extends Error {
 const NETWORK_MESSAGE =
   "连不上本地程序。请确认那个黑色窗口还开着（关掉它就等于关掉了程序），然后刷新本页重试。";
 
+/** 从响应体里挑一句能给人看的错误话术；认不出回 `HTTP {status}`。 */
 function pickMessage(data: unknown, status: number): string {
   if (data && typeof data === "object") {
     const d = data as Record<string, unknown>;
@@ -32,8 +34,6 @@ function pickMessage(data: unknown, status: number): string {
     if (detail && typeof detail === "object") {
       const inner = (detail as Record<string, unknown>).message;
       if (typeof inner === "string" && inner) return inner;
-      // FastAPI 参数校验 422：`detail` 是 `[{loc, msg, type}]`，取头一条的 msg，
-      // 免得越界报错退化成一句「HTTP 422」，人看不出哪儿填错了
       if (Array.isArray(detail)) {
         for (const row of detail) {
           const msg = row && typeof row === "object" ? (row as Record<string, unknown>).msg : undefined;
@@ -45,6 +45,13 @@ function pickMessage(data: unknown, status: number): string {
   return `HTTP ${status}`;
 }
 
+/**
+ * 发请求并解析 JSON；HTTP/网络错误一律转成 `ApiError`。
+ *
+ * @param method HTTP 方法
+ * @param url 请求路径
+ * @param body JSON 体或 FormData
+ */
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
   const init: RequestInit = { method, headers: {} };
   if (body instanceof FormData) {

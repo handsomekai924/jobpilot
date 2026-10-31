@@ -94,8 +94,6 @@ export async function renderTasks(root) {
   typeSel.value = state.type;
   statusSel.value = state.status;
 
-  // ── 数据进出 ────────────────────────────────────────────────
-
   /** 用一份快照列表整体替换本地缓存。 */
   function ingest(snapshots) {
     state.tasks.clear();
@@ -117,7 +115,6 @@ export async function renderTasks(root) {
       if (disposed) return;
       ingest(data.tasks || []);
     } catch {
-      /* 降级轮询下一轮再试 */
     }
   }
 
@@ -138,8 +135,6 @@ export async function renderTasks(root) {
       }, 5000);
     }
   }
-
-  // ── 渲染 ────────────────────────────────────────────────────
 
   /** 当前筛选条件下的任务列表（新到旧）。 */
   function visibleTasks() {
@@ -231,8 +226,6 @@ export async function renderTasks(root) {
     listEl.innerHTML = list.map(cardHtml).join("");
   }
 
-  // ── 操作 ────────────────────────────────────────────────────
-
   /** 对一个任务发操作请求并刷新。 */
   async function act(kind, id) {
     try {
@@ -309,8 +302,6 @@ export async function renderTasks(root) {
     state.q = qInput.value;
     paint();
   });
-
-  // ── 数据源：WS 优先，HTTP 兜底 ─────────────────────────────
 
   const offs = [
     ws.on("hello", (m) => ingest((m.data && m.data.tasks && m.data.tasks.tasks) || [])),

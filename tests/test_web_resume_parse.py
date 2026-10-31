@@ -893,11 +893,7 @@ def test_自定义招呼语约束两条路径都立即生效(db):
 
 
 def test_旧_analyze_接口已下线():
-    """遗留的 `/api/resume/analyze*` 四条路由已全部删除。
-
-    SPA 兜底会把没匹配的 GET 变成 200、POST 变成 405，所以「删没删」只能
-    看 resume 子 router 的路由表，不能靠状态码。
-    """
+    """遗留的 `/api/resume/analyze*` 四条路由已全部删除。"""
     from boss_web.api import resume
 
     paths = {getattr(r, "path", "") for r in resume.router.routes}

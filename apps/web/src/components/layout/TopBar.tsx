@@ -1,3 +1,5 @@
+/** 顶栏：平台切换器 + 共用路由入口 + 主题开关。 */
+
 import { useState } from "react";
 import { Box, MenuItem, Menu, Typography } from "@mui/material";
 import { useThemeMode } from "../../theme/ThemeModeProvider";
@@ -8,6 +10,7 @@ import { SegmentedControl, type SegmentedOption } from "../controls/SegmentedCon
 import { Button } from "../controls/Button";
 import { StatusDot } from "../data/StatusDot";
 
+/** 顶栏属性。 */
 export interface TopBarProps {
   /** 平台描述符列表（/api/platforms） */
   platforms: PlatformDescriptor[];
@@ -28,7 +31,6 @@ export function TopBar({
   const { mode, toggle } = useThemeMode();
   const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
 
-  // ≤3 平台内联分段；>3 收进下拉（拍板 #3）
   const inline = platforms.length > 0 && platforms.length <= 3;
   const platformOptions: SegmentedOption[] = platforms.map((p) => ({
     value: p.site_id,
@@ -74,7 +76,6 @@ export function TopBar({
             anchorEl={moreAnchor}
             open={moreAnchor != null}
             onClose={(_event, reason) => {
-              // 缺陷清单「下拉框」：鼠标收起不把焦点留在触发器上（蓝框不留），Esc 保留焦点
               if (reason === "escapeKeyDown") moreAnchor?.focus();
               else moreAnchor?.blur();
               setMoreAnchor(null);

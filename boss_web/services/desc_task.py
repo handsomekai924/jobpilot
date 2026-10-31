@@ -9,6 +9,7 @@ Attributes:
     ST_DONE: 任务正常结束。
     ST_ERROR: 任务出错。
     ST_CANCELLED: 任务被取消。
+    SITE: 本模块服务的站点；任务中心按站点记账、黑名单规则按站点取「本站生效」的那批。
 """
 
 from __future__ import annotations
@@ -36,8 +37,6 @@ ST_DONE = "done"
 ST_ERROR = "error"
 ST_CANCELLED = "cancelled"
 
-#: 本模块服务的站点（todo3 Stage 1 随模块搬进 boss-platform-boss 时改由 adapter 自述）。
-#: 用来：任务中心按站点记账的自述值 + 黑名单规则按站点取「本站生效」的那批。
 SITE = "boss"
 
 hub.register(

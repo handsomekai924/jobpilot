@@ -1,10 +1,4 @@
-"""JobSearchFilter 的装配与解析。
-
-验三件事：
-    1. `to_params()` 按 chunk `getFormData()` 的契约拼参数（单选/多选/空值）
-    2. `for_page()` 换页不动条件
-    3. `resolve()` 把 code 换回人读名（含分组的公司行业）
-"""
+"""`JobSearchFilter` 的装配与解析：参数拼装、换页条件、code 转人读名。"""
 
 from __future__ import annotations
 

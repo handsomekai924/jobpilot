@@ -1,8 +1,11 @@
+/** Sheet/Modal：dim 聚焦 + 材质化进入（blur+scale），同路进出。 */
+
 import { useEffect, type ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { springs, zIndex } from "../../theme/tokens";
 
+/** Sheet 属性。 */
 export interface SheetProps {
   open: boolean;
   onClose: () => void;
@@ -29,8 +32,7 @@ export function Sheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // 居中弹窗用 x/y 的 -50% 做位移（motion 写 transform，静态 translate(-50%,-50%) 会被吃掉，
-  // 这就是「弹窗不居中」的根因）；两侧/底部面板用小位移进出（同路进出）。
+  /** 居中弹窗的位移量：motion 写 transform，静态 translate 会被吃掉。 */
   const centered = anchor === "center";
   const baseX = centered ? "-50%" : 0;
   const baseY = centered ? "-50%" : 0;

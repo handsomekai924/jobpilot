@@ -209,9 +209,6 @@ class ChatCredentials:
 class ChatSocket:
     """一条 MQTT over WSS 长连接，用来往 `chat` 主题发消息。
 
-    发送成功判据是「帧发出去了」，不是「等到 PUBACK」——该网关对文本帧不回
-    PUBACK。发完主动断开；重连由显式 `connect()` 做。
-
     Args:
         credentials: 见 `ChatCredentials`。
         host: MQTT 网关主机。

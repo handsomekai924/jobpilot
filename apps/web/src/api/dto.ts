@@ -18,8 +18,10 @@ export interface JobSummary {
   jd_status?: JdStatus | string | null;
 }
 
+/** JD 采集状态。 */
 export type JdStatus = "pending" | "collecting" | "completed" | "empty" | "failed" | "unchecked";
 
+/** 命中的规则快照。 */
 export interface MatchedRule {
   rule_type: string;
   match_mode?: string | null;
@@ -43,6 +45,7 @@ export interface JobDetail extends JobSummary {
   matched_rule_snapshot?: MatchedRule[];
 }
 
+/** JD 状态 → 中文文案。 */
 export const JD_STATUS_LABEL: Record<JdStatus, string> = {
   pending: "待采集",
   collecting: "采集中",

@@ -16,7 +16,7 @@ from boss_login import (
     ZhipinLoginClient,
     run_qr_login,
 )
-from boss_login import config as C
+from boss_platform_boss.auth import config as C
 from boss_login.qrcode import _in_limit_range
 
 

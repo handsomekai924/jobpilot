@@ -356,7 +356,7 @@ class CdpStokenProvider:
         if not self.session_path:
             return
         try:
-            from boss_login.session import StoredSession, load_session, save_session
+            from .auth.session import StoredSession, load_session, save_session
         except ImportError:  # pragma: no cover
             return
         C = _config()

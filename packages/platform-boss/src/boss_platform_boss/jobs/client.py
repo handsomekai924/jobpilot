@@ -1323,7 +1323,7 @@ def http_from_session(
     显式传入 → 库里的 cookies → 环境变量；都没有就先不带，
     由 `CdpStokenProvider` 自动补。
     """
-    from boss_login.session import load_session
+    from ..auth.session import load_session
 
     import boss_db
 

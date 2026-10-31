@@ -42,8 +42,8 @@ from .errors import JobApiError, JobDataError, JobError, JobTransportError
 from ..stoken import StokenError
 from .store import open_store
 
-from boss_filter import JobSearchFilter, load_search_filter, search_filter_from_file
-from boss_filter.expect import JobExpectFilter
+from ..catalog import JobSearchFilter, load_search_filter, search_filter_from_file
+from ..catalog.expect import JobExpectFilter
 
 EXIT_OK = 0
 EXIT_ERROR = 1

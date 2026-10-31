@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-import boss_login.cli as cli
+import boss_platform_boss.auth.cli as cli
 from boss_login.client import ZhipinLoginClient
 from tools.mock_server import STORE
 

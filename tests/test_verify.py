@@ -9,7 +9,7 @@ import json
 
 import pytest
 
-from boss_login import config as C
+from boss_platform_boss.auth import config as C
 from boss_login.errors import ValidationError
 from boss_login.verify import (
     SliderSolution,

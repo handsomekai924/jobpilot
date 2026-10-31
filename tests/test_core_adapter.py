@@ -15,7 +15,7 @@ from boss_server.core import (
     registered_sites,
     reset_registry,
 )
-from boss_server.core.adapters.boss import BossAdapter
+from boss_platform_boss.adapter import BossAdapter
 from boss_server.core.registry import all_adapters
 
 

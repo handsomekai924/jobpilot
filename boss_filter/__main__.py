@@ -1,16 +1,11 @@
-"""`python -m boss_filter` 入口。"""
+"""过渡壳：`python -m boss_filter` 入口。"""
+
+from __future__ import annotations
 
 import sys
 
-from .cli import main
-
-
-def _force_utf8_streams() -> None:
-    """把标准流重配成 UTF-8，避免 Windows GBK 控制台编码报错。"""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+from boss_platform_boss.catalog.__main__ import _force_utf8_streams
+from boss_platform_boss.catalog.cli import main
 
 
 if __name__ == "__main__":

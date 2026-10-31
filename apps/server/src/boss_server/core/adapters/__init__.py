@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from ..registry import register
+from boss_platform_base.registry import register
 
 
 def load() -> None:

@@ -59,6 +59,7 @@ from .registry import (
     register,
     registered_sites,
     reset_registry,
+    set_loader,
 )
 
 __all__ = [
@@ -106,5 +107,11 @@ __all__ = [
     "reset_registry",
     "run_crawl",
     "run_deliver",
+    "set_loader",
     "throttle_hook",
 ]
+
+# server 是唯一装配点：import 平台包触发的注册动作在这里绑定给注册表。
+from .adapters import load as _load_adapters  # noqa: E402
+
+set_loader(_load_adapters)

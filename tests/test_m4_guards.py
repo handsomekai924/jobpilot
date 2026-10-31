@@ -14,7 +14,8 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SERVER = ROOT / "apps" / "server" / "src" / "boss_server"
-CORE = SERVER / "core"
+CORE = ROOT / "packages" / "core" / "src" / "boss_core"
+FLOW = SERVER / "orchestration" / "flow.py"
 SERVICES = SERVER / "services"
 
 TEMPLATE_HOLES: dict[str, frozenset[str]] = {
@@ -63,7 +64,7 @@ def _site_calls(func: ast.AST) -> set[str]:
 
 def _template(name: str) -> ast.FunctionDef:
     """从 `core/flow.py` 里取模板方法；取不到就当场炸。"""
-    tree = ast.parse((CORE / "flow.py").read_text(encoding="utf-8"))
+    tree = ast.parse(FLOW.read_text(encoding="utf-8"))
     for node in tree.body:
         if isinstance(node, ast.FunctionDef) and node.name == name:
             return node
@@ -83,7 +84,7 @@ def test_洞数固定_每个模板方法的站点调用点恰好三个():
 
 def test_洞只在模板里_别处不许再有站点调用点():
     """成功标准 #4 的另一半：站点调用点只许住在模板方法体内。"""
-    tree = ast.parse((CORE / "flow.py").read_text(encoding="utf-8"))
+    tree = ast.parse(FLOW.read_text(encoding="utf-8"))
     strays: list[str] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
@@ -123,18 +124,18 @@ def test_共享规则的输入不是洞():
 
 
 def _core_modules() -> dict[str, pathlib.Path]:
-    """`boss_server.core.*` 的模块名 → 源文件（`adapters/` 是站点实现，不在此列）。"""
+    """`boss_core.*` 的模块名 → 源文件。"""
     out: dict[str, pathlib.Path] = {}
     for path in sorted(CORE.rglob("*.py")):
         if "adapters" in path.parts or path.name == "__init__.py":
             continue
-        rel = path.relative_to(SERVER.parent).with_suffix("")
+        rel = path.relative_to(CORE.parent).with_suffix("")
         out[".".join(rel.parts)] = path
     return out
 
 
 def _imports_of(path: pathlib.Path, module: str) -> set[str]:
-    """这个文件相对 import 到的兄弟模块名（只有 `boss_server.core.*` 算边）。"""
+    """这个文件相对 import 到的兄弟模块名（只有 `boss_core.*` 算边）。"""
     package = module.rsplit(".", 1)[0]
     tree = ast.parse(path.read_text(encoding="utf-8"))
     edges: set[str] = set()
@@ -145,7 +146,7 @@ def _imports_of(path: pathlib.Path, module: str) -> set[str]:
         for _ in range(node.level - 1):
             base = base.rsplit(".", 1)[0] if "." in base else ""
         target = f"{base}.{node.module}" if node.module else base
-        if not target.startswith("boss_server.core"):
+        if not target.startswith("boss_core"):
             continue
         edges.add(target)
         if node.module is None:

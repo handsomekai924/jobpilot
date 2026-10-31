@@ -28,11 +28,13 @@ from pathlib import Path
 from typing import Any, Final, Iterator, Mapping
 from contextlib import contextmanager
 
+from boss_core.paths import default_data_dir, repo_root
+
 logger = logging.getLogger(__name__)
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
+PROJECT_ROOT: Final[Path] = repo_root()
 
-DATA_DIR: Final[Path] = PROJECT_ROOT / "data"
+DATA_DIR: Final[Path] = default_data_dir()
 
 DEFAULT_DB_PATH: Final[Path] = DATA_DIR / "boss.db"
 

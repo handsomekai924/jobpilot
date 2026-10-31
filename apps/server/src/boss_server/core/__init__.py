@@ -5,7 +5,7 @@ server 编排层只认这里的 Protocol/registry，站点实现在 `adapters/`�
 
 from __future__ import annotations
 
-from .contracts import (
+from boss_core.contracts import (
     ApplyGate,
     ApplyReceipt,
     AuthCaps,
@@ -43,7 +43,7 @@ from .limits import (
     fault_action,
     throttle_hook,
 )
-from .protocols import (
+from boss_core.protocols import (
     Applier,
     AuthFlow,
     AuthSink,

@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
-from .contracts import DeliverFault
+from boss_core.contracts import DeliverFault
 
 __all__ = [
     "BREAKER_TRIP",

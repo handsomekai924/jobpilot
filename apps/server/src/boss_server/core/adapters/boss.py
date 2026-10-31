@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Iterator, Mapping
 
-from ..contracts import (
+from boss_core.contracts import (
     ApplyGate,
     ApplyReceipt,
     AuthCaps,
@@ -28,7 +28,7 @@ from ..contracts import (
     SiteFilterOptions,
     SourceCaps,
 )
-from ..protocols import AuthSink
+from boss_core.protocols import AuthSink
 
 logger = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Mapping
 
-from .contracts import NavExtra
-from .protocols import SiteAdapter
+from boss_core.contracts import NavExtra
+from boss_core.protocols import SiteAdapter
 
 logger = logging.getLogger(__name__)
 

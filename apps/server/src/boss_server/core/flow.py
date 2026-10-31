@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, Sequence
 
-from .contracts import (
+from boss_core.contracts import (
     ApplyGate,
     ApplyReceipt,
     ConversationState,
@@ -19,7 +19,7 @@ from .contracts import (
     SessionRef,
 )
 from .limits import Breaker, FaultAction, SiteLimits
-from .protocols import SiteAdapter
+from boss_core.protocols import SiteAdapter
 
 __all__ = [
     "CrawlHooks",

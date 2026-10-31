@@ -16,7 +16,7 @@ import os
 
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
-#: segno 只在 boss_login.qrcode 的函数体里 try/except 着延迟导入，静态分析标成
+#: segno 只在 boss_platform_boss.auth.qrcode 的函数体里 try/except 着延迟导入，静态分析标成
 #: 「delayed, optional」，venv 漏装也照样出 exe——用户那边就是二维码裂图、黑窗
 #: 一点报错都没有（真机踩过）。构建期主动挡一道，别把「能跑但出不了图」的包发出去。
 if importlib.util.find_spec("segno") is None:
@@ -60,7 +60,7 @@ hiddenimports = [
     "python_multipart",
     "python_docx",  # Word 简历解析
     "pypdf",  # PDF 简历解析
-    # 画二维码 PNG。boss_login.qrcode 是函数内 try 导入，PyInstaller 标 optional
+    # 画二维码 PNG。boss_platform_boss.auth.qrcode 是函数内 try 导入，PyInstaller 标 optional
     # 就会漏；没进包 = 扫码登录永远裂图（响应 502 的 JSON 被 <img> 当坏图显示）。
     "segno",
     # 这两个包的子模块是靠 python-docx 内部结构间接导入的，静态分析容易漏；
@@ -76,6 +76,19 @@ hiddenimports = [
     "boss_server.cli",
     "boss_server.app",
     "boss_server.api",
+    # workspace 各包：装配点、注册表与按需导入的站点能力
+    "boss_core",
+    "boss_platform_base.registry",
+    "boss_platform_boss.adapter",
+    "boss_platform_boss.auth",
+    "boss_platform_boss.auth.task",
+    "boss_platform_boss.catalog",
+    "boss_platform_boss.jobs",
+    "boss_platform_boss.stoken_cdp",
+    "boss_browser_pool.cdp",
+    "boss_browser_pool.capture",
+    "boss_ai.llm",
+    "boss_db",
 ] + collect_submodules("uvicorn")
 
 # (源, 打包后相对路径)。静态资源整目录打进去——前端和 LLM 引导截图都在里面，
@@ -83,7 +96,12 @@ hiddenimports = [
 datas = [
     (os.path.join(ROOT, "apps", "server", "src", "boss_server", "static"), "boss_server/static"),
     # stoken.py 的 Node 备用算法链要用；生产走 CDP 用不到，但缺了会抛路径错
-    (os.path.join(ROOT, "boss_jobs", "assets", "run_abc.js"), "boss_jobs/assets"),
+    (
+        os.path.join(
+            ROOT, "packages", "platform-boss", "src", "boss_platform_boss", "assets", "run_abc.js"
+        ),
+        "boss_platform_boss/assets",
+    ),
     # python-docx 自带空白模板，缺了会在 Document() 时报找不到文件
     *collect_data_files("docx"),
 ]

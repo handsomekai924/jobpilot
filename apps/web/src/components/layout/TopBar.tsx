@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { Box, MenuItem, Menu, Typography } from "@mui/material";
-import { useThemeMode } from "../../theme/ThemeModeProvider";
-import { typeScale } from "../../theme/tokens";
-import type { PlatformDescriptor } from "../../platform/types";
-import { SHARED_NAV } from "../../platform/types";
-import { SegmentedControl, type SegmentedOption } from "../controls/SegmentedControl";
-import { Button } from "../controls/Button";
-import { StatusDot } from "../data/StatusDot";
+import { useThemeMode } from "@/theme/ThemeModeProvider";
+import { typeScale } from "@/theme/tokens";
+import type { PlatformDescriptor } from "@/platform/types";
+import { SHARED_NAV } from "@/platform/types";
+import { SegmentedControl, type SegmentedOption } from "@/components/controls/SegmentedControl";
+import { Button } from "@/components/controls/Button";
+import { StatusDot } from "@/components/data/StatusDot";
 
 /** 顶栏属性。 */
 export interface TopBarProps {

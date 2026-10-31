@@ -5,8 +5,14 @@ import react from "@vitejs/plugin-react";
 // dev 代理到本地 server（boss_web/config.py 的 DEFAULT_PORT = 8787）
 const SERVER = "http://127.0.0.1:8787";
 
+const SRC = decodeURIComponent(new URL("./src", import.meta.url).pathname)
+  .replace(/^\/([A-Za-z]:)/, "$1");
+
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: { "@": SRC },
+  },
   server: {
     port: 5173,
     proxy: {

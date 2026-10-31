@@ -10,15 +10,15 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, ConfirmSheet, EmptyState, InlineAlert, Pill, Select, Sheet, Skeleton, Surface, TextField, useToast,
   type PillTone,
-} from "../../../components";
-import { radius, typeScale } from "../../../theme/tokens";
-import { fmtNumber, fmtTime } from "../../../utils/format";
-import { resumeApi } from "../../../api/shared";
-import { DiffView, SecTitle } from "./chapters";
+} from "@/components";
+import { radius, typeScale } from "@/theme/tokens";
+import { fmtNumber, fmtTime } from "@/utils/format";
+import { resumeApi } from "@/api/shared";
+import { DiffView, SecTitle } from "@/views/shared/resumes/chapters";
 import {
   CHANGE_TYPE_LABEL, FORMAT_OPTIONS, REV_STATUS_META, REV_PAGE_SIZE, msgOf,
   type RevisionDetail, type RevisionRow,
-} from "./types";
+} from "@/views/shared/resumes/types";
 
 /** 优化记录段：修改稿归档列表与详情侧栏（diff / 变更点 / 下载 / 保存）。 */
 export function RecordsSection({ openRevisionId, onOpened }: {

@@ -1,6 +1,6 @@
 # JS 文档注释规范（JSDoc）
 
-全仓 `*.js` / `*.mjs` 的说明性文字只保留 **JSDoc**（`/** … */`）。行注释 `//` 一律删除（工具链注释除外）。
+全仓 `*.js` / `*.mjs` / `*.ts` / `*.tsx` 的说明性文字只保留 **JSDoc**（`/** … */`）。行注释 `//` 一律删除（工具链注释除外）。
 
 **例外**：`boss_jobs/assets/` 下的逆向/第三方脚本（如 `run_abc.js`）**不动**——那是抓来的资产，不是我们写的代码；`jsdoc_audit` 也豁免它们。
 
@@ -110,6 +110,35 @@ JS 的类型是 JSDoc 类型表达式，常用的：
 再删（`boss_web/static/js/ui.js` → `notes/boss_web/static/js/ui.md`）。笔记模板同 Python
 （见 [python.md](python.md) 末节），写完在 `notes/INDEX.md` 加一行。
 
+## 导入路径（`apps/web/src`）
+
+`apps/web` 走 Vite 打包，`src` 根映射为别名 `@/`（`tsconfig.json` 的 `paths` + `vite.config.ts` 的 `resolve.alias`）。源码里的 `import` / `export … from` / 动态 `import()` **一律用别名**：
+
+- 禁止相对路径：`./x`、`../x`、`../../x`（同目录也要改）。
+- 禁止绝对路径：`/src/x`、`src/x`。
+- 包导入照常写：`react`、`@mui/material`、`@testing-library/jest-dom/vitest`。
+- 扩展名保持原样：`@/theme/global.css` 不删 `.css`。
+
+```ts
+// 对
+import { Button } from "@/components";
+import { matchApi } from "@/api/shared";
+import "@/theme/global.css";
+
+// 错
+import { Button } from "./controls/Button";
+import { matchApi } from "../../../api/shared";
+import { matchApi } from "/src/api/shared";
+```
+
+例外：`boss_web/static/legacy/js` 是浏览器原生 ESM，没有打包器解析别名，继续用相对路径；逆向资产 `boss_jobs/assets/` 也不动。
+
+```bash
+python tools/import_path_audit.py   # 默认扫 apps/web/src，hard=0 才算完
+```
+
+导入迁移属于代码改动，与「只动注释」的整理分开做；`tools/code_diff_check.py` 只覆盖 `.py` / `.js` / `.vue`，不适用于 `.ts` / `.tsx`。
+
 ## 与 Python 的差异（对着 `python.md` 看）
 
 | 项 | Python | JS |
@@ -127,6 +156,7 @@ JS 的类型是 JSDoc 类型表达式，常用的：
 
 ```bash
 python tools/jsdoc_audit.py                  # hard=0：无 MISSING / DELETE_ME / RST 残留
+python tools/import_path_audit.py            # hard=0：无相对/绝对导入
 node --check <file>                          # 语法没坏
 python tools/code_diff_check.py              # 去注释后与 HEAD 的代码 token 一致 = 只改了文档
 python -m pytest tests/ -q                   # 后端测试不红

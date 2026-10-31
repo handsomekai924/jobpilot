@@ -5,11 +5,11 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { TasksPage } from "../TasksPage";
-import { resetStores } from "../../../../ws/dispatch";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { TasksPage } from "@/views/shared/tasks/TasksPage";
+import { resetStores } from "@/ws/dispatch";
 
 /** 平台描述符桩：两个站点，供站点筛选与角标。 */
 const PLATFORMS = {

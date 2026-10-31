@@ -10,18 +10,18 @@ import { Box } from "@mui/material";
 
 import {
   InlineAlert, PageHeader, ScrollArea, SegmentedControl, Sheet, ViewFade, pageRootSx, useToast,
-} from "../../../components";
-import { fontFamilyMono, typeScale } from "../../../theme/tokens";
-import { resumeApi, tasksApi } from "../../../api/shared";
-import { toTaskEvents } from "../taskEvents";
+} from "@/components";
+import { fontFamilyMono, typeScale } from "@/theme/tokens";
+import { resumeApi, tasksApi } from "@/api/shared";
+import { toTaskEvents } from "@/views/shared/taskEvents";
 import {
   PARSE_TERMINAL, POLL_MS, msgOf, reviseTerminal,
   type ParseRun, type ResumeDetail, type ResumeListItem, type ReviseSnapshot,
-} from "./types";
-import { LibrarySection } from "./LibrarySection";
-import { ParseSection } from "./ParseSection";
-import { ReviseSection } from "./ReviseSection";
-import { RecordsSection } from "./RecordsSection";
+} from "@/views/shared/resumes/types";
+import { LibrarySection } from "@/views/shared/resumes/LibrarySection";
+import { ParseSection } from "@/views/shared/resumes/ParseSection";
+import { ReviseSection } from "@/views/shared/resumes/ReviseSection";
+import { RecordsSection } from "@/views/shared/resumes/RecordsSection";
 
 const TABS = [
   { value: "library", label: "简历库" },

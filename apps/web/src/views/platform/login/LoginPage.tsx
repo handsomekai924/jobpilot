@@ -6,12 +6,12 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, PageHeader, Pill, ScrollArea, SegmentedControl, StatusDot, Surface, TextField,
   pageRootSx, useToast,
-} from "../../../components";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useFeeds, useSession, type AuthFeed } from "../../../stores/sessionStore";
-import { fmtClock } from "../../../utils/format";
-import { radius, typeScale } from "../../../theme/tokens";
-import { authApi, type AuthTask } from "../../../api/platform";
+} from "@/components";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useFeeds, useSession, type AuthFeed } from "@/stores/sessionStore";
+import { fmtClock } from "@/utils/format";
+import { radius, typeScale } from "@/theme/tokens";
+import { authApi, type AuthTask } from "@/api/platform";
 
 /** 登录方式：短信验证码 / App 扫码。 */
 type Mode = "sms" | "qr";

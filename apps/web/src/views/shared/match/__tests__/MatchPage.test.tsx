@@ -11,11 +11,11 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { MatchPage } from "../MatchPage";
-import { resetStores } from "../../../../ws/dispatch";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { MatchPage } from "@/views/shared/match/MatchPage";
+import { resetStores } from "@/ws/dispatch";
 
 const PLATFORMS = {
   platforms: [

@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useLocation } from "react-router-dom";
 
-import { springs } from "../../theme/tokens";
+import { springs } from "@/theme/tokens";
 
 /** 过渡层同时是布局层：撑满内容区，页面根才能按「整页固定 + 内部滚动」占满视口。 */
 const FILL: CSSProperties = {

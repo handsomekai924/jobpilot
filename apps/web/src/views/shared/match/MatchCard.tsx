@@ -9,9 +9,9 @@ import { memo } from "react";
 import { Box, Typography } from "@mui/material";
 import { motion } from "motion/react";
 
-import { Button, Pill, ScoreRing, Surface, TextField } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { GREETING_MAX, type MatchItem } from "./types";
+import { Button, Pill, ScoreRing, Surface, TextField } from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { GREETING_MAX, type MatchItem } from "@/views/shared/match/types";
 
 /** 技能标签行（匹配 / 欠缺）。 */
 function SkillLine({ label, values, tone }: { label: string; values: string[]; tone: "ok" | "warn" }) {

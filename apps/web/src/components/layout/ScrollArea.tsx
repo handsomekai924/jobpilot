@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import type { SxProps, Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 
-import { mergeSx } from "../../theme/sx";
+import { mergeSx } from "@/theme/sx";
 
 /**
  * 整页固定 + 内部滚动（布局契约）：页面根撑满内容区并裁掉溢出，

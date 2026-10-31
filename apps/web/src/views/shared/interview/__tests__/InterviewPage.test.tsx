@@ -10,11 +10,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { InterviewPage } from "../InterviewPage";
-import { resetStores } from "../../../../ws/dispatch";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { InterviewPage } from "@/views/shared/interview/InterviewPage";
+import { resetStores } from "@/ws/dispatch";
 
 /** 平台描述符桩：一个已登录的 boss 站点。 */
 const PLATFORMS = {

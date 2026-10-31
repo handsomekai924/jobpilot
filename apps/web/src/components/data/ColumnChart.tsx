@@ -2,10 +2,10 @@
 
 import { useMemo } from "react";
 
-import { EmptyState } from "./EmptyState";
-import { EChart, useChartColors, type ChartOption } from "./EChart";
-import { fmtCompact, fmtNumber } from "../../utils/format";
-import { fontFamily } from "../../theme/tokens";
+import { EmptyState } from "@/components/data/EmptyState";
+import { EChart, useChartColors, type ChartOption } from "@/components/data/EChart";
+import { fmtCompact, fmtNumber } from "@/utils/format";
+import { fontFamily } from "@/theme/tokens";
 
 /** 一根柱：标签、数值与 tooltip 次要说明。 */
 export interface ColumnDatum {

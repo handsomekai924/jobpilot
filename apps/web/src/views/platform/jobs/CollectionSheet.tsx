@@ -6,16 +6,16 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, Cascader, InlineAlert, MultiSelect, NumberField, Pill, SegmentedControl, Select, Sheet, Switch, TextField,
   type CascaderNode, type SelectOption,
-} from "../../../components";
-import type { PlatformCaps } from "../../../platform/types";
-import { radius, typeScale } from "../../../theme/tokens";
-import { fmtTime } from "../../../utils/format";
-import { filtersApi, type FilterConditions, type FilterOption, type ExpectRow } from "../../../api/platform";
-import { useExpectStore } from "../../../stores/expectStore";
+} from "@/components";
+import type { PlatformCaps } from "@/platform/types";
+import { radius, typeScale } from "@/theme/tokens";
+import { fmtTime } from "@/utils/format";
+import { filtersApi, type FilterConditions, type FilterOption, type ExpectRow } from "@/api/platform";
+import { useExpectStore } from "@/stores/expectStore";
 import {
   choiceKeyOf, emptyCollectionConfig, expectChoices, toSaveBody,
   type CollectionConfig, type ExpectKind,
-} from "./collection";
+} from "@/views/platform/jobs/collection";
 
 /** 维度标题（`CriteriaKey` → 人话）；顺序即表单顺序。 */
 const DIM_LABEL: Record<string, string> = {

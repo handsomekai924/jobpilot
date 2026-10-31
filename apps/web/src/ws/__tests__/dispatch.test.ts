@@ -2,10 +2,10 @@
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { applyWsEvent, resetStores } from "../dispatch";
-import type { WsEnvelope } from "../client";
-import { useTaskStore, selectTasks, selectRunning } from "../../stores/taskStore";
-import { useSessionStore, selectFeeds } from "../../stores/sessionStore";
+import { applyWsEvent, resetStores } from "@/ws/dispatch";
+import type { WsEnvelope } from "@/ws/client";
+import { useTaskStore, selectTasks, selectRunning } from "@/stores/taskStore";
+import { useSessionStore, selectFeeds } from "@/stores/sessionStore";
 
 /** 造一帧事件信封，未指定的字段用默认值。 */
 function frame(partial: Partial<WsEnvelope> & { type: string }): WsEnvelope {

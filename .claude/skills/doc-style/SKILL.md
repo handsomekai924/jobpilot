@@ -1,6 +1,6 @@
 ---
 name: doc-style
-description: 把代码里的说明性文字改写成文档注释（Python 用 Google 风格 docstring，JS 用 JSDoc，Vue3 用 SFC 规范），删掉正文注释/章节横幅/Sphinx 属性注释，长协议细节抽进 notes/。当用户要「改注释」「补文档字符串」「写 JSDoc」「统一文档风格」「审计注释」，或新增 .py / .js / .vue 文件时使用。
+description: 把代码里的说明性文字改写成文档注释（Python 用 Google 风格 docstring，JS 用 JSDoc，Vue3 用 SFC 规范），删掉正文注释/章节横幅/Sphinx 属性注释，长协议细节抽进 notes/；并审计前端导入路径（`apps/web` 一律用 `@/` 别名）。当用户要「改注释」「补文档字符串」「写 JSDoc」「统一文档风格」「审计注释」「查导入路径」，或新增 .py / .js / .ts / .tsx / .vue 文件时使用。
 ---
 
 # 文档注释改写
@@ -15,13 +15,14 @@ description: 把代码里的说明性文字改写成文档注释（Python 用 Go
 |---|---|---|
 | Python `.py` | [python.md](python.md) | `python tools/docstring_audit.py` + `python tools/comment_audit.py` |
 | JS `.js` / `.mjs` | [js.md](js.md) | `python tools/jsdoc_audit.py` |
+| TS / TSX `.ts` / `.tsx` | [js.md](js.md)（JSDoc 规则同 JS） | `python tools/import_path_audit.py`（导入路径；JSDoc 人工核） |
 | Vue3 `.vue` | [vue3.md](vue3.md) | `python tools/jsdoc_audit.py`（认 `<script>` 段） |
 
 三份规范的共同底线：**只写作用、入参、返回值，不写一坨冗余信息**。协议逆向、历史背景、实测记录进 `notes/`，不进文档注释。
 
 ## 通用流程
 
-对分到的**每个文件**走完这六步，不要跨文件跳步：
+对分到的**每个文件**走完这七步，不要跨文件跳步：
 
 1. **抽长细节**：文档注释里 ≥ 8 行的协议 / 逆向 / 实测细节，先写进 `notes/<相对路径>/<文件名>.md`，再精简原文档注释到 1–3 行作用 + 入参/返回值。
 2. **汇入属性**：`#:` 注释、字段行尾注释、JSDoc 里的 `@property` 散注释 → 并进类/接口的 `Attributes:` 或 `@property`，然后删原注释。
@@ -29,6 +30,7 @@ description: 把代码里的说明性文字改写成文档注释（Python 用 Go
 4. **去 RST / 去 Sphinx**：`:param x:` / `:returns:` / `:rtype:` / `:raises:` → `Args:` / `Returns:`（JS 是 `@param` / `@returns`）；`:class:`Foo`` / ` ``code`` ` → 单反引号 `Foo` / `code`；`用法::` 的 `::` 去掉；`**强调**` → 纯文本。
 5. **删正文注释**：函数体内的实现注释、行尾注释、`# --- 章节 ---` / `// ---------- 章节 ----------` 分隔线，全部删掉。工具链注释保留（清单见各语言规范）。
 6. **逐文件跑审计**：对应语言的审计脚本对**这个文件**跑一遍，hard=0 才算完。
+7. **导入路径**：`apps/web/src` 的 `import` / `export … from` / 动态 `import()` 一律用 `@/…` 别名，禁止 `./`、`../`、`/src/…`；改完跑 `python tools/import_path_audit.py`。
 
 ## 验收口径（改完必须全绿）
 
@@ -36,7 +38,10 @@ description: 把代码里的说明性文字改写成文档注释（Python 用 Go
 python tools/docstring_audit.py        # Python：hard=0，无 MISSING / RST 残留
 python tools/comment_audit.py          # Python：hard=0，SPHINX_ATTR=0 BANNER=0 DELETE_ME=0
 python tools/jsdoc_audit.py            # JS/Vue：hard=0，无 MISSING / DELETE_ME
+python tools/import_path_audit.py      # 前端：hard=0，无相对/绝对导入
 python -m pytest tests/ -q             # 测试不红
+cd apps/web && pnpm exec tsc --noEmit  # 前端类型检查
+cd apps/web && pnpm exec vitest run    # 前端测试不红
 ```
 
 **只动文档字符串和注释，不动代码 token。** 改完用 AST 对比证明（Python；JS 用 `node --check` + 肉眼抽查 `git diff`）：
@@ -64,3 +69,4 @@ python tools/code_diff_check.py        # 去掉文档注释后与 HEAD 的 AST �
 | 字典字面量里的 `#:`（`ENDPOINTS = { #: ... }`） | 汇进模块 `Attributes:` 写成 `ENDPOINTS["k"]: 说明。` |
 | 把函数体中部的字符串表达式当成 docstring | 只有 `def`/`class`/`async def` 紧跟的第一个字符串才是 docstring |
 | 只删注释却顺手「优化」了 import | AST 对比会红；未使用的 import 是 HEAD 遗留，别动 |
+| 把 `boss_web/static/legacy/js` 也改成 `@/` 别名 | legacy 是浏览器原生 ESM，没有打包器解析别名，继续用相对路径；审计已豁免 |

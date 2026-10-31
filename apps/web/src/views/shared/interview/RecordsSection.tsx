@@ -9,12 +9,12 @@ import { Box } from "@mui/material";
 
 import {
   Button, CellTitle, DataTable, ScrollArea, Surface, TextField, pageRootSx, useToast, type Column,
-} from "../../../components";
-import { fmtNumber, fmtTime } from "../../../utils/format";
-import { interviewApi } from "../../../api/shared";
-import { errMsg, PAGE_SIZE, type PrepTarget, type RecordRow } from "./types";
-import { Pager } from "./bits";
-import { PrepSheet } from "./PrepSheet";
+} from "@/components";
+import { fmtNumber, fmtTime } from "@/utils/format";
+import { interviewApi } from "@/api/shared";
+import { errMsg, PAGE_SIZE, type PrepTarget, type RecordRow } from "@/views/shared/interview/types";
+import { Pager } from "@/views/shared/interview/bits";
+import { PrepSheet } from "@/views/shared/interview/PrepSheet";
 
 /** 生成记录段：一岗一套题的归档列表，可开题目侧栏或重新生成。 */
 export function RecordsSection({

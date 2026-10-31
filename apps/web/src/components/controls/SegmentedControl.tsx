@@ -3,7 +3,7 @@
 import { useId, useRef, type KeyboardEvent, type ReactNode } from "react";
 import { Box, useTheme } from "@mui/material";
 import { motion, useReducedMotion } from "motion/react";
-import { springs, typeScale } from "../../theme/tokens";
+import { springs, typeScale } from "@/theme/tokens";
 
 /** 分段选项；`status` 是可选状态点。 */
 export interface SegmentedOption<T extends string = string> {

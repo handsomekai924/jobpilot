@@ -2,7 +2,7 @@
 
 import type {
   CityNode, CollectionParams, ExpectRow, FilterConditions, SearchFilterPayload,
-} from "../../../api/platform";
+} from "@/api/platform";
 
 /** 摘要里要翻译的维度名（与搜索条件字段一一对应）。 */
 export type LabelKind =

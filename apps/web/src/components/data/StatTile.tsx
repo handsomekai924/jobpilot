@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
 
 /** 数字牌属性。 */
 export interface StatTileProps {

@@ -5,11 +5,11 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { ResumesPage } from "../ResumesPage";
-import { resetStores } from "../../../../ws/dispatch";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { ResumesPage } from "@/views/shared/resumes/ResumesPage";
+import { resetStores } from "@/ws/dispatch";
 
 /** 平台描述符桩：一个 boss 站点。 */
 const PLATFORMS = {

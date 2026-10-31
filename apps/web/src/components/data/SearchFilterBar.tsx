@@ -3,8 +3,8 @@
 import type { ReactNode } from "react";
 import { Box, Chip, TextField, InputAdornment } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
 
 /** 一个快速筛选项。 */
 export interface FilterOption {

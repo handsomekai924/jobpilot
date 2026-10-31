@@ -1,7 +1,7 @@
 /** 格式化与防抖工具的单测。 */
 
 import { describe, expect, it, vi } from "vitest";
-import { debounce, fmtClock, fmtCompact, fmtEta, fmtNumber, fmtTime, sanitize } from "../format";
+import { debounce, fmtClock, fmtCompact, fmtEta, fmtNumber, fmtTime, sanitize } from "@/utils/format";
 
 /** 验时间格式化与无效值兜底。 */
 describe("fmtTime / fmtClock", () => {

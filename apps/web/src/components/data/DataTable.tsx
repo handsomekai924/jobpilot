@@ -3,10 +3,10 @@
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
-import { EmptyState } from "./EmptyState";
-import { Skeleton } from "./Skeleton";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
+import { EmptyState } from "@/components/data/EmptyState";
+import { Skeleton } from "@/components/data/Skeleton";
 
 /** 一列：渲染函数缺省时取 `row[key]`，`hideOnNarrow` 在窄屏隐藏。 */
 export interface Column<T> {

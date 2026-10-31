@@ -7,9 +7,9 @@
 
 import { HashRouter } from "react-router-dom";
 
-import { PlatformProvider } from "./platform/PlatformProvider";
-import { AppRoutes } from "./routes";
-import { WsBridge } from "./ws/WsBridge";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { AppRoutes } from "@/routes";
+import { WsBridge } from "@/ws/WsBridge";
 
 /** 应用根组件：HashRouter + 平台上下文 + WS 桥 + 路由表。 */
 export function App() {

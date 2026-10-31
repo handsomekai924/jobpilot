@@ -8,11 +8,11 @@ import { Box, Typography } from "@mui/material";
 
 import {
   Button, EmptyState, ScrollArea, Skeleton, Surface, TaskPanel, pageRootSx,
-} from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtTime } from "../../../utils/format";
-import { ParsedChapters } from "./chapters";
-import { PARSE_TERMINAL, type ParseRun, type ResumeDetail, type ResumeListItem } from "./types";
+} from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtTime } from "@/utils/format";
+import { ParsedChapters } from "@/views/shared/resumes/chapters";
+import { PARSE_TERMINAL, type ParseRun, type ResumeDetail, type ResumeListItem } from "@/views/shared/resumes/types";
 
 /** 解析段：一份简历的解析进度 / 八段结果，未解析时给发起入口。 */
 export function ParseSection({

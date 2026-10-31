@@ -8,12 +8,12 @@
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 
-import { Button, PageTransition, PlatformSidebar, ScrollArea, SessionSignal, TaskBadge, TopBar, pageRootSx } from "../components";
-import { usePlatform } from "../platform/PlatformProvider";
-import { byId } from "../platform/registry";
-import { SHARED_NAV } from "../platform/types";
-import { routeSegmentForKey } from "./match";
-import { typeScale } from "../theme/tokens";
+import { Button, PageTransition, PlatformSidebar, ScrollArea, SessionSignal, TaskBadge, TopBar, pageRootSx } from "@/components";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { byId } from "@/platform/registry";
+import { SHARED_NAV } from "@/platform/types";
+import { routeSegmentForKey } from "@/routes/match";
+import { typeScale } from "@/theme/tokens";
 
 /**
  * 整页固定 + 内部滚动：内容区自己不滚（overflow: hidden），滚动只发生在

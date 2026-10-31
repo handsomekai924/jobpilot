@@ -13,13 +13,13 @@ import {
   Button, ConfirmSheet, EmptyState, InlineAlert, InsetGroup, InsetRow, PageHeader, Pill,
   ScrollArea, SegmentedControl, Select, Sheet, Skeleton, StatusDot, TaskPanel, TextField, ViewFade,
   pageRootSx, useToast,
-} from "../../../components";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useTaskStore } from "../../../stores/taskStore";
-import { useThemeMode } from "../../../theme/ThemeModeProvider";
-import { fontFamilyMono, radius, typeScale } from "../../../theme/tokens";
-import { fmtNumber, fmtTime } from "../../../utils/format";
-import { blacklistApi, llmApi, systemApi, type BlacklistRule } from "../../../api/shared";
+} from "@/components";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useTaskStore } from "@/stores/taskStore";
+import { useThemeMode } from "@/theme/ThemeModeProvider";
+import { fontFamilyMono, radius, typeScale } from "@/theme/tokens";
+import { fmtNumber, fmtTime } from "@/utils/format";
+import { blacklistApi, llmApi, systemApi, type BlacklistRule } from "@/api/shared";
 
 /** 接口错误统一转人话（client 抛的都是带 message 的 ApiError）。 */
 function errText(e: unknown): string {

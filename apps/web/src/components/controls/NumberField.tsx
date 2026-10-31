@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Box, type TextFieldProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { TextField } from "./TextField";
-import { mergeSx } from "../../theme/sx";
+import { TextField } from "@/components/controls/TextField";
+import { mergeSx } from "@/theme/sx";
 
 /** 数值输入属性：步进量决定提交的小数位。 */
 export interface NumberFieldProps extends Omit<TextFieldProps, "type" | "value" | "onChange" | "inputProps"> {

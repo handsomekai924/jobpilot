@@ -7,10 +7,10 @@
 import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
-import { Button, ConfirmSheet, Surface, TextField, useToast } from "../../../components";
-import { fontFamilyMono, typeScale } from "../../../theme/tokens";
-import { systemApi } from "../../../api/shared";
-import { errText, GREETING_MAX } from "./types";
+import { Button, ConfirmSheet, Surface, TextField, useToast } from "@/components";
+import { fontFamilyMono, typeScale } from "@/theme/tokens";
+import { systemApi } from "@/api/shared";
+import { errText, GREETING_MAX } from "@/views/shared/match/types";
 
 /** 招呼语段：编辑全局提示词，可恢复内置默认。 */
 export function GreetingSection() {

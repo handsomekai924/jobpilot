@@ -4,8 +4,8 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode,
 } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { createAppleTheme } from "./muiTheme";
-import type { ThemeMode } from "./tokens";
+import { createAppleTheme } from "@/theme/muiTheme";
+import type { ThemeMode } from "@/theme/tokens";
 
 /** 与 legacy 前端共用的主题键：共存期两套 UI 主题同步。 */
 const STORAGE_KEY = "orbit-theme";

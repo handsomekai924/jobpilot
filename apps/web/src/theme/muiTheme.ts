@@ -1,10 +1,10 @@
 /** Apple 风格 MUI 主题：token → 组件 overrides + CSS 变量。 */
 
 import { createTheme, type Components, type Shadows, type Theme, type CSSObject } from "@mui/material/styles";
-import type { ThemeMode } from "./tokens";
+import type { ThemeMode } from "@/theme/tokens";
 import {
   fontFamily, fontFamilyMono, materials, microMotion, palette, radius, spacing, typeScale, zIndex,
-} from "./tokens";
+} from "@/theme/tokens";
 
 declare module "@mui/material/styles" {
   interface Palette {

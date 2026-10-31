@@ -3,7 +3,7 @@
 import { Box, type BoxProps } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { mergeSx } from "../../theme/sx";
+import { mergeSx } from "@/theme/sx";
 
 /** 卡片面属性：`interactive` 带按压缩放，`hoverable` 只悬浮高亮。 */
 export interface SurfaceProps extends Omit<BoxProps, "children"> {

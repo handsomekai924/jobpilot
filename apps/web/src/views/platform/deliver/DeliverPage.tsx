@@ -5,13 +5,13 @@ import { Box, Checkbox, Skeleton, Tooltip, Typography } from "@mui/material";
 import {
   Button, EmptyState, InlineAlert, NumberField, PageHeader, Pill, ScoreRing, ScrollArea, Select, Sheet, Surface,
   pageRootSx, useToast,
-} from "../../../components";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useTaskStore } from "../../../stores/taskStore";
-import { fmtClock, fmtNumber } from "../../../utils/format";
-import { radius, typeScale } from "../../../theme/tokens";
-import { deliverApi, jobsApi, type DeliverStartBody } from "../../../api/platform";
-import { matchApi } from "../../../api/shared";
+} from "@/components";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useTaskStore } from "@/stores/taskStore";
+import { fmtClock, fmtNumber } from "@/utils/format";
+import { radius, typeScale } from "@/theme/tokens";
+import { deliverApi, jobsApi, type DeliverStartBody } from "@/api/platform";
+import { matchApi } from "@/api/shared";
 
 /** 匹配结果行（`analysis.matches[]` + 出门补的招呼冷却字段）。 */
 interface MatchRow {

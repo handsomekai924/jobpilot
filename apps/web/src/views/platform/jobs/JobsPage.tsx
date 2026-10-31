@@ -7,18 +7,18 @@ import { useNavigate } from "react-router-dom";
 import {
   Button, ConfirmSheet, EmptyState, InlineAlert, JobCard, JobDetailDrawer, PageHeader, Pill,
   ScrollArea, SearchFilterBar, Select, Skeleton, Surface, TextField, pageRootSx, useToast,
-} from "../../../components";
-import type { JobDetail, JobSummary } from "../../../api/dto";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useTaskStore, type TaskSnapshot } from "../../../stores/taskStore";
-import { fmtNumber } from "../../../utils/format";
-import { radius, typeScale } from "../../../theme/tokens";
-import { crawlApi, filtersApi, jobsApi, type FilterConditions, type JobItem } from "../../../api/platform";
-import { interviewApi } from "../../../api/shared";
-import { CollectionSheet } from "./CollectionSheet";
+} from "@/components";
+import type { JobDetail, JobSummary } from "@/api/dto";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useTaskStore, type TaskSnapshot } from "@/stores/taskStore";
+import { fmtNumber } from "@/utils/format";
+import { radius, typeScale } from "@/theme/tokens";
+import { crawlApi, filtersApi, jobsApi, type FilterConditions, type JobItem } from "@/api/platform";
+import { interviewApi } from "@/api/shared";
+import { CollectionSheet } from "@/views/platform/jobs/CollectionSheet";
 import {
   collectionSummary, emptyCollectionConfig, labelLookup, type CollectionConfig,
-} from "./collection";
+} from "@/views/platform/jobs/collection";
 
 const PAGE_SIZE = 24;
 

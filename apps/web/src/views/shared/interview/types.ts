@@ -2,7 +2,7 @@
  * 面试题页共用的数据形状与小工具（出题 / 生成记录 两段共用）。
  */
 
-import type { TaskSnapshot } from "../../../stores/taskStore";
+import type { TaskSnapshot } from "@/stores/taskStore";
 
 /** 与旧页一致的分页大小。 */
 export const PAGE_SIZE = 20;

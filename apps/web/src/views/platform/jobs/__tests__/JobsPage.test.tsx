@@ -5,10 +5,10 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { JobsPage } from "../JobsPage";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { JobsPage } from "@/views/platform/jobs/JobsPage";
 
 /** 平台描述符：`caps.source.expect_flow` / `caps.catalog.unsupported` 是这页的降级开关。 */
 function platform(over: {

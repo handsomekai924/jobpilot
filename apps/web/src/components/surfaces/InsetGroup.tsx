@@ -2,7 +2,7 @@
 
 import { Box, Typography, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { mergeSx } from "../../theme/sx";
+import { mergeSx } from "@/theme/sx";
 
 /** 分组卡属性。 */
 export interface InsetGroupProps {

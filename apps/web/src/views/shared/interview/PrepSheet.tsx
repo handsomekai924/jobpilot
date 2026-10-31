@@ -10,13 +10,13 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import {
   Button, EmptyState, NumberField, Pill, SegmentedControl, Select, Sheet, Skeleton, Surface, useToast,
-} from "../../../components";
-import { radius, springs, typeScale } from "../../../theme/tokens";
-import { interviewApi } from "../../../api/shared";
+} from "@/components";
+import { radius, springs, typeScale } from "@/theme/tokens";
+import { interviewApi } from "@/api/shared";
 import {
   errMsg, QUESTION_TYPES, SUPPLEMENT_MAX,
   type CtxInfo, type PrepTarget, type QuestionItem, type InterviewTaskSnap,
-} from "./types";
+} from "@/views/shared/interview/types";
 
 /** 题目侧栏：上下文与摘要、导出、补题、按题型浏览。 */
 export function PrepSheet({

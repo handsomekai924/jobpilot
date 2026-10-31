@@ -6,7 +6,7 @@
  * 不知道 URL 长什么样，也不知道某个站点是哪家。
  */
 
-import { api, sitePath } from "./client";
+import { api, sitePath } from "@/api/client";
 
 /** 站点作用域下的路径；集中收口，视图别自己调 `sitePath`。 */
 const at = (site: string, path: string) => sitePath(site, path);

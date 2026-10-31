@@ -8,13 +8,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 
-import { PageHeader, pageRootSx, SegmentedControl, ViewFade } from "../../../components";
-import { useTaskStore, useTasks } from "../../../stores/taskStore";
-import { getStatus } from "../../../ws/client";
-import { interviewApi } from "../../../api/shared";
-import { busyJobIds, toTaskSnapshot, type InterviewTaskSnap } from "./types";
-import { GenerateSection } from "./GenerateSection";
-import { RecordsSection } from "./RecordsSection";
+import { PageHeader, pageRootSx, SegmentedControl, ViewFade } from "@/components";
+import { useTaskStore, useTasks } from "@/stores/taskStore";
+import { getStatus } from "@/ws/client";
+import { interviewApi } from "@/api/shared";
+import { busyJobIds, toTaskSnapshot, type InterviewTaskSnap } from "@/views/shared/interview/types";
+import { GenerateSection } from "@/views/shared/interview/GenerateSection";
+import { RecordsSection } from "@/views/shared/interview/RecordsSection";
 
 const TABS = [
   { value: "generate", label: "出题" },

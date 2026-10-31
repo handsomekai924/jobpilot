@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
-import { Button } from "../controls/Button";
-import { Sheet } from "./Sheet";
+import { Button } from "@/components/controls/Button";
+import { Sheet } from "@/components/feedback/Sheet";
 
 /** 确认弹窗属性。 */
 export interface ConfirmSheetProps {

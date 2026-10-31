@@ -5,12 +5,12 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { OverviewPage } from "../OverviewPage";
-import { applyWsEvent, resetStores } from "../../../../ws/dispatch";
-import type { WsEnvelope } from "../../../../ws/client";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { OverviewPage } from "@/views/shared/overview/OverviewPage";
+import { applyWsEvent, resetStores } from "@/ws/dispatch";
+import type { WsEnvelope } from "@/ws/client";
 
 /** jsdom 没有 canvas，用假 echarts 承接 init；页面级只验装配，图元走 charts.test.tsx。 */
 const echartsMock = vi.hoisted(() => {

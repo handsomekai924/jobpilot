@@ -10,15 +10,15 @@ import { Box } from "@mui/material";
 
 import {
   PageHeader, pageRootSx, ScrollArea, SegmentedControl, useToast, ViewFade,
-} from "../../../components";
-import { useTasks } from "../../../stores/taskStore";
+} from "@/components";
+import { useTasks } from "@/stores/taskStore";
 import {
   matchApi, resumeApi, type ResumeItem,
-} from "../../../api/shared";
-import { rank, TASK_TERMINAL, type AnalysisRow, type MatchItem, type MatchTaskSnap } from "./types";
-import { WorkbenchSection } from "./WorkbenchSection";
-import { HistorySection } from "./HistorySection";
-import { GreetingSection } from "./GreetingSection";
+} from "@/api/shared";
+import { rank, TASK_TERMINAL, type AnalysisRow, type MatchItem, type MatchTaskSnap } from "@/views/shared/match/types";
+import { WorkbenchSection } from "@/views/shared/match/WorkbenchSection";
+import { HistorySection } from "@/views/shared/match/HistorySection";
+import { GreetingSection } from "@/views/shared/match/GreetingSection";
 
 const TABS = [
   { value: "workbench", label: "匹配工作台" },

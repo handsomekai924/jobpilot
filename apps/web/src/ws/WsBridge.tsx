@@ -7,10 +7,10 @@
 
 import { useEffect } from "react";
 
-import { api } from "../api/client";
-import { useTaskStore, type TaskSnapshot } from "../stores/taskStore";
-import * as ws from "./client";
-import { applyWsEvent } from "./dispatch";
+import { api } from "@/api/client";
+import { useTaskStore, type TaskSnapshot } from "@/stores/taskStore";
+import * as ws from "@/ws/client";
+import { applyWsEvent } from "@/ws/dispatch";
 
 /** 断线兜底轮询间隔（毫秒）。 */
 const FALLBACK_POLL_MS = 60_000;

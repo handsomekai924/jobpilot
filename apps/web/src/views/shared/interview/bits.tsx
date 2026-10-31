@@ -1,9 +1,9 @@
 /** 出题 / 记录两段共用的小组件（勾选 + 分页脚）。 */
 
 import { Box, Checkbox, Typography } from "@mui/material";
-import { Button } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtNumber } from "../../../utils/format";
+import { Button } from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtNumber } from "@/utils/format";
 
 /** 行勾选（components/ 没有 Checkbox——缺口记在文件头，先用 MUI Checkbox 封一层局部小组件）。 */
 export function RowCheck({

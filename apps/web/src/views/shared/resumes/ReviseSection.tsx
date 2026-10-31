@@ -11,16 +11,16 @@ import { Box, Checkbox, Typography } from "@mui/material";
 import {
   Button, EmptyState, ScrollArea, SegmentedControl, Select, Skeleton, Surface, TaskPanel,
   TextField, pageRootSx, useToast,
-} from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtNumber, fmtTime } from "../../../utils/format";
-import { crawlBatchApi, interviewApi, resumeApi } from "../../../api/shared";
-import { toTaskEvents } from "../taskEvents";
+} from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtNumber, fmtTime } from "@/utils/format";
+import { crawlBatchApi, interviewApi, resumeApi } from "@/api/shared";
+import { toTaskEvents } from "@/views/shared/taskEvents";
 import {
   JOB_PAGE_SIZE, MAX_TARGET, MODE_OPTIONS, msgOf, reviseTerminal,
   type JobPickRow, type PresetItem, type ResumeListItem, type ReviseMode, type ReviseSnapshot,
   type SectionItem,
-} from "./types";
+} from "@/views/shared/resumes/types";
 
 /** 优化段：选简历与模式，定向勾岗位或自由选章节，启动 / 停止任务。 */
 export function ReviseSection({

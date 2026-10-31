@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { microMotion, palette, type ThemeMode } from "../../theme/tokens";
+import { microMotion, palette, type ThemeMode } from "@/theme/tokens";
 
 /** 进度条属性。 */
 export interface ProgressBarProps {

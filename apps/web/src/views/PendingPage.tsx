@@ -6,7 +6,7 @@
  */
 
 import { Box } from "@mui/material";
-import { Button, EmptyState, PageHeader, ScrollArea, Surface, pageRootSx } from "../components";
+import { Button, EmptyState, PageHeader, ScrollArea, Surface, pageRootSx } from "@/components";
 
 /** 未迁移占位页的参数。 */
 export interface PendingPageProps {

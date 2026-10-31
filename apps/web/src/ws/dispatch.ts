@@ -5,10 +5,10 @@
  * 连接生命周期在 `WsBridge.tsx`，喂进来的是同一条路上的帧。
  */
 
-import { useTaskStore, type TaskSnapshot } from "../stores/taskStore";
-import { projectSession, useSessionStore, type AuthFeedKind } from "../stores/sessionStore";
-import type { PlatformSession } from "../platform/types";
-import type { WsEnvelope } from "./client";
+import { useTaskStore, type TaskSnapshot } from "@/stores/taskStore";
+import { projectSession, useSessionStore, type AuthFeedKind } from "@/stores/sessionStore";
+import type { PlatformSession } from "@/platform/types";
+import type { WsEnvelope } from "@/ws/client";
 
 /** 待喂料事件 type → 喂料种类。 */
 const FEED_KIND: Record<string, AuthFeedKind> = {

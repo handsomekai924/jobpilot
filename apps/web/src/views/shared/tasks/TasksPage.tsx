@@ -11,14 +11,14 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, EmptyState, InlineAlert, PageHeader, Pill, ScrollArea, Select, Skeleton, Surface, TaskPanel, TextField,
   pageRootSx, useToast,
-} from "../../../components";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useTaskStore, type TaskSnapshot } from "../../../stores/taskStore";
-import { getStatus } from "../../../ws/client";
-import { fmtClock, fmtNumber } from "../../../utils/format";
-import { radius, typeScale } from "../../../theme/tokens";
-import { tasksApi } from "../../../api/shared";
-import { toTaskEvents } from "../taskEvents";
+} from "@/components";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useTaskStore, type TaskSnapshot } from "@/stores/taskStore";
+import { getStatus } from "@/ws/client";
+import { fmtClock, fmtNumber } from "@/utils/format";
+import { radius, typeScale } from "@/theme/tokens";
+import { tasksApi } from "@/api/shared";
+import { toTaskEvents } from "@/views/shared/taskEvents";
 
 /** 类型徽标文案（legacy `TYPE_LABELS`）。 */
 const TYPE_LABELS: Record<string, string> = {

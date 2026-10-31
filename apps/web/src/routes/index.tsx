@@ -8,21 +8,21 @@
 import type { ComponentType } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 
-import { usePlatform } from "../platform/PlatformProvider";
-import { byId } from "../platform/registry";
-import { PLATFORM_NAV, SHEET_MERGED_NAV } from "../platform/types";
-import { platformKeyFromPath } from "./match";
-import { PlatformLayout, SharedLayout, ShellLayout } from "./layouts";
-import { OverviewPage } from "../views/shared/overview/OverviewPage";
-import { TasksPage } from "../views/shared/tasks/TasksPage";
-import { SettingsPage } from "../views/shared/settings/SettingsPage";
-import { LoginPage } from "../views/platform/login/LoginPage";
-import { JobsPage } from "../views/platform/jobs/JobsPage";
-import { DeliverPage } from "../views/platform/deliver/DeliverPage";
-import { ResumesPage } from "../views/shared/resumes/ResumesPage";
-import { InterviewPage } from "../views/shared/interview/InterviewPage";
-import { MatchPage } from "../views/shared/match/MatchPage";
-import { PendingPage } from "../views/PendingPage";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { byId } from "@/platform/registry";
+import { PLATFORM_NAV, SHEET_MERGED_NAV } from "@/platform/types";
+import { platformKeyFromPath } from "@/routes/match";
+import { PlatformLayout, SharedLayout, ShellLayout } from "@/routes/layouts";
+import { OverviewPage } from "@/views/shared/overview/OverviewPage";
+import { TasksPage } from "@/views/shared/tasks/TasksPage";
+import { SettingsPage } from "@/views/shared/settings/SettingsPage";
+import { LoginPage } from "@/views/platform/login/LoginPage";
+import { JobsPage } from "@/views/platform/jobs/JobsPage";
+import { DeliverPage } from "@/views/platform/deliver/DeliverPage";
+import { ResumesPage } from "@/views/shared/resumes/ResumesPage";
+import { InterviewPage } from "@/views/shared/interview/InterviewPage";
+import { MatchPage } from "@/views/shared/match/MatchPage";
+import { PendingPage } from "@/views/PendingPage";
 
 /**
  * 旧 hash → 新路由（docs 3.2「旧路由兼容」）。

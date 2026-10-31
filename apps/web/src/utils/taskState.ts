@@ -1,6 +1,6 @@
 /** 任务状态归一与外观映射。 */
 
-import type { StatusTone } from "../components/data/StatusDot";
+import type { StatusTone } from "@/components/data/StatusDot";
 
 /** 长任务状态机视图（5.3 TaskPanel 行：状态 → 外观映射表）。 */
 export type TaskState = "idle" | "running" | "done" | "error" | "cancelled";

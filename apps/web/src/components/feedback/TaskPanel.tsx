@@ -2,14 +2,14 @@
 
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
-import { typeScale } from "../../theme/tokens";
-import { fmtEta } from "../../utils/format";
-import { TASK_STATE_META, taskStateOf, type TaskState } from "../../utils/taskState";
-import { Button } from "../controls/Button";
-import { StatusDot } from "../data/StatusDot";
-import { Surface } from "../surfaces/Surface";
-import { ProgressBar } from "./ProgressBar";
-import { EventStream, type TaskEvent } from "./EventStream";
+import { typeScale } from "@/theme/tokens";
+import { fmtEta } from "@/utils/format";
+import { TASK_STATE_META, taskStateOf, type TaskState } from "@/utils/taskState";
+import { Button } from "@/components/controls/Button";
+import { StatusDot } from "@/components/data/StatusDot";
+import { Surface } from "@/components/surfaces/Surface";
+import { ProgressBar } from "@/components/feedback/ProgressBar";
+import { EventStream, type TaskEvent } from "@/components/feedback/EventStream";
 
 /** 任务面板属性。 */
 export interface TaskPanelProps {

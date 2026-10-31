@@ -3,8 +3,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { Cascader, type CascaderNode } from "../controls/Cascader";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { Cascader, type CascaderNode } from "@/components/controls/Cascader";
 
 /** 省 → 市 → 区三级城市树。 */
 const tree: CascaderNode[] = [

@@ -5,10 +5,10 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { DeliverPage } from "../DeliverPage";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { DeliverPage } from "@/views/platform/deliver/DeliverPage";
 
 /** 平台描述符：`caps.delivery.apply_gate` 是这页的门槛两路径开关（只影响文案，不影响调用）。 */
 function platform(over: { apply_gate?: string } = {}) {

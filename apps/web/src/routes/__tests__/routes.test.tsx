@@ -5,10 +5,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../components/feedback/Toast";
-import { PlatformProvider } from "../../platform/PlatformProvider";
-import { AppRoutes, legacyTarget } from "../index";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { AppRoutes, legacyTarget } from "@/routes/index";
 
 /** 两个站点、能力有差异：用来验「描述符驱动 + caps 降级」；`expect` 是真实描述符形状，`talent` 用于验未注册私有入口的兜底。 */
 const PLATFORMS = {

@@ -3,8 +3,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { MultiSelect } from "../controls/MultiSelect";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { MultiSelect } from "@/components/controls/MultiSelect";
 
 /** 三个行业选项。 */
 const options = [

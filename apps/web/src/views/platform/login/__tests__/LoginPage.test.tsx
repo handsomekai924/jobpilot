@@ -5,12 +5,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-import { ThemeModeProvider } from "../../../../theme/ThemeModeProvider";
-import { ToastProvider } from "../../../../components/feedback/Toast";
-import { PlatformProvider } from "../../../../platform/PlatformProvider";
-import { LoginPage } from "../LoginPage";
-import { applyWsEvent, resetStores } from "../../../../ws/dispatch";
-import type { WsEnvelope } from "../../../../ws/client";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider } from "@/components/feedback/Toast";
+import { PlatformProvider } from "@/platform/PlatformProvider";
+import { LoginPage } from "@/views/platform/login/LoginPage";
+import { applyWsEvent, resetStores } from "@/ws/dispatch";
+import type { WsEnvelope } from "@/ws/client";
 
 /** 平台描述符：`caps.auth` 是这页的降级开关，所以两个站点各给一份不同的。 */
 function platform(auth: { sms: boolean; slider: boolean; qr: boolean }) {

@@ -131,6 +131,7 @@ export function useCrawlTask(intervalMs = 1500) {
 
 ```bash
 python tools/jsdoc_audit.py     # 认 <script>/<script setup> 段里的 JSDoc
+python tools/import_path_audit.py  # 进 apps/web/src 的 Vue 同样用 @/ 别名
 node --check <extracted.js>     # 语法没坏（工具会抽出 script 段临时校验）
 ```
 

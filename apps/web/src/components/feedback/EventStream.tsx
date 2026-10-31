@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion } from "motion/react";
-import { springs, typeScale } from "../../theme/tokens";
-import { fmtClock } from "../../utils/format";
-import { Pill, type PillTone } from "../data/Pill";
+import { springs, typeScale } from "@/theme/tokens";
+import { fmtClock } from "@/utils/format";
+import { Pill, type PillTone } from "@/components/data/Pill";
 
 /** 事件类型。 */
 export type EventKind = "info" | "ok" | "warn" | "error" | "muted";

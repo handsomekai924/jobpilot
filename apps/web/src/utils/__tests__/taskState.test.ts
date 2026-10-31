@@ -1,7 +1,7 @@
 /** 任务状态归一与外观映射的单测。 */
 
 import { describe, expect, it } from "vitest";
-import { TASK_STATE_META, taskStateOf } from "../taskState";
+import { TASK_STATE_META, taskStateOf } from "@/utils/taskState";
 
 /** 验后端状态字符串的归一与映射表覆盖。 */
 describe("taskStateOf", () => {

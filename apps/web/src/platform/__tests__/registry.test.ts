@@ -2,9 +2,9 @@
 
 import { describe, expect, it } from "vitest";
 
-import { byId, siteIdFromPath } from "../registry";
-import { platformKeyFromPath, routeSegmentForKey, sharedKeyFromPath } from "../../routes/match";
-import type { PlatformDescriptor } from "../types";
+import { byId, siteIdFromPath } from "@/platform/registry";
+import { platformKeyFromPath, routeSegmentForKey, sharedKeyFromPath } from "@/routes/match";
+import type { PlatformDescriptor } from "@/platform/types";
 
 /** 已登录的 BOSS 描述符（带 `expect` 私有入口）。 */
 const BOSS = {

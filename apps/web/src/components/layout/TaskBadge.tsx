@@ -7,11 +7,11 @@
 import { useNavigate } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 
-import { useSessionStore } from "../../stores/sessionStore";
-import { useRunningTasks } from "../../stores/taskStore";
-import { usePlatform } from "../../platform/PlatformProvider";
-import { typeScale } from "../../theme/tokens";
-import { StatusDot } from "../data/StatusDot";
+import { useSessionStore } from "@/stores/sessionStore";
+import { useRunningTasks } from "@/stores/taskStore";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { typeScale } from "@/theme/tokens";
+import { StatusDot } from "@/components/data/StatusDot";
 
 /** 任务角标：在跑条数；0 条时不渲染数字，只留入口。 */
 export function TaskBadge() {

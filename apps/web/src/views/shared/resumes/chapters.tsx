@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 
-import { Pill } from "../../../components";
-import { fontFamilyMono, typeScale } from "../../../theme/tokens";
-import type { DiffBlock, ParsedData } from "./types";
+import { Pill } from "@/components";
+import { fontFamilyMono, typeScale } from "@/theme/tokens";
+import type { DiffBlock, ParsedData } from "@/views/shared/resumes/types";
 
 /** 段落小标题（解析结果 / 对比面板统一用它分段）。 */
 export function SecTitle({ children }: { children: React.ReactNode }) {

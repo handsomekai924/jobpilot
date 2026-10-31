@@ -11,15 +11,15 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, EmptyState, InlineAlert, PageHeader, Pill, ProgressBar, ScrollArea, StatusDot, Surface,
   pageRootSx,
-} from "../../../components";
-import { SHARED_NAV, SHEET_MERGED_NAV, type PlatformDescriptor, type PlatformSession } from "../../../platform/types";
-import { byId } from "../../../platform/registry";
-import { usePlatform } from "../../../platform/PlatformProvider";
-import { useFeeds, useSession, type AuthFeed } from "../../../stores/sessionStore";
-import { useRunningTasks, type TaskSnapshot } from "../../../stores/taskStore";
-import { taskStateOf, TASK_STATE_META } from "../../../utils/taskState";
-import { radius, typeScale } from "../../../theme/tokens";
-import { LibraryDataSection } from "./LibraryDataSection";
+} from "@/components";
+import { SHARED_NAV, SHEET_MERGED_NAV, type PlatformDescriptor, type PlatformSession } from "@/platform/types";
+import { byId } from "@/platform/registry";
+import { usePlatform } from "@/platform/PlatformProvider";
+import { useFeeds, useSession, type AuthFeed } from "@/stores/sessionStore";
+import { useRunningTasks, type TaskSnapshot } from "@/stores/taskStore";
+import { taskStateOf, TASK_STATE_META } from "@/utils/taskState";
+import { radius, typeScale } from "@/theme/tokens";
+import { LibraryDataSection } from "@/views/shared/overview/LibraryDataSection";
 
 const FEED_TEXT: Record<AuthFeed["kind"], string> = {
   code: "需要你输入短信验证码",

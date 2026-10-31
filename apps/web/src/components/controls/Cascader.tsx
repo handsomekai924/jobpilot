@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import { Box, Popover, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
-import { Button } from "./Button";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
+import { Button } from "@/components/controls/Button";
 
 /** 级联树节点：带子级只导航，叶子即取值。 */
 export interface CascaderNode {

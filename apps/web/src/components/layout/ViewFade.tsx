@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
-import { springs } from "../../theme/tokens";
+import { springs } from "@/theme/tokens";
 
 /** 与 PageTransition 同为布局层：撑满父级槽位，内部再细分「固定 + 内部滚动」。 */
 const FILL: CSSProperties = {

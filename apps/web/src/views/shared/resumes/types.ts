@@ -2,7 +2,7 @@
  * 简历页共用的数据形状与常量（简历库 / 简历解析 / 简历优化 / 优化记录 四段共用）。
  */
 
-import type { PillTone, TaskEvent } from "../../../components";
+import type { PillTone, TaskEvent } from "@/components";
 
 /** 简历列表行（`GET /api/resume/list` 的 item：meta 摘要，`llm` 只报解析过没有）。 */
 export interface ResumeListItem {

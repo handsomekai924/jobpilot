@@ -1,12 +1,12 @@
 /** 职位详情右侧 Sheet：基础信息、命中规则、技能/福利与职位描述。 */
 
 import { Box, Typography } from "@mui/material";
-import type { JobDetail, JdStatus, MatchedRule } from "../../api/dto";
-import { JD_STATUS_LABEL } from "../../api/dto";
-import { typeScale } from "../../theme/tokens";
-import { Button } from "../controls/Button";
-import { Pill, type PillTone } from "./Pill";
-import { Sheet } from "../feedback/Sheet";
+import type { JobDetail, JdStatus, MatchedRule } from "@/api/dto";
+import { JD_STATUS_LABEL } from "@/api/dto";
+import { typeScale } from "@/theme/tokens";
+import { Button } from "@/components/controls/Button";
+import { Pill, type PillTone } from "@/components/data/Pill";
+import { Sheet } from "@/components/feedback/Sheet";
 
 /** 职位详情 Sheet 属性。 */
 export interface JobDetailDrawerProps {

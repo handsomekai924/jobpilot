@@ -8,8 +8,8 @@
 
 import { create } from "zustand";
 
-import { useSessionStore } from "./sessionStore";
-import { filtersApi, type ExpectLists } from "../api/platform";
+import { useSessionStore } from "@/stores/sessionStore";
+import { filtersApi, type ExpectLists } from "@/api/platform";
 
 /** localStorage 键前缀（按站点分桶）。 */
 const STORAGE_PREFIX = "console.expects.";

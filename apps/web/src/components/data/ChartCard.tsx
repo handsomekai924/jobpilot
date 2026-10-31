@@ -4,10 +4,10 @@ import { useState, type ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-import { SegmentedControl } from "../controls/SegmentedControl";
-import { Surface } from "../surfaces/Surface";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
+import { SegmentedControl } from "@/components/controls/SegmentedControl";
+import { Surface } from "@/components/surfaces/Surface";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
 
 /** 表格孪生的形状：第一列左对齐，其余右对齐（数值列）。 */
 export interface ChartTable {

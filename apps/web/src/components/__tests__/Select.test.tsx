@@ -3,8 +3,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { Select } from "../controls/Select";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { Select } from "@/components/controls/Select";
 
 /** 两个学历选项。 */
 const options = [

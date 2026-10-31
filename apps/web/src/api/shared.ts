@@ -5,7 +5,7 @@
  * 共用接口（简历/匹配/面试题/任务/LLM/系统）不带站点语义——列表要按站点筛就传 `?site=`。
  */
 
-import { api } from "./client";
+import { api } from "@/api/client";
 
 /**
  * 任务中心统一快照形状（后端 `_normalize` 的镜像）。

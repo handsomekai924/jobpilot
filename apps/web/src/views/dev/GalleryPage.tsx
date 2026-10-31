@@ -6,8 +6,8 @@ import {
   Button, Cascader, DataTable, EmptyState, InlineAlert, InsetGroup, InsetRow, JobCard,
   MultiSelect, PageHeader, Pill, ScoreRing, SearchFilterBar, SegmentedControl, Select,
   Sheet, Skeleton, StatusDot, Surface, Switch, TaskPanel, TextField, useToast,
-} from "../../components";
-import { useThemeMode } from "../../theme/ThemeModeProvider";
+} from "@/components";
+import { useThemeMode } from "@/theme/ThemeModeProvider";
 
 /**
  * M0 组件画廊：设计系统与公用组件的可视化验收页（apple-design「交互原型胜过百万张静态图」）。

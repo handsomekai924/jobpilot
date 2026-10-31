@@ -3,9 +3,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { ToastProvider, useToast } from "../feedback/Toast";
-import { Button } from "../controls/Button";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { ToastProvider, useToast } from "@/components/feedback/Toast";
+import { Button } from "@/components/controls/Button";
 
 /** 点按钮弹一条 150ms 的 toast。 */
 function Harness() {

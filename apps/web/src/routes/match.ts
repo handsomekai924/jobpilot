@@ -5,9 +5,9 @@
  * 视图里不出现 `if (site === "boss")`。
  */
 
-import { PLATFORM_NAV, SHARED_NAV } from "../platform/types";
-import { siteIdFromPath } from "../platform/registry";
-import type { PlatformDescriptor } from "../platform/types";
+import { PLATFORM_NAV, SHARED_NAV } from "@/platform/types";
+import { siteIdFromPath } from "@/platform/registry";
+import type { PlatformDescriptor } from "@/platform/types";
 
 /** 共用路由 key（`overview` / `resumes` / …）；平台作用域返回 `null`。 */
 export function sharedKeyFromPath(

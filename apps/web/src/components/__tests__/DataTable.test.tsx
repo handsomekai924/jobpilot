@@ -3,8 +3,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { DataTable } from "../data/DataTable";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { DataTable } from "@/components/data/DataTable";
 
 /** 测试行结构。 */
 interface Row { id: string; name: string; city: string; }

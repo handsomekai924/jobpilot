@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { mergeStats, normalizeStats } from "../stats";
+import { mergeStats, normalizeStats } from "@/views/shared/overview/stats";
 
 /** 单站点 stats 归一。 */
 describe("normalizeStats", () => {

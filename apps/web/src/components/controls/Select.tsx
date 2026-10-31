@@ -2,8 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Box, MenuItem, TextField, Typography, type TextFieldProps, type SelectProps as MuiSelectProps } from "@mui/material";
-import { typeScale } from "../../theme/tokens";
-import type { SelectOption } from "./MultiSelect";
+import { typeScale } from "@/theme/tokens";
+import type { SelectOption } from "@/components/controls/MultiSelect";
 
 /** 单选下拉属性；`clearable` 时显示清除按钮。 */
 export interface SelectProps extends Omit<TextFieldProps, "select" | "onChange" | "value"> {

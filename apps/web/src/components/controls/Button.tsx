@@ -3,7 +3,7 @@
 import { Button as MuiButton, type ButtonProps as MuiButtonProps, type SxProps, type Theme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { mergeSx } from "../../theme/sx";
+import { mergeSx } from "@/theme/sx";
 
 /** 按钮语义：主操作 / 次操作 / 弱调 / 纯文字 / 破坏。 */
 export type ButtonVariant = "filled" | "gray" | "tinted" | "plain" | "danger";

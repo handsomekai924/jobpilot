@@ -4,7 +4,7 @@
  * 兼容 `event` / `type` / `payload` 等变体，并把「第 N 页 · 入库 +N」这类可读行拼出来。
  */
 
-import type { EventKind, TaskEvent } from "../../components";
+import type { EventKind, TaskEvent } from "@/components";
 
 /** 后端事件原始形状（宽松：各业务任务自己拼的字典）。 */
 export interface RawEvent {

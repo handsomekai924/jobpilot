@@ -7,13 +7,13 @@
 import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
-import { Button, EmptyState, pageRootSx, Pill, ScrollArea, Sheet, Surface, useToast } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtNumber, fmtTime } from "../../../utils/format";
-import { matchApi } from "../../../api/shared";
+import { Button, EmptyState, pageRootSx, Pill, ScrollArea, Sheet, Surface, useToast } from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtNumber, fmtTime } from "@/utils/format";
+import { matchApi } from "@/api/shared";
 import {
   analysisStatusLabel, errText, type AnalysisRow,
-} from "./types";
+} from "@/views/shared/match/types";
 
 /** 分析历史段：归档列表，可载入工作台或删除。 */
 export function HistorySection({

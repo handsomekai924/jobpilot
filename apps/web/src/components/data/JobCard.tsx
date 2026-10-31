@@ -2,12 +2,12 @@
 
 import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { JobSummary, JdStatus } from "../../api/dto";
-import { JD_STATUS_LABEL } from "../../api/dto";
-import { typeScale } from "../../theme/tokens";
-import { Pill, type PillTone } from "./Pill";
-import { ScoreRing } from "./ScoreRing";
-import { Surface } from "../surfaces/Surface";
+import type { JobSummary, JdStatus } from "@/api/dto";
+import { JD_STATUS_LABEL } from "@/api/dto";
+import { typeScale } from "@/theme/tokens";
+import { Pill, type PillTone } from "@/components/data/Pill";
+import { ScoreRing } from "@/components/data/ScoreRing";
+import { Surface } from "@/components/surfaces/Surface";
 
 /** 职位卡片属性。 */
 export interface JobCardProps {

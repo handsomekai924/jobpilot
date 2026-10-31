@@ -7,11 +7,11 @@
 import { useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
-import { Button, ConfirmSheet, EmptyState, Pill, Skeleton, Surface, useToast } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtTime } from "../../../utils/format";
-import { resumeApi } from "../../../api/shared";
-import { PARSE_TERMINAL, msgOf, type ParseRun, type ResumeListItem } from "./types";
+import { Button, ConfirmSheet, EmptyState, Pill, Skeleton, Surface, useToast } from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtTime } from "@/utils/format";
+import { resumeApi } from "@/api/shared";
+import { PARSE_TERMINAL, msgOf, type ParseRun, type ResumeListItem } from "@/views/shared/resumes/types";
 
 /** 简历库段：上传入口与简历清单，删除走二次确认。 */
 export function LibrarySection({

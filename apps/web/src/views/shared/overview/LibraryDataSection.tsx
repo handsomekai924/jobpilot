@@ -8,13 +8,13 @@
 import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
-import { BarChart, ChartCard, ColumnChart, InlineAlert, StatTile, Surface } from "../../../components";
-import type { BarDatum, ChartTable, ColumnDatum } from "../../../components";
-import { useRunningTasks } from "../../../stores/taskStore";
-import { jobsApi } from "../../../api/platform";
-import { fmtNumber } from "../../../utils/format";
-import { typeScale } from "../../../theme/tokens";
-import { mergeStats, type LibraryStats } from "./stats";
+import { BarChart, ChartCard, ColumnChart, InlineAlert, StatTile, Surface } from "@/components";
+import type { BarDatum, ChartTable, ColumnDatum } from "@/components";
+import { useRunningTasks } from "@/stores/taskStore";
+import { jobsApi } from "@/api/platform";
+import { fmtNumber } from "@/utils/format";
+import { typeScale } from "@/theme/tokens";
+import { mergeStats, type LibraryStats } from "@/views/shared/overview/stats";
 
 /** 接口错误转人话。 */
 function errText(e: unknown): string {

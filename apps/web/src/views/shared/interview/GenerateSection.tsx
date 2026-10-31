@@ -11,14 +11,14 @@ import { Box, Typography } from "@mui/material";
 import {
   Button, CellTitle, DataTable, Pill, ScrollArea, Select, Surface, TextField, pageRootSx,
   useToast, type Column,
-} from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtTime } from "../../../utils/format";
-import type { TaskSnapshot } from "../../../stores/taskStore";
-import { crawlBatchApi, interviewApi } from "../../../api/shared";
-import { errMsg, PAGE_SIZE, type JobRow, type PrepTarget } from "./types";
-import { Pager, RowCheck } from "./bits";
-import { PrepSheet } from "./PrepSheet";
+} from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtTime } from "@/utils/format";
+import type { TaskSnapshot } from "@/stores/taskStore";
+import { crawlBatchApi, interviewApi } from "@/api/shared";
+import { errMsg, PAGE_SIZE, type JobRow, type PrepTarget } from "@/views/shared/interview/types";
+import { Pager, RowCheck } from "@/views/shared/interview/bits";
+import { PrepSheet } from "@/views/shared/interview/PrepSheet";
 
 /** 出题段：筛选岗位、勾选批量生成，行内可单个生成或查看题目。 */
 export function GenerateSection({

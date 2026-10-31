@@ -8,7 +8,7 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 
-import type { PlatformSession } from "../platform/types";
+import type { PlatformSession } from "@/platform/types";
 
 /** 登录喂料三态（waiting_human 状态机的 UI 半边，docs 5.5）。 */
 export type AuthFeedKind = "code" | "slider" | "scan";

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { NumberField } from "../controls/NumberField";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { NumberField } from "@/components/controls/NumberField";
 
 /** 套主题渲染。 */
 function wrap(ui: React.ReactElement) {

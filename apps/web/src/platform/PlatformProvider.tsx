@@ -10,9 +10,9 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { fetchPlatforms, byId, siteIdFromPath } from "./registry";
-import { platformKeyFromPath, sharedKeyFromPath, routeSegmentForKey } from "../routes/match";
-import { PLATFORM_NAV, type PlatformDescriptor } from "./types";
+import { fetchPlatforms, byId, siteIdFromPath } from "@/platform/registry";
+import { platformKeyFromPath, sharedKeyFromPath, routeSegmentForKey } from "@/routes/match";
+import { PLATFORM_NAV, type PlatformDescriptor } from "@/platform/types";
 
 /** 共用路由下记住的当前平台。 */
 const STORAGE_KEY = "console.siteId";

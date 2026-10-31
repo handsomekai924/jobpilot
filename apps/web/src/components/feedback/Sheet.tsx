@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { springs, zIndex } from "../../theme/tokens";
+import { springs, zIndex } from "@/theme/tokens";
 
 /** Sheet 属性。 */
 export interface SheetProps {

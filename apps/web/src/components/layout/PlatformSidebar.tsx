@@ -2,11 +2,11 @@
 
 import { Box, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
-import type { PlatformDescriptor } from "../../platform/types";
-import { PLATFORM_NAV, SHEET_MERGED_NAV } from "../../platform/types";
-import { StatusDot } from "../data/StatusDot";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
+import type { PlatformDescriptor } from "@/platform/types";
+import { PLATFORM_NAV, SHEET_MERGED_NAV } from "@/platform/types";
+import { StatusDot } from "@/components/data/StatusDot";
 
 /** 侧栏属性。 */
 export interface PlatformSidebarProps {

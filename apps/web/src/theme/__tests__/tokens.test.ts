@@ -1,8 +1,8 @@
 /** 设计 token 与 MUI 主题的单测。 */
 
 import { describe, expect, it } from "vitest";
-import { materials, palette, springs, typeScale, radius } from "../tokens";
-import { createAppleTheme } from "../muiTheme";
+import { materials, palette, springs, typeScale, radius } from "@/theme/tokens";
+import { createAppleTheme } from "@/theme/muiTheme";
 
 /** 验设计 token 的数值约束与主题产出。 */
 describe("设计 token（docs/DESIGN.md 的数值形态）", () => {

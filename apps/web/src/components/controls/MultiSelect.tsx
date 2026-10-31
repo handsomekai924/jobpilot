@@ -3,9 +3,9 @@
 import { useMemo, useRef, useState } from "react";
 import { Box, Checkbox, Popover, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { typeScale } from "../../theme/tokens";
-import { mergeSx } from "../../theme/sx";
-import { Button } from "./Button";
+import { typeScale } from "@/theme/tokens";
+import { mergeSx } from "@/theme/sx";
+import { Button } from "@/components/controls/Button";
 
 /** 下拉选项：code 为提交值，name 为显示名。 */
 export interface SelectOption {

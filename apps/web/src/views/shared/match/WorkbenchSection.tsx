@@ -10,16 +10,16 @@ import { Box, Typography } from "@mui/material";
 
 import {
   Button, EmptyState, Pill, ScrollArea, Select, Skeleton, Surface, TaskPanel, TextField,
-} from "../../../components";
-import { useToast } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
-import { fmtNumber, fmtTime } from "../../../utils/format";
+} from "@/components";
+import { useToast } from "@/components";
+import { typeScale } from "@/theme/tokens";
+import { fmtNumber, fmtTime } from "@/utils/format";
 import {
   errText, rank, PAGE_SIZE, TASK_TERMINAL, type CrawlPick, type JobPick, type MatchItem, type MatchTaskSnap,
-} from "./types";
-import { MatchCard } from "./MatchCard";
-import { crawlBatchApi, interviewApi, matchApi } from "../../../api/shared";
-import { toTaskEvents } from "../taskEvents";
+} from "@/views/shared/match/types";
+import { MatchCard } from "@/views/shared/match/MatchCard";
+import { crawlBatchApi, interviewApi, matchApi } from "@/api/shared";
+import { toTaskEvents } from "@/views/shared/taskEvents";
 
 /** 结果卡骨架：几何对齐 MatchCard（圆环 + 两行文案 + 招呼语框 + 按钮行），预占最终空间免得回弹。 */
 function MatchCardSkeleton() {

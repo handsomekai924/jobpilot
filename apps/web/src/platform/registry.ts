@@ -4,8 +4,8 @@
  * 切换器、侧边栏、caps 降级全部由描述符生成；新增站点后端注册了，前端一个字不改。
  */
 
-import { api } from "../api/client";
-import type { PlatformDescriptor } from "./types";
+import { api } from "@/api/client";
+import type { PlatformDescriptor } from "@/platform/types";
 
 /** `GET /api/platforms` 的回包。 */
 interface PlatformsResponse {

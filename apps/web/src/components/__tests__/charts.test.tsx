@@ -5,11 +5,11 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ThemeModeProvider } from "../../theme/ThemeModeProvider";
-import { BarChart } from "../data/BarChart";
-import { ChartCard } from "../data/ChartCard";
-import { ColumnChart } from "../data/ColumnChart";
-import { StatTile } from "../data/StatTile";
+import { ThemeModeProvider } from "@/theme/ThemeModeProvider";
+import { BarChart } from "@/components/data/BarChart";
+import { ChartCard } from "@/components/data/ChartCard";
+import { ColumnChart } from "@/components/data/ColumnChart";
+import { StatTile } from "@/components/data/StatTile";
 
 /** ECharts 假件（jsdom 无 canvas）：记录 setOption 收到的 option。 */
 const echartsMock = vi.hoisted(() => {

@@ -5,7 +5,7 @@ import {
 } from "react";
 import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { springs } from "../../theme/tokens";
+import { springs } from "@/theme/tokens";
 
 /** 轻提示色调。 */
 export type ToastTone = "ok" | "warn" | "danger" | "info";

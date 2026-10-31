@@ -27,6 +27,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from boss_browser_pool.cdp import BrowserError
+
 from . import config as C
 
 logger = logging.getLogger(__name__)
@@ -59,8 +61,7 @@ __all__ = [
 ]
 
 
-class StokenError(RuntimeError):
-    """`__zp_stoken__` 获取失败。"""
+StokenError = BrowserError
 
 
 @dataclass(frozen=True)

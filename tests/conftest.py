@@ -58,7 +58,7 @@ def isolated_db(monkeypatch, tmp_path):
 
     monkeypatch.setenv(boss_db.DB_ENV, str(tmp_path / "boss.db"))
     monkeypatch.setattr(
-        "boss_jobs.cdp_stoken.CdpStokenProvider._acquire_from_chrome",
+        "boss_platform_boss.stoken_cdp.CdpStokenProvider._acquire_from_chrome",
         lambda self: "0138FAKECDP",
     )
     yield

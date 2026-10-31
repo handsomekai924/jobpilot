@@ -180,7 +180,7 @@ def test_stoken_error_becomes_friendly_503(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("连不上 CDP（ws://127.0.0.1:9222/devtools/browser/abc）：握手被拒")
 
-    monkeypatch.setattr("boss_jobs.cdp_stoken.find_chrome", boom)
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
     resp = client.post("/api/system/chrome/open")
 
     body = resp.json()

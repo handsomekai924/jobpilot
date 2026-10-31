@@ -11,17 +11,17 @@ from pathlib import Path
 
 import pytest
 
+import boss_browser_pool.cdp as cdp
 import boss_db
-import boss_jobs.cdp_stoken as cdp
-from boss_jobs.cdp_stoken import (
+from boss_browser_pool.cdp import find_chrome
+from boss_jobs.stoken import STOKEN_MAX_AGE
+from boss_jobs.stoken import StokenError
+from boss_platform_boss.stoken_cdp import (
     RENEW_COOLDOWN,
     CdpStokenProvider,
     StokenRecord,
     StokenStore,
-    find_chrome,
 )
-from boss_jobs.stoken import STOKEN_MAX_AGE
-from boss_jobs.stoken import StokenError
 
 
 class FakeCookieJar:

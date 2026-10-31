@@ -1,4 +1,4 @@
-"""`boss_jobs.cdp_capture` 的测试，用合成 CDP 事件与假 WebSocket 顶替真服务端。"""
+"""`boss_browser_pool.capture` 的测试，用合成 CDP 事件与假 WebSocket 顶替真服务端。"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import websocket
 
-from boss_jobs import cdp_capture as CC
+from boss_browser_pool import capture as CC
 
 
 class FakeCall:

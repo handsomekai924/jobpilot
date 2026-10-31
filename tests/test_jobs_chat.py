@@ -561,7 +561,7 @@ def _stub_chat_client(monkeypatch):
     client = JobClient(http=FakeHttp([]))
     fetched: list = []
     monkeypatch.setattr(client, "fetch_me", lambda: fetched.append(1) or CREDS)
-    monkeypatch.setattr("boss_jobs.client.ChatSocket", StubChatSocket)
+    monkeypatch.setattr("boss_platform_boss.jobs.client.ChatSocket", StubChatSocket)
     return client, fetched
 
 

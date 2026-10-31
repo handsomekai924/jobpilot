@@ -112,8 +112,8 @@ def is_temp_run() -> bool:
 
 def _env_names() -> tuple[str, str]:
     """`(库路径环境变量, Chrome profile 环境变量)`，延迟导入取自各包常量。"""
+    from boss_browser_pool.cdp import CHROME_PROFILE_ENV
     from boss_db import DB_ENV
-    from boss_jobs.cdp_stoken import CHROME_PROFILE_ENV
 
     return DB_ENV, CHROME_PROFILE_ENV
 

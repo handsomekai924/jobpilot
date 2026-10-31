@@ -92,7 +92,7 @@ def chrome() -> dict[str, Any]:
 @router.post("/chrome/mode")
 def set_chrome_mode(body: ChromeModeBody) -> dict[str, Any]:
     """切换取令牌窗口的档位，立即生效（不用重启）。"""
-    from boss_jobs.cdp_stoken import CHROME_MODES
+    from boss_browser_pool.cdp import CHROME_MODES
 
     raw = (body.mode or "").strip().lower()
     if raw and raw not in CHROME_MODES:
@@ -110,11 +110,11 @@ def set_chrome_mode(body: ChromeModeBody) -> dict[str, Any]:
 @router.post("/chrome/open")
 def open_chrome() -> dict[str, Any]:
     """用可见窗口拉起取令牌的 Chrome（风控滑块场景）；失败抛 `EnvironmentWebError`。"""
-    from boss_jobs.cdp_stoken import StokenError, launch_chrome
+    from boss_browser_pool.cdp import BrowserError, launch_chrome
 
     try:
         launch_chrome(mode="visible")
-    except StokenError as exc:
+    except BrowserError as exc:
         raise EnvironmentWebError(troubleshoot.humanize(exc)) from exc
     except Exception as exc:  # noqa: BLE001 - 拉不起来一律按环境问题报人话
         raise EnvironmentWebError(troubleshoot.humanize(exc)) from exc

@@ -56,15 +56,15 @@ _NON_COOKIE_KEYS: frozenset[str] = frozenset({"__zp_stoken__"})
 
 
 def _config():
-    """延迟取站点常量：拆包过渡期它们仍在 `boss_jobs.config`。"""
-    from boss_jobs import config
+    """延迟取站点常量，避免平台包与 jobs 在导入期互等。"""
+    from .jobs import config
 
     return config
 
 
 def _stoken_max_age() -> int:
-    """延迟取令牌有效期，避免平台包与站点包在导入期互等。"""
-    from boss_jobs.stoken import STOKEN_MAX_AGE
+    """延迟取令牌有效期，避免导入期互等。"""
+    from .stoken import STOKEN_MAX_AGE
 
     return STOKEN_MAX_AGE
 
@@ -347,7 +347,7 @@ class CdpStokenProvider:
 
     def _apply_cookie(self, token: str, expires_at: float) -> None:
         """把令牌写进会话 cookiejar（带过期时间）。"""
-        from boss_jobs.stoken import put_cookie
+        from .stoken import put_cookie
 
         put_cookie(self.http.cookies, _config().STOKEN_COOKIE, token, expires=int(expires_at))
 

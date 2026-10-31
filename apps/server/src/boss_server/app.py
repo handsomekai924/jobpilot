@@ -9,7 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from boss_jobs.cdp_stoken import StokenError
+from boss_browser_pool.cdp import BrowserError
 from boss_jobs.errors import JobError
 
 from . import config as C
@@ -45,10 +45,10 @@ def create_app() -> FastAPI:
         )
         return JSONResponse(status_code=exc.status_code, content=exc.payload())
 
-    @app.exception_handler(StokenError)
-    async def _stoken_error(_: Request, exc: StokenError) -> JSONResponse:  # noqa: ANN202
-        """取令牌失败翻成环境问题人话，回 503。"""
-        logger.warning("取安全令牌失败：%s", exc)
+    @app.exception_handler(BrowserError)
+    async def _browser_error(_: Request, exc: BrowserError) -> JSONResponse:  # noqa: ANN202
+        """浏览器 / CDP 失败翻成环境问题人话，回 503。"""
+        logger.warning("浏览器操作失败：%s", exc)
         return JSONResponse(
             status_code=503,
             content={"ok": False, "code": "environment", "message": humanize(exc)},

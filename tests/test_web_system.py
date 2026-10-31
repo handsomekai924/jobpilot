@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_jobs.cdp_stoken import StokenError
+from boss_platform_boss.stoken import StokenError
 from boss_server import runtime
 from boss_server.app import create_app
 from boss_server.services import app_settings_store, troubleshoot
@@ -90,7 +90,7 @@ def test_health_reports_paths(client, tmp_path):
 
 def test_chrome_status_reports_found(client, monkeypatch):
     """验 `/api/system/chrome` 报出找到的 Chrome 路径。"""
-    monkeypatch.setattr("boss_jobs.cdp_stoken.find_chrome", lambda: r"C:\fake\chrome.exe")
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", lambda: r"C:\fake\chrome.exe")
     body = client.get("/api/system/chrome").json()
 
     assert body["found"] is True
@@ -105,7 +105,7 @@ def test_chrome_status_gives_guidance_when_missing(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。")
 
-    monkeypatch.setattr("boss_jobs.cdp_stoken.find_chrome", boom)
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
     body = client.get("/api/system/chrome").json()
 
     assert body["found"] is False
@@ -155,7 +155,7 @@ def test_open_chrome_translates_failure(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("拉不起 Chrome（C:\\x\\chrome.exe）：[WinError 2] 找不到文件")
 
-    monkeypatch.setattr("boss_jobs.cdp_stoken.launch_chrome", boom)
+    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", boom)
     resp = client.post("/api/system/chrome/open")
 
     assert resp.status_code == 503
@@ -166,7 +166,7 @@ def test_open_chrome_translates_failure(client, monkeypatch):
 
 def test_open_chrome_success_message(client, monkeypatch):
     """验打开 Chrome 成功时给的是人话提示。"""
-    monkeypatch.setattr("boss_jobs.cdp_stoken.launch_chrome", lambda **kwargs: None)
+    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", lambda **kwargs: None)
     resp = client.post("/api/system/chrome/open")
 
     assert resp.status_code == 200

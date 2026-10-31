@@ -170,7 +170,7 @@ def _self_check(info: dict[str, str]) -> int:
     print(f"日志目录     {log_dir()}")
 
     try:
-        from boss_jobs.cdp_stoken import find_chrome
+        from boss_browser_pool.cdp import find_chrome
 
         print(f"Chrome       {find_chrome()}")
     except Exception as exc:  # noqa: BLE001 - 自检就是要如实报告任何失败

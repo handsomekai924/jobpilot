@@ -10,7 +10,7 @@ import json
 
 import pytest
 
-import boss_jobs.cli as cli
+import boss_platform_boss.jobs.cli as cli
 from boss_jobs.client import JobClient, create_client, http_from_session
 from boss_jobs.errors import (
     JobApiError,
@@ -290,7 +290,7 @@ def test_crawl_keeps_already_stored_pages_on_error(tmp_path):
 def test_crawl_opens_default_store_when_not_given(tmp_path, monkeypatch):
     """验不传 store 时自动开默认库。"""
     db_path = tmp_path / "auto.db"
-    monkeypatch.setattr("boss_jobs.client.open_store", lambda path=None: JobStore(db_path))
+    monkeypatch.setattr("boss_platform_boss.jobs.client.open_store", lambda path=None: JobStore(db_path))
     client, _, _ = client_with([ok_page([])])
     report = client.crawl(page_interval=0.0, search_filter=_StubFilter())
     assert report.stats.pages == 1
@@ -822,7 +822,7 @@ def test_cli_fetch_writes_db(tmp_path, monkeypatch):
     ]
     fake_http = FakeHttp(responses)
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: fake_http,
     )
     f = tmp_path / "f.json"
@@ -839,7 +839,7 @@ def test_cli_fetch_writes_db(tmp_path, monkeypatch):
 def test_cli_fetch_reports_browser_check(tmp_path, monkeypatch, capsys):
     """验自动补令牌后仍被拒时，提示用 CDP/Chrome 补救。"""
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: FakeHttp(
             [
                 {"code": 37, "message": "你的浏览器环境异常", "zpData": {"seed": "s", "ts": 1, "name": "n"}},
@@ -862,7 +862,7 @@ def test_cli_fetch_reports_browser_check(tmp_path, monkeypatch, capsys):
 def test_cli_fetch_reports_risk_control(tmp_path, monkeypatch, capsys):
     """code 36 是账号风控，话术要明说「不去绕」。"""
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: FakeHttp(
             [{"code": 36, "message": "您的账户存在异常行为", "zpData": {}}]
         ),
@@ -912,7 +912,7 @@ def test_cli_fetch_filter文件_有筛选就走搜索流(tmp_path, monkeypatch, 
     )
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--max-pages", "1", "--filter", str(f)])
     assert code == 0
@@ -933,7 +933,7 @@ def test_cli_fetch_库里的条件_走搜索流(tmp_path, monkeypatch, capsys):
         boss_db.DOC_SEARCH_FILTER, {"query": "go", "city": "101010100"}, db, site="boss")
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(db), "fetch", "--max-pages", "1"])
     assert code == 0
@@ -948,7 +948,7 @@ def test_cli_fetch_两边都没有条件_报错(tmp_path, monkeypatch, capsys):
     """验库里条件全空且没给 --filter/--expect 时报错退出。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--max-pages", "1"])
     assert code == cli.EXIT_USAGE
@@ -977,7 +977,7 @@ def test_cli_fetch_expect_兼职(tmp_path, monkeypatch, capsys):
     """验 --expect part_time 走期望流，jobType=1903。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(
             captured,
             expects=ok_expects(part_time=[{"encryptExpectId": "PT1", "positionName": "派单", "locationName": "佛山"}]),
@@ -997,7 +997,7 @@ def test_cli_fetch_expect_推荐(tmp_path, monkeypatch, capsys):
     """验 --expect recommend 走混合期望并带 mixExpectType。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(
             captured,
             expects=ok_expects(
@@ -1017,7 +1017,7 @@ def test_cli_fetch_expect_指定期望(tmp_path, monkeypatch, capsys):
     """验 --expect expect:<id> 显式点名，不拉期望列表。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(captured, expects=ok_expects()),
     )
     code = cli.main(
@@ -1039,7 +1039,7 @@ def test_cli_fetch_expect_临时期望(tmp_path, monkeypatch, capsys):
     )
     captured = {}
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session",
+        "boss_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(captured, expects=ok_expects()),
     )
     code = cli.main(
@@ -1065,7 +1065,7 @@ def test_cli_fetch_expect与filter互斥(tmp_path, capsys):
 def test_cli_fetch_expect_取值不认识就报错(tmp_path, monkeypatch, capsys):
     """验 --expect 取值不认识时报错退出。"""
     monkeypatch.setattr(
-        "boss_jobs.client.http_from_session", lambda *a, **k: _routing_http({}, expects=ok_expects())
+        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _routing_http({}, expects=ok_expects())
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--expect", "bogus"])
     assert code == 2

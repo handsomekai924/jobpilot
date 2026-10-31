@@ -201,9 +201,9 @@ def test_compute_stoken_喂给Node的命令行对(monkeypatch, tmp_path):
         seen["cmd"] = cmd
         return subprocess.CompletedProcess(cmd, 0, stdout=b"0138stub", stderr=b"")
 
-    monkeypatch.setattr("boss_jobs.stoken.subprocess.run", fake_run)
-    monkeypatch.setattr("boss_jobs.stoken.find_node", lambda: "node")
-    monkeypatch.setattr("boss_jobs.stoken._local_js_timezone_offset", lambda: -480)
+    monkeypatch.setattr("boss_platform_boss.stoken.subprocess.run", fake_run)
+    monkeypatch.setattr("boss_platform_boss.stoken.find_node", lambda: "node")
+    monkeypatch.setattr("boss_platform_boss.stoken._local_js_timezone_offset", lambda: -480)
 
     token = compute_stoken("/* js */", seed="SEED", ts=1790759239936, name="n1", cache_dir=tmp_path)
 
@@ -249,8 +249,8 @@ def test_compute_stoken_node失败带stderr(monkeypatch, tmp_path):
         """回一个退出码 1 的进程结果。"""
         return subprocess.CompletedProcess(cmd, 1, stdout=b"", stderr=b"boom")
 
-    monkeypatch.setattr("boss_jobs.stoken.subprocess.run", fake_run)
-    monkeypatch.setattr("boss_jobs.stoken.find_node", lambda: "node")
+    monkeypatch.setattr("boss_platform_boss.stoken.subprocess.run", fake_run)
+    monkeypatch.setattr("boss_platform_boss.stoken.find_node", lambda: "node")
 
     with pytest.raises(StokenError, match="boom"):
         compute_stoken("/* js */", seed="S", ts=1, name="n", cache_dir=tmp_path)
@@ -304,7 +304,7 @@ def test_compute_stoken_真Node出0138前缀(tmp_path):
 
 def test_provider_拿挑战下脚本算令牌并写cookie(tmp_path, monkeypatch):
     """验一条龙后写 cookie，第二次 ensure 直接复用。"""
-    monkeypatch.setattr("boss_jobs.stoken.compute_stoken", lambda *a, **k: "0138MINTED")
+    monkeypatch.setattr("boss_platform_boss.stoken.compute_stoken", lambda *a, **k: "0138MINTED")
     http = FakeHttp(
         get_responses=[
             FakeResponse(challenge_payload()),
@@ -323,7 +323,7 @@ def test_provider_拿挑战下脚本算令牌并写cookie(tmp_path, monkeypatch)
 
 def test_provider_ensure_force_会重算(tmp_path, monkeypatch):
     """验 force=True 时强制重算并覆盖 cookie。"""
-    monkeypatch.setattr("boss_jobs.stoken.compute_stoken", lambda *a, **k: "0138NEW")
+    monkeypatch.setattr("boss_platform_boss.stoken.compute_stoken", lambda *a, **k: "0138NEW")
     http = FakeHttp(
         get_responses=[
             FakeResponse(challenge_payload()),
@@ -346,7 +346,7 @@ def test_provider_接口不给挑战就把码说清楚(tmp_path):
 
 def test_provider_会话不支持cookie就报错(tmp_path, monkeypatch):
     """验会话缺 `cookies.set` 时抛错。"""
-    monkeypatch.setattr("boss_jobs.stoken.compute_stoken", lambda *a, **k: "0138X")
+    monkeypatch.setattr("boss_platform_boss.stoken.compute_stoken", lambda *a, **k: "0138X")
     http = FakeHttp(
         get_responses=[
             FakeResponse(challenge_payload()),

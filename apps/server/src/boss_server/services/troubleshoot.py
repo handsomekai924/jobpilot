@@ -82,7 +82,7 @@ def humanize(exc: BaseException | str) -> str:
 
 def current_mode() -> str:
     """当前生效的 Chrome 窗口档位（环境变量优先，否则 `boss_jobs` 的默认值）。"""
-    from boss_jobs.cdp_stoken import CHROME_MODE_ENV, DEFAULT_CHROME_MODE
+    from boss_browser_pool.cdp import CHROME_MODE_ENV, DEFAULT_CHROME_MODE
 
     env = os.environ.get(CHROME_MODE_ENV, "").strip().lower()
     return env or DEFAULT_CHROME_MODE
@@ -90,7 +90,7 @@ def current_mode() -> str:
 
 def chrome_status() -> dict[str, Any]:
     """界面用的 Chrome 检测结果。不启动任何东西，探测失败也照常返回。"""
-    from boss_jobs.cdp_stoken import CHROME_MODES, find_chrome
+    from boss_browser_pool.cdp import CHROME_MODES, find_chrome
 
     status: dict[str, Any] = {
         "found": False,

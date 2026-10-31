@@ -54,7 +54,7 @@ class AppSettings:
 
 def normalize_chrome_mode(value: Any) -> str:
     """只接受 `boss_jobs` 认得的档位；其余一律回空串。"""
-    from boss_jobs.cdp_stoken import CHROME_MODES
+    from boss_browser_pool.cdp import CHROME_MODES
 
     text = str(value or "").strip().lower()
     return text if text in CHROME_MODES else ""
@@ -133,7 +133,7 @@ def apply_chrome_mode(mode: str, path: Path | str | None = None) -> AppSettings:
         mode: 目标档位；不认识的值会被收成空串。
         path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
     """
-    from boss_jobs.cdp_stoken import CHROME_MODE_ENV
+    from boss_browser_pool.cdp import CHROME_MODE_ENV
 
     settings = _patch({"chrome_mode": normalize_chrome_mode(mode)}, path)
 
@@ -180,7 +180,7 @@ def restore_on_startup(path: Path | str | None = None) -> AppSettings:
     """
     settings = load_settings(path)
     if settings.chrome_mode:
-        from boss_jobs.cdp_stoken import CHROME_MODE_ENV
+        from boss_browser_pool.cdp import CHROME_MODE_ENV
 
         os.environ[CHROME_MODE_ENV] = settings.chrome_mode
     return settings

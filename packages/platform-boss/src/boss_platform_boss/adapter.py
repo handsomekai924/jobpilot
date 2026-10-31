@@ -63,10 +63,11 @@ class BossAdapter:
         return (NavExtra(key="expect", label="求职期望", route="expect"),)
 
     def session_summary(self) -> Mapping[str, Any]:
-        """从 `login_tasks.status_payload()` 抽会话三件套。"""
-        from boss_server.services.login_task import login_tasks
+        """从登录网关抽会话三件套。"""
+        from .auth.gateway import get_gateway
 
-        payload = login_tasks.status_payload()
+        gateway = get_gateway()
+        payload = gateway.status_payload() if gateway is not None else {}
         task = payload.get("task") or {}
         busy = bool(task) and str(task.get("status") or "") not in (
             "done",
@@ -144,7 +145,7 @@ class BossAdapter:
 
 
 class BossAuthFlow:
-    """登录：薄壳包 `boss_server.services.login_task`。"""
+    """登录：只认 `auth.gateway` 注入的登录任务中心（server 实现）。"""
 
     def caps(self) -> AuthCaps:
         """BOSS 三样都有：短信 / 人机协作滑块 / APP 扫码。"""
@@ -152,46 +153,48 @@ class BossAuthFlow:
 
     def start_sms(self, phone: str, sink: AuthSink) -> LoginHandle:
         """起短信登录。"""
-        from boss_server.services.login_task import login_tasks
-
-        task = login_tasks.start_send(phone)
+        gateway = _gateway()
+        task = gateway.start_send(phone)
         return str(task.task_id)
 
     def submit_code(self, handle: LoginHandle, code: str) -> None:
         """塞验证码。"""
-        from boss_server.services.login_task import login_tasks
-
-        login_tasks.submit_code(handle, code)
+        _gateway().submit_code(handle, code)
 
     def submit_slider(self, handle: LoginHandle, ticket: str | Mapping[str, Any]) -> None:
         """塞滑块票据；字符串票据当 `geetest_validate` 收。"""
-        from boss_server.services.login_task import login_tasks
-
         payload: Mapping[str, Any]
         if isinstance(ticket, Mapping):
             payload = ticket
         else:
             payload = {"geetest_validate": ticket}
-        login_tasks.solve_slider(handle, payload)
+        _gateway().solve_slider(handle, payload)
 
     def start_qr(self, sink: AuthSink) -> LoginHandle:
         """起 APP 扫码登录。"""
-        from boss_server.services.login_task import login_tasks
-
-        task = login_tasks.start_qr()
+        gateway = _gateway()
+        task = gateway.start_qr()
         return str(task.task_id)
 
     def poll(self, handle: LoginHandle) -> LoginState:
         """看登录任务状态。"""
-        from boss_server.services.login_task import login_tasks
-
-        snap = login_tasks.snapshot(handle)
+        snap = _gateway().snapshot(handle)
         status = str(snap.get("status") or "running")
         return LoginState(
             status=status,
             message=str(snap.get("error") or ""),
             payload=snap,
         )
+
+
+def _gateway() -> Any:
+    """取已绑定的登录任务中心；未绑定（平台包单测）时报清楚。"""
+    from .auth.gateway import get_gateway
+
+    gateway = get_gateway()
+    if gateway is None:
+        raise RuntimeError("登录任务中心未绑定：先在 server 侧 import boss_server.services.login_task")
+    return gateway
 
 
 class BossCatalog:

@@ -12,6 +12,7 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CORE = ROOT / "packages" / "core" / "src" / "boss_core"
+PLATFORM_BOSS = ROOT / "packages" / "platform-boss" / "src" / "boss_platform_boss"
 
 SITE_PRIVATE_WORDS: tuple[str, ...] = (
     "开聊提醒",
@@ -123,3 +124,23 @@ def test_扫描器认得出docstring和代码字符串(tmp_path):
     path = tmp_path / "_selfcheck.py"
     path.write_text('"""开聊提醒是 BOSS 私有语义。"""\nMSG = "开聊提醒"\n', encoding="utf-8")
     assert _code_strings(path) == ["开聊提醒"]
+
+
+def test_平台包不反向依赖_server():
+    """站点实现只认注入点，不许 import `boss_server`。"""
+    leaks: list[str] = []
+    files = sorted(PLATFORM_BOSS.rglob("*.py"))
+    assert files, "平台包一个文件都没扫到，守卫等于没跑"
+    for path in files:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                names = [node.module or ""]
+            else:
+                continue
+            for name in names:
+                if name == "boss_server" or name.startswith("boss_server."):
+                    leaks.append(f"{path.name} -> {name}")
+    assert not leaks, "platform-boss 反向依赖了 server：\n" + "\n".join(leaks)

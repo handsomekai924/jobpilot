@@ -188,7 +188,6 @@ EVENT_DEQUE_OWNERS: frozenset[str] = frozenset({
     "deliver_task",
     "desc_task",
     "interview_generation_task",
-    "login_task",
     "match_task",
     "parse_task",
     "resume_revision_task",

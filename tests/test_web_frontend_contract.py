@@ -596,8 +596,10 @@ def test_短信任务不推扫码面板():
 
 
 def test_后端任务快照带kind():
-    """验后端任务快照带 kind。"""
-    src = (STATIC.parent / "services" / "login_task.py").read_text(encoding="utf-8")
+    """验后端任务快照带 kind（状态机在平台包）。"""
+    from boss_platform_boss.auth import task as login_task_module
+
+    src = Path(login_task_module.__file__).read_text(encoding="utf-8")
     assert '"kind": self.kind' in src
     assert 'kind="qr"' in src
 

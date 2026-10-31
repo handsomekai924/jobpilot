@@ -1,7 +1,8 @@
 """LLM 配置存取：状态库 `data/boss.db` 的 `doc('llm_config')`，API 回显时打码。
 
 可配置的只有 api_key / base_url / model 三项；采样与超时参数是系统固定值，
-读写都会被强制成常量，界面和接口都改不动。
+读写都会被强制成常量，界面和接口都改不动。配置类型与采样常量以本模块
+（`boss_server.config`）为准，`boss_ai` 只负责按传入值调用。
 
 Attributes:
     _UPDATABLE: 用户可改的字段名；其余一律忽略。
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import boss_db
+from boss_ai.llm import LLMConfig as _AILLMConfig
 
 from .. import config as C
 
@@ -24,8 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class LLMConfig:
-    """LLM 配置项。
+class LLMConfig(_AILLMConfig):
+    """LLM 配置项（默认值与归一化都跟随服务端常量）。
 
     Attributes:
         api_key: API 密钥；空串 = 未配置。
@@ -36,17 +38,9 @@ class LLMConfig:
         timeout: 请求超时（秒），同上。
     """
 
-    api_key: str = ""
-    base_url: str = "https://api.openai.com/v1"
-    model: str = ""
     temperature: float = C.LLM_TEMPERATURE
     max_tokens: int = C.LLM_MAX_TOKENS
     timeout: float = C.LLM_TIMEOUT
-
-    @property
-    def configured(self) -> bool:
-        """三项可配置字段是否都已填好。"""
-        return bool(self.api_key and self.base_url and self.model)
 
     def normalize(self) -> "LLMConfig":
         """把采样参数拉回系统常量（历史配置里可能还留着旧值）。"""

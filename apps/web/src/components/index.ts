@@ -8,6 +8,7 @@ export { Switch, type SwitchProps } from "./controls/Switch";
 export { MultiSelect, type MultiSelectProps, type SelectOption } from "./controls/MultiSelect";
 export { Cascader, type CascaderProps, type CascaderNode } from "./controls/Cascader";
 export { TextField, type TextFieldProps } from "./controls/TextField";
+export { NumberField, type NumberFieldProps } from "./controls/NumberField";
 export { Select, type SelectProps } from "./controls/Select";
 
 export { StatusDot, type StatusDotProps, type StatusTone } from "./data/StatusDot";

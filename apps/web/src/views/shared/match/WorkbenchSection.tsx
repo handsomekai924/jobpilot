@@ -356,10 +356,6 @@ export function WorkbenchSection({
             />
           </Box>
 
-          <Typography sx={{ ...typeScale.s, color: "text.secondary", mt: 1 }}>
-            不选批次 = 搜全部职位；勾具体岗位 = 只匹配这几个，不勾 = 范围内全部（量大时会比较久，进度在右边实时更新）。
-          </Typography>
-
           <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
               <Pill tone={selected.size ? "accent" : "static"}>已选 {selected.size}</Pill>
@@ -496,10 +492,7 @@ export function WorkbenchSection({
             <MatchCardSkeleton />
           </Box>
         ) : matches.length === 0 ? (
-          <EmptyState
-            title="启动匹配后，结果会按分数从高到低排在这里"
-            description="每条给匹配度、匹配理由和一句招呼语；招呼语可以改、可以重打草稿，确认后才落库。"
-          />
+          <EmptyState title="启动匹配后，结果会按分数从高到低排在这里" />
         ) : (
           <Box>
             {matches.map((m) => (

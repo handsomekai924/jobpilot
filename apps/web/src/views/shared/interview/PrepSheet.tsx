@@ -9,7 +9,7 @@ import { Box, Typography } from "@mui/material";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import {
-  Button, EmptyState, Pill, SegmentedControl, Select, Sheet, Skeleton, Surface, TextField, useToast,
+  Button, EmptyState, NumberField, Pill, SegmentedControl, Select, Sheet, Skeleton, Surface, useToast,
 } from "../../../components";
 import { radius, springs, typeScale } from "../../../theme/tokens";
 import { interviewApi } from "../repos";
@@ -36,7 +36,7 @@ export function PrepSheet({
   const [typeFilter, setTypeFilter] = useState("");
   const [supOpen, setSupOpen] = useState(false);
   const [supType, setSupType] = useState<string>(QUESTION_TYPES[0]);
-  const [supCount, setSupCount] = useState("3");
+  const [supCount, setSupCount] = useState(3);
   const [genBusy, setGenBusy] = useState(false);
   /** 一次只展示一题（缺陷清单提议）：当前题 index，配合上一题 / 下一题翻页 */
   const [qIndex, setQIndex] = useState(0);
@@ -143,7 +143,7 @@ export function PrepSheet({
   };
 
   const submitSupplement = () => {
-    const n = Number(supCount);
+    const n = supCount;
     if (!supType) {
       toast.toast("请选择题型", "warn");
       return;
@@ -242,17 +242,14 @@ export function PrepSheet({
                 emptyLabel={null}
                 sx={{ maxWidth: 240 }}
               />
-              <TextField
+              <NumberField
                 label="补几条"
-                type="number"
                 value={supCount}
-                onChange={(e) => setSupCount(e.target.value)}
+                min={1}
+                max={SUPPLEMENT_MAX}
+                onChange={setSupCount}
                 sx={{ maxWidth: 160 }}
               />
-              <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-                只补所选题型，追加到已有题目后面、自动避开已有题目；不覆盖旧题，单次最多{" "}
-                {SUPPLEMENT_MAX} 条。
-              </Typography>
               <Box sx={{ display: "flex", gap: 1 }}>
                 <Button
                   variant="filled"
@@ -280,14 +277,7 @@ export function PrepSheet({
           </Box>
 
           {visible.length === 0 ? (
-            <EmptyState
-              title={questions.length ? "没有符合筛选条件的题目" : "这个岗位还没有面试题"}
-              description={
-                questions.length
-                  ? "换个题型再看看。"
-                  : "点「生成面试题」出一套，或用「补题」按题型追加。"
-              }
-            />
+            <EmptyState title={questions.length ? "没有符合筛选条件的题目" : "这个岗位还没有面试题"} />
           ) : (
             <>
               <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1.5 }}>

@@ -27,7 +27,6 @@ export function GalleryPage() {
     <Box sx={{ maxWidth: 960, mx: "auto", px: 3, py: 5 }}>
       <PageHeader
         title="组件画廊"
-        subtitle="Apple 设计系统 · M0 公用组件验收（docs/DESIGN.md）"
         actions={
           <>
             <Button variant="gray" onClick={toggle}>

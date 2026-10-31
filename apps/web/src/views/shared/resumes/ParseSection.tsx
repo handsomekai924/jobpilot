@@ -33,10 +33,7 @@ export function ParseSection({
     return (
       <Box sx={pageRootSx}>
         <ScrollArea>
-          <EmptyState
-            title="还没有选中简历"
-            description="到「简历库」上传一份简历，再回来看解析结果。"
-          />
+          <EmptyState title="还没有选中简历" />
         </ScrollArea>
       </Box>
     );
@@ -89,7 +86,6 @@ export function ParseSection({
           ) : (
             <EmptyState
               title="这份简历还没解析"
-              description="解析会识别出八段：基本信息 / 求职意向 / 工作经历 / 项目经历 / 教育经历 / 技能标签 / 自我评价 / 摘要。"
               action={
                 <Button
                   variant="filled"

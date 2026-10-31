@@ -136,11 +136,7 @@ function LibraryCharts({ stats }: { stats: LibraryStats }) {
             caption={`保留 ${fmtNumber(stats.kept)} · 丢弃 ${fmtNumber(stats.dropped)}`}
             meter={keepRate}
           />
-          <StatTile
-            label="缺失描述"
-            value={fmtNumber(stats.missingDesc)}
-            caption="还没抓到 JD 的在库职位"
-          />
+          <StatTile label="缺失描述" value={fmtNumber(stats.missingDesc)} />
         </Box>
       </Surface>
 

@@ -14,11 +14,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Checkbox, Skeleton, Tooltip, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-
 import {
-  Button, EmptyState, InlineAlert, PageHeader, Pill, ScoreRing, ScrollArea, Select, Sheet, Surface,
-  TextField, pageRootSx, useToast,
+  Button, EmptyState, InlineAlert, NumberField, PageHeader, Pill, ScoreRing, ScrollArea, Select, Sheet, Surface,
+  pageRootSx, useToast,
 } from "../../components";
 import { usePlatform } from "../../platform/PlatformProvider";
 import { useTaskStore } from "../../stores/taskStore";
@@ -231,7 +229,6 @@ function ScoreHoverCard({ site, row }: { site: string; row: MatchRow }) {
 
 export function DeliverPage() {
   const toast = useToast();
-  const navigate = useNavigate();
   const { activeSiteId, activePlatform } = usePlatform();
   const site = activeSiteId;
   const applyGate = activePlatform?.caps.delivery.apply_gate;
@@ -242,7 +239,6 @@ export function DeliverPage() {
   const [analysis, setAnalysis] = useState<AnalysisPayload | null>(null);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [minScore, setMinScore] = useState(70);
-  const [minDraft, setMinDraft] = useState("70");
   const [limits, setLimits] = useState<DeliverLimits | null>(null);
   const [status, setStatus] = useState<DeliverStatus | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -315,7 +311,6 @@ export function DeliverPage() {
     try {
       const cfg = await deliverApi.config(site);
       setMinScore(cfg.min_score);
-      setMinDraft(String(cfg.min_score));
     } catch { /* 阈值读不到就用默认 70，别挡着发送 */ }
     try {
       const s = await deliverApi.status(site) as DeliverStatus;
@@ -346,11 +341,10 @@ export function DeliverPage() {
     }
   }, [deliverTask, loadConfigAndStatus, loadAnalysis, analysisId]);
 
-  const saveMinScore = useCallback(async (raw: string) => {
-    const v = Math.min(100, Math.max(0, parseInt(raw, 10) || 0));
+  const saveMinScore = useCallback(async (raw: number) => {
+    const v = Math.min(100, Math.max(0, Math.round(raw)));
     setMinScore(v);
-    setMinDraft(String(v));
-    // 阈值失焦自动保存：给个在飞文案（别无声无息），重叠保存也让后端最后一次生效
+    // 阈值提交（失焦 / Enter / 步进）自动保存：给个在飞文案（别无声无息），重叠保存也让后端最后一次生效
     setMinSaving(true);
     try {
       await deliverApi.saveConfig(site, { min_score: v });
@@ -439,7 +433,6 @@ export function DeliverPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="发对话与投递"
-        subtitle="发出去的是招呼语正文；投不投简历由门槛决定，两路径都在这里说清楚。"
         actions={
           <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
             <Pill tone={limits?.apply_enabled === false ? "warn" : "static"}>{quotaText}</Pill>
@@ -470,7 +463,7 @@ export function DeliverPage() {
       <Surface sx={{ flex: "0 0 auto", mt: 2, mb: 2.5 }}>
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "flex-end" }}>
           <Select
-            label="用哪次匹配"
+            label="匹配批次"
             options={analyses.map((a) => ({
               code: a.analysis_id,
               name: `${a.resume_title || a.resume_id || "分析"} · ${a.job_count ?? 0} 条 · ${fmtClock(a.created_at ?? null)}`,
@@ -480,13 +473,13 @@ export function DeliverPage() {
             emptyLabel={analyses.length ? "选一次分析" : "还没有分析"}
             sx={{ flex: "1 1 280px", minWidth: 240 }}
           />
-          <TextField
+          <NumberField
             label="评分阈值"
-            type="number"
-            value={minDraft}
-            onChange={(e) => setMinDraft(e.target.value)}
-            onBlur={() => void saveMinScore(minDraft)}
-            inputProps={{ min: 0, max: 100, step: 1 }}
+            controlsPosition="right"
+            value={minScore}
+            min={0}
+            max={100}
+            onChange={(v) => void saveMinScore(v)}
             sx={{ width: 120 }}
           />
           <Button variant="filled" disabled={sending} onClick={() => openConfirm(allTargets, "all", `筛选条件：评分 ≥ ${minScore}`)}>
@@ -496,11 +489,14 @@ export function DeliverPage() {
             发送选中（{selTargets.length}）
           </Button>
         </Box>
-        <Typography sx={{ ...typeScale.xs, color: "text.secondary", mt: 1 }}>
-          每次发送前都会弹窗让你确认 · 30 天内已发过的会跳过 · ≥ 阈值才进「一键发送全部」，改完自动保存
-          {minSaving ? " · 保存中…" : ""}
-          {excluded > 0 ? ` · 当前清单有 ${excluded} 条不满足发送条件` : ""}
-        </Typography>
+        {(minSaving || excluded > 0) && (
+          <Typography sx={{ ...typeScale.xs, color: "text.secondary", mt: 1 }}>
+            {[
+              minSaving ? "保存中…" : "",
+              excluded > 0 ? `当前清单有 ${excluded} 条不满足发送条件` : "",
+            ].filter(Boolean).join(" · ")}
+          </Typography>
+        )}
       </Surface>
 
       {/* 局部滚动：发送清单内容区（容器头固定，行卡自滚）；骨架 / 空态同占这块 */}
@@ -516,14 +512,11 @@ export function DeliverPage() {
           </ScrollArea>
         ) : !analysisId ? (
           <ScrollArea>
-            <EmptyState
-              title="还没有分析结果"
-              description="先在「匹配」跑一次匹配，结果会出现在这里。"
-            />
+            <EmptyState title="还没有分析结果" />
           </ScrollArea>
         ) : ranked.length === 0 ? (
           <ScrollArea>
-            <EmptyState title="这次分析没有匹配结果" description="换一份简历或放宽职位范围再跑一次。" />
+            <EmptyState title="这次分析没有匹配结果" />
           </ScrollArea>
         ) : (
           <Surface sx={{ p: 0, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -590,21 +583,6 @@ export function DeliverPage() {
           </Surface>
         )}
       </Box>
-
-      {/* 固定底：任务中心路标，不随清单滚 */}
-      <Typography sx={{ ...typeScale.s, color: "text.secondary", mt: 2, flex: "0 0 auto" }}>
-        发送进度、失败重试都在任务中心
-        <Box
-          component="button"
-          onClick={() => navigate("/tasks")}
-          sx={{
-            border: 0, bgcolor: "transparent", color: "primary.main", cursor: "pointer",
-            font: "inherit", textDecoration: "underline", ml: 0.5, p: 0,
-          }}
-        >
-          去看
-        </Box>
-      </Typography>
 
       <Sheet
         open={confirmOpen}

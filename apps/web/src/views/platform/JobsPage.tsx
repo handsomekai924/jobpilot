@@ -3,8 +3,8 @@
  *
  * 采集条件是站点作用域配置（`/api/sites/{site}/collection/config`），就地编辑
  * （`CollectionSheet`），不在共用设置页里配——搜索维度每个平台都不一样。
- * caps 降级（docs 3.3）：`catalog.unsupported` 维度置灰、`source.expect_flow`
- * 为假就不出期望流入口；差异只走描述符，视图里不写 `site ===`。
+ * caps 降级（docs 3.3）：`catalog.unsupported` 维度置灰；差异只走描述符，
+ * 视图里不写 `site ===`。
  *
  * 采集/补 JD 的细进度统一在任务中心看（本页只跟到结束好收结果），与 legacy 同款分工。
  */
@@ -413,7 +413,6 @@ export function JobsPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="找工作"
-        subtitle="在本地职位库浏览、筛选和补全职位描述。采集条件就地配，细进度去任务中心。"
         actions={
           <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
             <Pill tone="static">共 {fmtNumber(total)} 条</Pill>
@@ -448,19 +447,6 @@ export function JobsPage() {
               </Box>
             ) : (
               <Typography sx={{ ...typeScale.bodySm }}>{summaryText}</Typography>
-            )}
-            {caps?.source.expect_flow && (
-              <>
-                <Typography sx={{ ...typeScale.xs, color: "text.secondary", mt: 0.5 }}>
-                  这个平台支持求职期望流——求职期望已并入「采集条件」：来源切换、期望清单、
-                  同步都在里面，改完即时生效。
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Button size="small" variant="gray" onClick={() => setSheetOpen(true)}>
-                    打开采集条件
-                  </Button>
-                </Box>
-              </>
             )}
           </Box>
         </Box>
@@ -534,10 +520,7 @@ export function JobsPage() {
             ))}
           </Box>
         ) : items.length === 0 ? (
-          <EmptyState
-            title="库还是空的"
-            description="点右上「开始采集」拉一批，或放宽上面的筛选条件。"
-          />
+          <EmptyState title="库还是空的" />
         ) : (
           <Box
             sx={{

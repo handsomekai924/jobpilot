@@ -83,9 +83,6 @@ export function LibrarySection({
   return (
     <Box>
       <Surface sx={{ mb: 2.5, display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}>
-        <Typography sx={{ ...typeScale.s, color: "text.secondary", flex: 1, minWidth: 220 }}>
-          Word（.docx）/ PDF 最大 8MB；Markdown（.md）/ 纯文本（.txt）最大 2MB。上传后自动发起解析。
-        </Typography>
         <Button variant="filled" disabled={uploading} onClick={() => fileRef.current?.click()}>
           {uploading ? "上传中…" : "上传简历"}
         </Button>
@@ -106,7 +103,6 @@ export function LibrarySection({
       ) : resumes.length === 0 ? (
         <EmptyState
           title="还没有简历"
-          description="上传一份简历（Word / PDF / Markdown / 纯文本），AI 会整理成固定八段，后面人岗匹配用的就是这份结果。"
           action={
             <Button variant="filled" disabled={uploading} onClick={() => fileRef.current?.click()}>
               {uploading ? "上传中…" : "上传简历"}

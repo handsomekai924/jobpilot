@@ -13,7 +13,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
 import {
   Button, ConfirmSheet, EmptyState, InlineAlert, InsetGroup, InsetRow, PageHeader, Pill,
@@ -143,7 +142,7 @@ function modeOptions(ruleType: string): { code: string; name: string }[] {
 /** LLM 配置段：只有 api_key / base_url / model 三项能改，采样参数是后端固定值。 */
 function LlmSection() {
   const toast = useToast();
-  const [cfg, setCfg] = useState<LlmConfigView | null>(null);
+  const [, setCfg] = useState<LlmConfigView | null>(null);
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
@@ -208,19 +207,6 @@ function LlmSection() {
     return ids.map((id) => ({ code: id, name: id }));
   }, [models, model]);
 
-  const keyHint = cfg?.has_key
-    ? `已保存 Key：${cfg.api_key}（留空则不修改）`
-    : "还没有保存过 Key";
-
-  const fixedText = useMemo(() => {
-    const f = cfg?.fixed ?? {};
-    return (
-      `程序已经定好 AI 的生成参数了（temperature ${f.temperature ?? 0.7} · ` +
-      `通用 ${f.max_tokens ?? 2048} tokens · 简历解析 ${f.resume_parse_max_tokens ?? 8192} tokens · ` +
-      `人岗匹配 ${f.match_max_tokens ?? 4096} tokens · 超时 ${f.timeout ?? 120} 秒）。`
-    );
-  }, [cfg]);
-
   /** 测试连通：失败也回 200 带人话，message 原样展示（toast 只报结果，细节看行内提示）。 */
   const runTest = useCallback(async () => {
     if (testing) return;
@@ -266,10 +252,7 @@ function LlmSection() {
 
   return (
     <Box>
-      <InsetGroup
-        header="接口配置"
-        footer="Key 只存在你电脑上的数据库里，页面不会明文回显；请求直接从本机发往你填的地址。"
-      >
+      <InsetGroup header="接口配置">
         <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             label="API Key"
@@ -278,14 +261,12 @@ function LlmSection() {
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-…（留空 = 不修改）"
             autoComplete="off"
-            helperText={keyHint}
           />
           <TextField
             label="接口地址"
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
             placeholder="https://api.deepseek.com/v1"
-            helperText="DeepSeek 用默认地址即可；别的 OpenAI 兼容服务填它给你的地址"
           />
           <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
             <Select
@@ -300,8 +281,6 @@ function LlmSection() {
               {modelsBusy ? "拉取中…" : "拉取模型"}
             </Button>
           </Box>
-
-          <InlineAlert tone="info">{fixedText}</InlineAlert>
 
           <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
             <Button variant="filled" onClick={() => void save()} disabled={saving}>
@@ -659,7 +638,6 @@ function RuleSheet({
           value={pattern}
           onChange={(e) => setPattern(e.target.value)}
           autoComplete="off"
-          helperText={ruleType === "company" ? "公司名或正则" : "关键词或正则"}
         />
         <Select
           label="匹配方式"
@@ -667,15 +645,6 @@ function RuleSheet({
           value={matchMode}
           onChange={setMatchMode}
           emptyLabel={null}
-          helperText={
-            ruleType === "company"
-              ? matchMode === "exact"
-                ? "精确匹配：公司名标准化后全等才算命中"
-                : "正则匹配：按正则搜索公司名，保存/启用前会校验正则"
-              : matchMode === "contains"
-                ? "包含匹配：文本里出现规则内容即命中"
-                : "正则匹配：按正则搜索职位名/JD 正文，保存/启用前会校验正则"
-          }
         />
         {ruleType !== "company" && (
           <Select
@@ -802,7 +771,6 @@ function RuleRow({
 /** 黑名单规则段：规则增删改/启停/试跑/命中记录 + 已入库职位重检（重检进度在任务中心）。 */
 function BlacklistSection() {
   const toast = useToast();
-  const navigate = useNavigate();
   const { activeSiteId: site } = usePlatform();
   const tasks = useTaskStore((s) => s.tasks);
   const [rules, setRules] = useState<RuleView[]>([]);
@@ -856,7 +824,7 @@ function BlacklistSection() {
   }, [recheckTask, loadRules, toast]);
 
   if (!site) {
-    return <EmptyState title="还没有可用平台" description="后端注册平台后，才能管理它的黑名单规则。" />;
+    return <EmptyState title="还没有可用平台" />;
   }
 
   const toggle = async (rule: RuleView) => {
@@ -966,18 +934,11 @@ function BlacklistSection() {
         >
           {recheckStarting ? "启动中…" : recheckTaskId ? "重检中…" : "重新检查已入库职位"}
         </Button>
-        {recheckTaskId && (
-          <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-            进度与停止都在
-            <Button variant="plain" size="small" onClick={() => navigate("/tasks")}>任务中心</Button>
-            ；结束会自动刷新规则。
-          </Typography>
-        )}
       </Box>
 
       {loadError && <InlineAlert tone="danger">{loadError}</InlineAlert>}
 
-      <InsetGroup header="规则列表" footer="命中记录只做审计，不会自动删规则。">
+      <InsetGroup header="规则列表">
         {rulesLoading && rules.length === 0 ? (
           // 规则列表拉取窗口：2 行规则骨架（约等于 RuleRow 高度），数据到了直接替换不跳版
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1, p: 2 }}>
@@ -1106,7 +1067,6 @@ export function SettingsPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="设置"
-        subtitle="LLM 接口、程序更新、黑名单规则和外观偏好集中管理。修改后记得保存；当前采集任务使用启动时的配置快照。"
       />
 
       <Box sx={{ flex: "0 0 auto", mb: 3 }}>

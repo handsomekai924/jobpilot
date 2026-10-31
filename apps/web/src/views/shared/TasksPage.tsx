@@ -310,7 +310,6 @@ export function TasksPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="任务中心"
-        subtitle="所有异步任务都在这里：抓取、补 JD、解析、优化、匹配、发送、出题……可以随时停止、重试、清理。"
         actions={
           <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
             <Pill tone={failedCount > 0 ? "danger" : "static"}>
@@ -372,10 +371,7 @@ export function TasksPage() {
             ))}
           </Box>
         ) : visible.length === 0 ? (
-          <EmptyState
-            title={all.length ? "没有符合筛选条件的任务" : "还没有任何任务"}
-            description={all.length ? "换个筛选条件再看看。" : "发起抓取、投递或登录后，进度会实时推到这里。"}
-          />
+          <EmptyState title={all.length ? "没有符合筛选条件的任务" : "还没有任何任务"} />
         ) : (
           <Box>
             {visible.map((t) => (

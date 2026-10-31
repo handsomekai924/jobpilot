@@ -40,6 +40,7 @@ export function MultiSelect({
   const triggerRef = useRef<HTMLElement | null>(null);
   const summary = useMemo(() => summarize(options, values, placeholder), [options, values, placeholder]);
   const empty = values.length === 0;
+  const open = anchor != null;
 
   return (
     <Box sx={mergeSx({ display: "flex", flexDirection: "column", gap: 0.5 }, sx)}>
@@ -52,8 +53,7 @@ export function MultiSelect({
         ref={triggerRef}
         disabled={disabled}
         aria-haspopup="listbox"
-        aria-expanded={anchor != null}
-        className="apple-press"
+        aria-expanded={open}
         onClick={(e: React.MouseEvent<HTMLElement>) => setAnchor(e.currentTarget)}
         sx={{
           display: "flex",
@@ -63,13 +63,19 @@ export function MultiSelect({
           minWidth: 140,
           height: 36,
           px: 1.5,
-          border: 0,
+          border: "1px solid transparent",
+          // 边框跟随展开态而非 :focus：点开后 Popover 会把焦点抢走，:focus 边框会一闪而过
+          borderColor: open ? "primary.main" : "transparent",
           borderRadius: "12px",
           bgcolor: "surface2",
           color: empty ? "text.disabled" : "text.primary",
           ...typeScale.bodySm,
           cursor: disabled ? "default" : "pointer",
           opacity: disabled ? 0.5 : 1,
+          transition: "border-color 120ms ease",
+          "&:focus": { outline: "none" },
+          // 键盘 Tab 聚焦（未展开）时也保留焦点边框
+          "&:focus-visible": { borderColor: "primary.main" },
           "&::after": { content: '"▾"', color: "text.secondary", fontSize: 11 },
         }}
       >
@@ -95,15 +101,14 @@ export function MultiSelect({
               mt: 1,
               borderRadius: "16px",
               minWidth: 220,
-              maxHeight: 320,
-              overflowY: "auto",
               border: "1px solid",
               borderColor: "divider",
             },
           },
         }}
       >
-        <Box role="listbox" aria-multiselectable="true" sx={{ py: 1 }}>
+        {/* 最多露 5 项（行高约 32px + 列表上下各 8px），超出列表内滚动，底栏常驻 */}
+        <Box role="listbox" aria-multiselectable="true" sx={{ py: 1, maxHeight: 176, overflowY: "auto" }}>
           {options.length === 0 && (
             <Typography sx={{ ...typeScale.bodySm, color: "text.secondary", px: 2, py: 1 }}>暂无选项</Typography>
           )}

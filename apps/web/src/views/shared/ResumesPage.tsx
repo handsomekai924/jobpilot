@@ -270,7 +270,6 @@ export function ResumesPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="简历"
-        subtitle="上传简历、LLM 解析与优化修改。解析结果是人岗匹配的底稿，先在这里确认没有读错。"
       />
 
       {loadError ? (

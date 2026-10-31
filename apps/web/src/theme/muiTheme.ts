@@ -201,14 +201,14 @@ export function createAppleTheme(mode: ThemeMode): Theme {
       },
     },
 
-    // iOS 风格开关：51×31 轨道、27 圆钮
+    // iOS 风格开关：40×24 轨道、20 圆钮（对齐 small 输入框的紧凑密度）
     MuiSwitch: {
       styleOverrides: {
-        root: { width: 51, height: 31, padding: 0 },
+        root: { width: 40, height: 24, padding: 0 },
         switchBase: {
           padding: 2,
           "&.Mui-checked": {
-            transform: "translateX(20px)",
+            transform: "translateX(16px)",
             color: "#FFFFFF",
             "& + .MuiSwitch-track": {
               backgroundColor: c.ok,
@@ -217,7 +217,7 @@ export function createAppleTheme(mode: ThemeMode): Theme {
             },
           },
         },
-        thumb: { width: 27, height: 27, boxShadow: "0 1px 3px rgba(0,0,0,0.25)" },
+        thumb: { width: 20, height: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.25)" },
         track: {
           borderRadius: radius.pill,
           backgroundColor: mode === "dark" ? "rgba(120,120,128,0.5)" : "rgba(120,120,128,0.32)",
@@ -227,7 +227,8 @@ export function createAppleTheme(mode: ThemeMode): Theme {
     },
 
     MuiTextField: {
-      defaultProps: { variant: "filled", margin: "dense" },
+      // margin="dense" 在 MUI v5+ 不再缩小填充输入框，紧凑尺寸改由 size=small 统一控制
+      defaultProps: { variant: "filled", margin: "dense", size: "small" },
       styleOverrides: {
         root: {
           "& .MuiFilledInput-root": {

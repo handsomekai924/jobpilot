@@ -107,9 +107,6 @@ export function GreetingSection() {
         <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
           当前状态：{promptIsDefault ? "使用内置默认" : "使用自定义"} · 最多 {GREETING_MAX} 字
         </Typography>
-        <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-          留空 = 用内置默认。保存后下次生成 / 重新生成立即生效。
-        </Typography>
         <Typography sx={{ ...typeScale.xs, color: "text.secondary" }}>内置默认</Typography>
         <Surface sx={{ maxHeight: 180, overflowY: "auto" }}>
           <Typography

@@ -167,10 +167,7 @@ export function RecordsSection({ openRevisionId, onOpened }: {
           {Array.from({ length: 3 }, (_, i) => <Skeleton key={i} height={88} />)}
         </Box>
       ) : items.length === 0 ? (
-        <EmptyState
-          title="还没有优化记录"
-          description="到「简历优化」发起一次定向 / 自由优化，生成的修改稿会落在这里等你确认。"
-        />
+        <EmptyState title="还没有优化记录" />
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           {items.map((row) => {

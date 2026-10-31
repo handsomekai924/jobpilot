@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
 import {
-  Button, Cascader, InlineAlert, MultiSelect, Pill, SegmentedControl, Select, Sheet, Switch, TextField,
+  Button, Cascader, InlineAlert, MultiSelect, NumberField, Pill, SegmentedControl, Select, Sheet, Switch, TextField,
   type CascaderNode, type SelectOption,
 } from "../../components";
 import type { PlatformCaps } from "../../platform/types";
@@ -68,12 +68,14 @@ function ParamRow({
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
       <Typography sx={{ ...typeScale.bodySm }}>{label}</Typography>
-      <TextField
-        type="number"
+      <NumberField
         aria-label={label}
-        value={String(value)}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
-        inputProps={{ min, max, step }}
+        value={value}
+        min={min}
+        max={max}
+        step={step}
+        controlsPosition="right"
+        onChange={onChange}
         sx={{ width: 110 }}
       />
     </Box>
@@ -255,7 +257,7 @@ export function CollectionSheet({ site, caps, open, onClose, value, onSaved }: C
               <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography sx={{ ...typeScale.xs, color: "text.secondary", flex: 1, minWidth: 0 }}>
-                    {syncedAt > 0 ? `期望列表上次同步：${fmtTime(syncedAt)}` : "期望建在招聘站那边，本地只读"}
+                    {syncedAt > 0 ? `期望列表上次同步：${fmtTime(Math.floor(syncedAt / 1000))}` : "期望建在招聘站那边，本地只读"}
                   </Typography>
                   <Button size="small" variant="gray" disabled={syncing} onClick={() => void syncExpects()}>
                     {syncing ? "同步中…" : "同步"}
@@ -281,6 +283,7 @@ export function CollectionSheet({ site, caps, open, onClose, value, onSaved }: C
                           border: 0,
                           borderTop: i === 0 ? 0 : "1px solid",
                           borderColor: "divider",
+                          color: "text.primary",
                           bgcolor: active
                             ? (t) => (t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)")
                             : "transparent",
@@ -300,29 +303,15 @@ export function CollectionSheet({ site, caps, open, onClose, value, onSaved }: C
                     );
                   })}
                 </Box>
-                {expects == null && (
-                  <Typography sx={{ ...typeScale.xs, color: "text.secondary" }}>
-                    期望列表要在线拉，拉不到就先用搜索条件。
-                  </Typography>
-                )}
               </Box>
             )}
           </Box>
-        ) : (
-          <InlineAlert tone="info">
-            这个平台没有求职期望流（caps.source.expect_flow 为假），只走关键词搜索。
-          </InlineAlert>
-        )}
+        ) : null}
 
         <Box>
           <Typography sx={{ ...typeScale.s, fontWeight: 590, color: "text.secondary", mb: 1 }}>
             搜索条件
           </Typography>
-          {source === "expect" && (
-            <Typography sx={{ ...typeScale.xs, color: "text.secondary", mb: 1 }}>
-              期望流下这些维度多数不进请求串，留着也行，切回搜索条件才生效。
-            </Typography>
-          )}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             <TextField
               label={DIM_LABEL.keyword}
@@ -432,13 +421,13 @@ export function CollectionSheet({ site, caps, open, onClose, value, onSaved }: C
               value={draft.collection.max_pages ?? 5}
               min={1}
               max={10}
-              onChange={(n) => patchCollection({ max_pages: n || 1 })}
+              onChange={(n) => patchCollection({ max_pages: n })}
             />
             <ParamRow
               label="起始页"
               value={draft.collection.start_page ?? 1}
               min={1}
-              onChange={(n) => patchCollection({ start_page: n || 1 })}
+              onChange={(n) => patchCollection({ start_page: n })}
             />
             <ParamRow
               label="翻页间隔（秒）"

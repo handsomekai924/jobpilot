@@ -14,7 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 
 import {
-  InlineAlert, PageHeader, pageRootSx, ScrollArea, SegmentedControl, useToast, ViewFade,
+  PageHeader, pageRootSx, ScrollArea, SegmentedControl, useToast, ViewFade,
 } from "../../components";
 import { useTasks } from "../../stores/taskStore";
 import {
@@ -184,15 +184,7 @@ export function MatchPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="匹配"
-        subtitle="拿你的简历和搜到的岗位逐个比对：给出匹配度、好在哪、差在哪，还有一句给 HR 的开场白（可自己改）。"
       />
-
-      {/* 发对话/投递是平台作用域（各家登录态、各家通道），归 M3 的 deliver 页——这里只留路标 */}
-      <Box sx={{ flex: "0 0 auto" }}>
-        <InlineAlert tone="info">
-          发对话与投递已移到平台侧『发对话与投递』页——那页按平台登录态操作，这页只管匹配、历史分析和招呼语文案。
-        </InlineAlert>
-      </Box>
 
       <Box sx={{ my: 2.5, flex: "0 0 auto" }}>
         <SegmentedControl<TabValue>

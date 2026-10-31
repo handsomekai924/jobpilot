@@ -231,7 +231,7 @@ export function ReviseSection({
   };
 
   if (resumes.length === 0) {
-    return <EmptyState title="还没有简历" description="先到「简历库」上传一份简历，再回来做优化。" />;
+    return <EmptyState title="还没有简历" />;
   }
 
   const running = task != null && !reviseTerminal(task);

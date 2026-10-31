@@ -5,12 +5,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 
 import {
   Button, CellTitle, DataTable, ScrollArea, Surface, TextField, pageRootSx, useToast, type Column,
 } from "../../../components";
-import { typeScale } from "../../../theme/tokens";
 import { fmtNumber, fmtTime } from "../../../utils/format";
 import { interviewApi } from "../repos";
 import { errMsg, PAGE_SIZE, type PrepTarget, type RecordRow } from "./types";
@@ -114,9 +113,6 @@ export function RecordsSection({
         >
           查询
         </Button>
-        <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-          一岗一套题；点「详情」进题目侧栏浏览、补题、导出。
-        </Typography>
       </Surface>
 
       <ScrollArea sx={{ pt: 0 }}>

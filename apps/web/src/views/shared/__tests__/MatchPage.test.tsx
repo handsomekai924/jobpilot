@@ -451,8 +451,8 @@ describe("MatchPage 工作台布局与搜索范围", () => {
 
 describe("MatchPage 匹配结果骨架屏", () => {
   it("载入历史分析在途用骨架屏预占结果区，回来后换成真卡", async () => {
-    // 详情回包拖慢一点，才能截到「在途」那一帧
-    vi.stubGlobal("fetch", stubFetchWithDelay("/api/match/analyses/a1", 150));
+    // 详情回包拖慢一点，才能截到「在途」那一帧（太短会在断言前就回包）
+    vi.stubGlobal("fetch", stubFetchWithDelay("/api/match/analyses/a1", 800));
     fetchMock = globalThis.fetch as unknown as ReturnType<typeof stubFetch>;
 
     renderPage();
@@ -472,9 +472,9 @@ describe("MatchPage 匹配结果骨架屏", () => {
 });
 
 describe("MatchPage 发对话/投递的归属", () => {
-  it("页面上没有投递/发对话的假按钮，只有一条搬家说明", async () => {
+  it("页面上没有投递/发对话的假按钮", async () => {
     renderPage();
-    expect(await screen.findByText(/发对话与投递已移到平台侧/)).toBeInTheDocument();
+    await screen.findByRole("radio", { name: "匹配工作台" });
     const names = screen.getAllByRole("button").map((b) => b.textContent ?? "");
     expect(names.join(" ")).not.toMatch(/投递|发对话|发送|打招呼/);
   });

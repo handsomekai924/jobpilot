@@ -77,7 +77,7 @@ describe("LoginPage 主动登录", () => {
     // 空态是一整句，别用精确匹配去找「还没登录」
     expect(await screen.findByText(/还没登录/)).toBeInTheDocument();
     // SegmentedControl 的选项是 role=radio，不是 button
-    expect(screen.getByRole("radio", { name: /手机号 \+ 验证码/ })).toBeEnabled();
+    expect(screen.getByRole("radio", { name: "手机号" })).toBeEnabled();
     // 默认落在短信档，发码按钮在
     expect(screen.getByRole("button", { name: "发送验证码" })).toBeInTheDocument();
 

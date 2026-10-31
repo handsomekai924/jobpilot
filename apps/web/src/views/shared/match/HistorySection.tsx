@@ -95,10 +95,7 @@ export function HistorySection({
       {/* 只有历史项列表局部滚动 */}
       <ScrollArea>
         {rows.length === 0 ? (
-          <EmptyState
-            title="还没有历史分析"
-            description="跑过一次匹配后，结果会归档到这里，随时可以载回来看或删掉。"
-          />
+          <EmptyState title="还没有历史分析" />
         ) : (
           <Box>
             {rows.map((row) => (

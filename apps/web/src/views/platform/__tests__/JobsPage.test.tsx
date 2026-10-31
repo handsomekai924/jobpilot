@@ -150,7 +150,7 @@ describe("JobsPage 列表与采集", () => {
     expect(urls.some((u) => u.startsWith("/api/jobs"))).toBe(false);
   });
 
-  it("采集条件摘要带关键词与页数，期望流不出口时连提示都不出", async () => {
+  it("采集条件摘要带关键词与页数，不摆期望流说明", async () => {
     vi.stubGlobal("fetch", stubFetch({ expect_flow: false }));
     renderPage();
     await screen.findByText("前端工程师");
@@ -161,12 +161,6 @@ describe("JobsPage 列表与采集", () => {
     expect(screen.getByText(/抓取 JD/)).toBeInTheDocument();
     // 期望流的说明（与侧栏入口）都按 caps 走，不为假入口
     expect(screen.queryByText(/支持求职期望流/)).not.toBeInTheDocument();
-  });
-
-  it("caps.source.expect_flow 为真时给期望流说明", async () => {
-    renderPage();
-    await screen.findByText("前端工程师");
-    expect(screen.getByText(/支持求职期望流/)).toBeInTheDocument();
   });
 
   it("开始采集打 /crawl/start，跑起来后按钮变「采集中…」", async () => {

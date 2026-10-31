@@ -267,7 +267,7 @@ describe("InterviewPage 出题", () => {
 });
 
 describe("InterviewPage 补题", () => {
-  it("选题型 + 条数 → generate 带 question_type/question_count，文案写明不覆盖旧题", async () => {
+  it("选题型 + 条数 → generate 带 question_type/question_count", async () => {
     renderPage();
     await screen.findByText("前端工程师");
     await userEvent.click(screen.getAllByRole("button", { name: "查看" })[0]);
@@ -275,8 +275,6 @@ describe("InterviewPage 补题", () => {
     expect(await screen.findByText("上下文与摘要")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "补题" }));
-    // 补题语义必须写在 UI 上：只补所选题型、追加、不覆盖旧题
-    expect(screen.getByText(/不覆盖旧题/)).toBeInTheDocument();
     await userEvent.click(combo("题型"));
     await userEvent.click(await screen.findByRole("option", { name: "场景" }));
 
@@ -313,13 +311,6 @@ describe("InterviewPage 生成任务迁任务中心", () => {
 
     // 管理动作（取消/重试/删除）都在任务中心，本页不出这段
     expect(screen.queryByRole("radio", { name: "生成任务" })).not.toBeInTheDocument();
-  });
-
-  it("留任务中心路标，不摆假按钮", async () => {
-    renderPage();
-    await screen.findByText("前端工程师");
-    expect(screen.getByText(/生成任务的进度/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "去看" })).toBeInTheDocument();
   });
 });
 

@@ -149,7 +149,7 @@ export function ColumnChart({
   }, [data, unit, formatValue, labeled, colors]);
 
   if (data.length === 0) {
-    return <EmptyState title="暂无数据" description="有数据后这里出图。" />;
+    return <EmptyState title="暂无数据" />;
   }
 
   return (

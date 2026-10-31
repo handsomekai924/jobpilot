@@ -254,9 +254,6 @@ export function GenerateSection({
         >
           {genKey === "batch" ? "出题中…" : `出题（已选 ${selected.size}）`}
         </Button>
-        <Typography sx={{ ...typeScale.s, color: "text.secondary", flexBasis: "100%" }}>
-          勾选岗位后批量出题；题量按匹配度自动（10–15 题），不手动指定；已在任务里的岗位会自动跳过。
-        </Typography>
       </Surface>
 
       <ScrollArea sx={{ pt: 0 }}>

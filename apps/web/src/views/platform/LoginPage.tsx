@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
 import {
-  Button, InlineAlert, PageHeader, Pill, ScrollArea, SegmentedControl, StatusDot, Surface, TextField,
+  Button, PageHeader, Pill, ScrollArea, SegmentedControl, StatusDot, Surface, TextField,
   pageRootSx, useToast,
 } from "../../components";
 import { usePlatform } from "../../platform/PlatformProvider";
@@ -27,12 +27,6 @@ const FEED_TITLE: Record<AuthFeed["kind"], string> = {
   code: "需要你输入短信验证码",
   slider: "需要你过一下滑块",
   scan: "需要你扫码确认",
-};
-
-const FEED_HINT: Record<AuthFeed["kind"], string> = {
-  code: "验证码已经发到手机上，填进来就继续。",
-  slider: "风控要求人拖一次滑块。打开下面的页面，拖完票据会自动递回来。",
-  scan: "用招聘 App 扫下面的码，在手机上点确认。",
 };
 
 /** 手机号打码只做展示；提交用原值。 */
@@ -113,10 +107,6 @@ function FeedCard({
         {feed.phone_masked && <Pill tone="static">{feed.phone_masked}</Pill>}
         <Typography sx={{ ...typeScale.xs, color: "text.secondary" }}>{fmtClock(feed.at)}</Typography>
       </Box>
-
-      <Typography sx={{ ...typeScale.s, color: "text.secondary", mb: 1.5 }}>
-        {FEED_HINT[feed.kind]}
-      </Typography>
 
       {feed.kind === "code" && (
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
@@ -219,7 +209,6 @@ export function LoginPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="登录与会话"
-        subtitle={`${activePlatform?.display_name ?? site} · 发码登录，或用 App 扫码；风控拦住时由你本人过滑块`}
         actions={
           session ? (
             <StatusDot
@@ -279,17 +268,11 @@ export function LoginPage() {
               value={mode}
               onChange={(v) => setMode(v as Mode)}
               options={[
-                { value: "sms", label: "手机号 + 验证码", disabled: !canSms },
+                { value: "sms", label: "手机号", disabled: !canSms },
                 { value: "qr", label: "App 扫码", disabled: !canQr },
               ]}
             />
           </Box>
-
-          {!canSms && !canQr && (
-            <InlineAlert tone="warn">
-              这个平台没声明任何登录方式（caps.auth 全为假），登录页在这里只是占位。
-            </InlineAlert>
-          )}
 
           {mode === "sms" && (
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "flex-end" }}>
@@ -355,13 +338,6 @@ export function LoginPage() {
             </Box>
           )}
         </Surface>
-
-        {caps?.slider && (
-          <Typography sx={{ ...typeScale.s, color: "text.secondary", mt: 2 }}>
-            这个平台可能触发风控滑块——出现时上面会自动出一张「需要你过一下滑块」的卡，
-            拖完票据由后端递回，不需要你做别的。
-          </Typography>
-        )}
       </ScrollArea>
     </Box>
   );

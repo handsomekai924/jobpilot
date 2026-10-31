@@ -14,13 +14,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box } from "@mui/material";
 
 import { PageHeader, pageRootSx, SegmentedControl, ViewFade } from "../../components";
 import { useTaskStore, useTasks } from "../../stores/taskStore";
 import { getStatus } from "../../ws/client";
-import { typeScale } from "../../theme/tokens";
 import { interviewApi } from "./repos";
 import { busyJobIds, toTaskSnapshot, type InterviewTaskSnap } from "./interview/types";
 import { GenerateSection } from "./interview/GenerateSection";
@@ -34,7 +32,6 @@ const TABS = [
 type TabValue = (typeof TABS)[number]["value"];
 
 export function InterviewPage() {
-  const navigate = useNavigate();
   const allTasks = useTasks();
   const upsert = useTaskStore((s) => s.upsert);
 
@@ -74,7 +71,6 @@ export function InterviewPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="面试题"
-        subtitle="按抓取批次或职位名挑一批岗位批量出题；生成的题可以逐题浏览、补题、导出。"
       />
 
       <Box sx={{ my: 2.5, flex: "0 0 auto" }}>
@@ -99,21 +95,6 @@ export function InterviewPage() {
           <RecordsSection busy={busy} onTaskStarted={() => void refreshTasks()} />
         )}
       </ViewFade>
-
-      {/* 生成任务已迁任务中心——留路标，不摆假按钮；固定在最外层底部，不随内容滚 */}
-      <Typography sx={{ ...typeScale.s, color: "text.secondary", mt: 2, flex: "0 0 auto" }}>
-        生成任务的进度、取消 / 重试 / 删除都在任务中心
-        <Box
-          component="button"
-          onClick={() => navigate("/tasks")}
-          sx={{
-            border: 0, bgcolor: "transparent", color: "primary.main", cursor: "pointer",
-            font: "inherit", textDecoration: "underline", ml: 0.5, p: 0,
-          }}
-        >
-          去看
-        </Box>
-      </Typography>
     </Box>
   );
 }

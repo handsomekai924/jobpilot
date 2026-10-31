@@ -87,7 +87,7 @@ export function SegmentedControl<T extends string = string>({
               minWidth: size === "sm" ? 56 : 72,
               height: size === "sm" ? 28 : 32,
               px: size === "sm" ? 1.5 : 2.25,
-              border: 0,
+              border: "1px solid transparent",
               borderRadius: "999px",
               bgcolor: "transparent",
               color: selected ? "text.primary" : "text.secondary",
@@ -100,6 +100,8 @@ export function SegmentedControl<T extends string = string>({
               ...(size === "sm" ? typeScale.s : typeScale.bodySm),
               fontWeight: 590,
               WebkitTapHighlightColor: "transparent",
+              transition: "border-color 120ms ease",
+              "&:focus": { outline: "none" },
             }}
           >
             {selected && (

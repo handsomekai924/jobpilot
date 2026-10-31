@@ -130,7 +130,6 @@ export function Cascader({
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="apple-press"
         onClick={openAt}
         sx={{
           display: "flex",
@@ -140,13 +139,19 @@ export function Cascader({
           minWidth: 140,
           height: 36,
           px: 1.5,
-          border: 0,
+          border: "1px solid transparent",
+          // 边框跟随展开态而非 :focus：点开后 Popover 会把焦点抢走，:focus 边框会一闪而过
+          borderColor: open ? "primary.main" : "transparent",
           borderRadius: "12px",
           bgcolor: "surface2",
           color: empty ? "text.disabled" : "text.primary",
           ...typeScale.bodySm,
           cursor: disabled ? "default" : "pointer",
           opacity: disabled ? 0.5 : 1,
+          transition: "border-color 120ms ease",
+          "&:focus": { outline: "none" },
+          // 键盘 Tab 聚焦（未展开）时也保留焦点边框
+          "&:focus-visible": { borderColor: "primary.main" },
           "&::after": { content: '"▾"', color: "text.secondary", fontSize: 11 },
         }}
       >
@@ -173,7 +178,7 @@ export function Cascader({
           },
         }}
       >
-        <Box sx={{ display: "flex", minWidth: 200 }}>
+        <Box sx={{ display: "flex", minWidth: 160 }}>
           {nodes.length === 0 && (
             <Typography sx={{ ...typeScale.bodySm, color: "text.secondary", px: 2, py: 1.5 }}>
               暂无选项
@@ -184,7 +189,8 @@ export function Cascader({
               key={i}
               sx={{
                 minWidth: 160,
-                maxHeight: 280,
+                // 每列最多露 5 项（行高约 36px），超出列内滚动
+                maxHeight: 180,
                 overflowY: "auto",
                 borderRight: i < cols.length - 1 ? "1px solid" : 0,
                 borderColor: "divider",

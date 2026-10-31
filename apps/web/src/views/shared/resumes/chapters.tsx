@@ -72,11 +72,6 @@ export function ParsedChapters({ data }: { data: ParsedData }) {
           {intent.position ? <Pill tone="accent">{intent.position}</Pill> : null}
           {intent.city ? <Pill tone="static">{intent.city}</Pill> : null}
           {intent.salary ? <Pill tone="static">{intent.salary}</Pill> : null}
-          {!intent.position && !intent.city && !intent.salary ? (
-            <Typography sx={{ ...typeScale.s, color: "text.secondary" }}>
-              没有期望岗位 / 城市 / 薪资——去「查看原文」看看是不是没写在简历里
-            </Typography>
-          ) : null}
         </Box>
       </Box>
 

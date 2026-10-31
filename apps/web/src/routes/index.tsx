@@ -77,7 +77,6 @@ function PlatformExtraPage() {
   return (
     <PendingPage
       title={title}
-      scope={platform?.display_name ?? siteId}
       legacyHash={PLATFORM_LEGACY[key ?? ""] ?? PLATFORM_LEGACY.expect}
     />
   );

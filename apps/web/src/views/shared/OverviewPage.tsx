@@ -96,7 +96,6 @@ export function OverviewPage() {
     <Box sx={pageRootSx}>
       <PageHeader
         title="总览"
-        subtitle="各平台会话、职位库、在跑任务与常用入口"
       />
 
       <ScrollArea>
@@ -135,7 +134,7 @@ export function OverviewPage() {
         {loading ? (
           <Typography sx={{ ...typeScale.bodySm, color: "text.secondary" }}>加载中…</Typography>
         ) : platforms.length === 0 ? (
-          <EmptyState title="还没有平台" description="后端注册平台后，这里会列出各站点的会话状态。" />
+          <EmptyState title="还没有平台" />
         ) : (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 4 }}>
             {platforms.map((p) => (
@@ -154,7 +153,7 @@ export function OverviewPage() {
           在跑任务
         </Typography>
         {running.length === 0 ? (
-          <EmptyState title="当前没有在跑的任务" description="发起抓取、投递或登录后，进度会实时推到这里。" />
+          <EmptyState title="当前没有在跑的任务" />
         ) : (
           <Box sx={{ mb: 4 }}>
             {running.map((t) => (

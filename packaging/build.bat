@@ -16,7 +16,7 @@ if not exist ".venv\Scripts\python.exe" (
   exit /b 1
 )
 
-rem The React shell is built first: PyInstaller packs boss_web/static/dist.
+rem The React shell is built first: PyInstaller packs boss_server/static/dist.
 rem Without it the frozen exe starts into an empty page, so fail loudly here.
 where pnpm >nul 2>nul
 if errorlevel 1 (
@@ -46,7 +46,7 @@ if exist "dist" (
   exit /b 1
 )
 
-.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm --distpath dist --workpath build packaging\boss_web.spec
+.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm --distpath dist --workpath build packaging\boss_server.spec
 if errorlevel 1 exit /b 1
 
 .venv\Scripts\python.exe packaging\make_zip.py

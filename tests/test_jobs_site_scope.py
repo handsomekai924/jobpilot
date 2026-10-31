@@ -188,7 +188,7 @@ def client():
     """起一个不带假服务端的测试客户端。"""
     from fastapi.testclient import TestClient
 
-    from boss_web import create_app
+    from boss_server import create_app
 
     return TestClient(create_app())
 

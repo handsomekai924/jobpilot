@@ -12,9 +12,9 @@ from fastapi.testclient import TestClient
 
 from boss_jobs.models import Job, PageResult
 from boss_jobs.store import JobStore
-from boss_web import create_app
-from boss_web.services import blacklist
-from boss_web.services.blacklist_recheck import RecheckTaskManager, recheck_tasks
+from boss_server import create_app
+from boss_server.services import blacklist
+from boss_server.services.blacklist_recheck import RecheckTaskManager, recheck_tasks
 
 
 @pytest.fixture
@@ -408,7 +408,7 @@ def test_blacklist_recheck_api_endpoints(client: TestClient):
 
 def test_match_auto_delivery_blocked_helper():
     """验证自动投递拦截判定的各分支。"""
-    from boss_web.services.match_task import _auto_delivery_blocked
+    from boss_server.services.match_task import _auto_delivery_blocked
 
     assert _auto_delivery_blocked({"company_blacklisted": True})
     assert _auto_delivery_blocked({"jd_blacklisted": True})
@@ -427,7 +427,7 @@ def test_match_auto_delivery_blocked_helper():
 
 def test_crawl_task_progress_does_not_double_count_finished():
     """验证 finished 事件不重复累计进度。"""
-    from boss_web.services.crawl_task import CrawlTask
+    from boss_server.services.crawl_task import CrawlTask
 
     task = CrawlTask({})
     task.push({"event": "page", "page": 1, "inserted": 2, "updated": 1, "company_hits": 1, "jd_hits": 1})
@@ -440,7 +440,7 @@ def test_crawl_task_progress_does_not_double_count_finished():
 
 def test_crawl_task_detail_done_counts_empty():
     """验证空描述详情也计入完成数。"""
-    from boss_web.services.crawl_task import CrawlTask
+    from boss_server.services.crawl_task import CrawlTask
 
     task = CrawlTask({})
     task.push({"event": "detail_done", "has_desc": False, "jd_status": "empty"})
@@ -450,7 +450,7 @@ def test_crawl_task_detail_done_counts_empty():
 
 def test_crawl_task_snapshot_feeds_task_center():
     """任务中心卡片的「当前/进度」直接读 snapshot：阶段给中文，进度按页数算。"""
-    from boss_web.services.crawl_task import CrawlTask
+    from boss_server.services.crawl_task import CrawlTask
 
     task = CrawlTask({"max_pages": 5})
     task.phase = "crawl"
@@ -469,7 +469,7 @@ def test_crawl_task_snapshot_feeds_task_center():
 
 def test_match_includes_safety_snapshot():
     """match 结果必须带完整安全快照（安全状态字段一个不能少）。"""
-    from boss_web.services.match_task import _blacklist_snapshot
+    from boss_server.services.match_task import _blacklist_snapshot
 
     job = make_job("z1", brand_name="甲公司", job_desc="写代码")
     snap = _blacklist_snapshot(job)

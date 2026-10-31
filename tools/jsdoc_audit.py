@@ -3,7 +3,7 @@
 用法：
 
     python tools/jsdoc_audit.py                   # 全仓
-    python tools/jsdoc_audit.py boss_web/static   # 指定路径
+    python tools/jsdoc_audit.py apps/server/src/boss_server/static   # 指定路径
 
 退出码 1 = 有 MISSING / DELETE_ME / RST 残留；过长只告警。
 

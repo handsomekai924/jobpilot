@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_web import create_app
+from boss_server import create_app
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@
  * 接口形状按后端来（repos 的类型面有几处窄了，读的时候再放宽，见原 MatchPage 文件头）。
  */
 
-/** 一条匹配结果（`MatchTask._match_job` 的 item；详见 boss_web/services/match_task.py）。 */
+/** 一条匹配结果（`MatchTask._match_job` 的 item；详见 boss_server/services/match_task.py）。 */
 export interface MatchItem {
   encrypt_job_id: string;
   job_name: string;

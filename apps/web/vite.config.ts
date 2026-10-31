@@ -2,7 +2,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// dev 代理到本地 server（boss_web/config.py 的 DEFAULT_PORT = 8787）
+// dev 代理到本地 server（boss_server/config.py 的 DEFAULT_PORT = 8787）
 const SERVER = "http://127.0.0.1:8787";
 
 const SRC = decodeURIComponent(new URL("./src", import.meta.url).pathname)
@@ -20,8 +20,8 @@ export default defineConfig({
     },
   },
   build: {
-    // 产物直接落 boss_web/static/dist，PyInstaller 照常收集（改造文档第八节）
-    outDir: "../../boss_web/static/dist",
+    // 产物直接落 boss_server/static/dist，PyInstaller 照常收集（改造文档第八节）
+    outDir: "../../apps/server/src/boss_server/static/dist",
     emptyOutDir: true,
   },
   test: {

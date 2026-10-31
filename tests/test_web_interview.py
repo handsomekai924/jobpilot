@@ -11,9 +11,9 @@ from fastapi.testclient import TestClient
 
 from boss_jobs.models import Job, PageResult
 from boss_jobs.store import JobStore
-from boss_web.app import create_app
-from boss_web.services import interview_generator as IG
-from boss_web.services import interview_generation_task as IGT
+from boss_server.app import create_app
+from boss_server.services import interview_generator as IG
+from boss_server.services import interview_generation_task as IGT
 
 SAMPLE = """# 张三
 
@@ -419,7 +419,7 @@ def test_reference_answer_legacy_key_compat(client):
 def test_api_generate_task_flow(client, monkeypatch):
     """generate → 任务跑完（假出题）→ 列表能看到题。"""
     _seed_analysis()
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -549,7 +549,7 @@ def test_api_generation_records(client):
 def test_api_generate_batch_without_analysis(client, monkeypatch):
     """批量出题：有分析的带上 match，没分析的按裸 JD + 简历出；重跑原地替换。"""
     _seed_analysis(job_ids=["j1", "j2"])
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -617,7 +617,7 @@ def test_api_generate_batch_requires_jobs(client):
 def test_api_supplement_type_and_limit(client, monkeypatch):
     """补题：只补指定题型、追加不覆盖、避开已有题；条数最多 10。"""
     _seed_analysis()
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -681,7 +681,7 @@ def test_parallel_tasks_and_no_dup_submit(client, monkeypatch):
                 has_more=False,
             )
         )
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -731,7 +731,7 @@ def test_parallel_tasks_and_no_dup_submit(client, monkeypatch):
 def test_task_center_delete_retry(client, monkeypatch):
     """失败任务保留展示，可删除 / 重试；单岗失败不拖垮，占用口径只算 running。"""
     _seed_analysis(job_ids=["j1", "j2"])
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 

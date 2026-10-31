@@ -17,21 +17,21 @@ from boss_jobs import GreetingDelivery, Job, JobApiError
 from boss_jobs.config import BROWSER_CHECK_GIVEUP
 from boss_jobs.models import PageResult
 from boss_jobs.store import JobStore
-from boss_web import config as C
-from boss_web import create_app
-from boss_web.errors import ConflictError
-from boss_web.services.deliver_config_store import (
+from boss_server import config as C
+from boss_server import create_app
+from boss_server.errors import ConflictError
+from boss_server.services.deliver_config_store import (
     DeliverConfig,
     load_config,
     save_config,
     update_config,
 )
-from boss_web.services.deliver_task import (
+from boss_server.services.deliver_task import (
     GREET_COOLDOWN_SECONDS,
     DeliverTaskManager,
     greet_cooldown_state,
 )
-from boss_web.services.resume_store import load_analysis, save_analysis
+from boss_server.services.resume_store import load_analysis, save_analysis
 
 
 class FakeGreetClient:
@@ -602,7 +602,7 @@ def fake_client() -> FakeGreetClient:
 @pytest.fixture
 def patched_manager(monkeypatch, fake_client):
     """把接口层用的全局任务管理器换成注入假客户端的——绝不打真网络。"""
-    import boss_web.api.deliver as api_deliver
+    import boss_server.api.deliver as api_deliver
 
     mgr = DeliverTaskManager(
         client_factory=lambda: fake_client, sleeper=lambda _s: None, interval=0.0

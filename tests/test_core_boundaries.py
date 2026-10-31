@@ -1,4 +1,4 @@
-"""共享层的边界守卫：站点私有语义与反向依赖不得渗进 `boss_web/core/`。
+"""共享层的边界守卫：站点私有语义与反向依赖不得渗进 `boss_server/core/`。
 
 Attributes:
     SITE_PRIVATE_WORDS: 站点私有语义的指纹；共享层的代码字符串里一个都不该出现。
@@ -10,7 +10,8 @@ from __future__ import annotations
 import ast
 import pathlib
 
-CORE = pathlib.Path(__file__).resolve().parent.parent / "boss_web" / "core"
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+CORE = ROOT / "apps" / "server" / "src" / "boss_server" / "core"
 
 SITE_PRIVATE_WORDS: tuple[str, ...] = (
     "开聊提醒",
@@ -33,10 +34,10 @@ FORBIDDEN_IMPORTS: tuple[str, ...] = (
     "boss_login",
     "boss_filter",
     "boss_db",
-    "boss_web.services",
-    "boss_web.api",
-    "boss_web.app",
-    "boss_web.cli",
+    "boss_server.services",
+    "boss_server.api",
+    "boss_server.app",
+    "boss_server.cli",
 )
 
 

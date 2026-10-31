@@ -5,9 +5,9 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_web import create_app
-from boss_web.errors import ConflictError
-from boss_web.services.task_runtime import (
+from boss_server import create_app
+from boss_server.errors import ConflictError
+from boss_server.services.task_runtime import (
     POLICY_GLOBAL_SINGLE,
     POLICY_PER_KEY_SINGLE,
     POLICY_UNLIMITED,

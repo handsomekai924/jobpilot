@@ -44,7 +44,7 @@ def clean_store():
 @pytest.fixture(autouse=True)
 def reset_task_hub():
     """任务中心是进程内单例：用例之间清掉任务记录，免得旧任务的占用串场。"""
-    from boss_web.services.task_runtime import hub
+    from boss_server.services.task_runtime import hub
 
     hub.reset()
     yield

@@ -7,8 +7,8 @@ import time
 import pytest
 
 import boss_db
-from boss_web.core.contracts import DeliverFault
-from boss_web.core.limits import (
+from boss_server.core.contracts import DeliverFault
+from boss_server.core.limits import (
     BREAKER_TRIP,
     Breaker,
     FaultAction,
@@ -217,8 +217,8 @@ class FakeGreetClient:
 
 def _run_deliver(matches: list[dict]):
     """落 analysis → 起发送任务 → 等结束，回 `(快照, 假客户端, 睡过的间隔)`。"""
-    from boss_web.services.deliver_task import DeliverTaskManager
-    from boss_web.services.resume_store import save_analysis
+    from boss_server.services.deliver_task import DeliverTaskManager
+    from boss_server.services.resume_store import save_analysis
 
     aid = save_analysis(
         {
@@ -311,7 +311,7 @@ def client():
     """起一个不带假服务端的测试客户端。"""
     from fastapi.testclient import TestClient
 
-    from boss_web import create_app
+    from boss_server import create_app
 
     return TestClient(create_app())
 

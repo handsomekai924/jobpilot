@@ -13,8 +13,9 @@ import ast
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-CORE = ROOT / "boss_web" / "core"
-SERVICES = ROOT / "boss_web" / "services"
+SERVER = ROOT / "apps" / "server" / "src" / "boss_server"
+CORE = SERVER / "core"
+SERVICES = SERVER / "services"
 
 TEMPLATE_HOLES: dict[str, frozenset[str]] = {
     "run_crawl": frozenset({
@@ -122,18 +123,18 @@ def test_共享规则的输入不是洞():
 
 
 def _core_modules() -> dict[str, pathlib.Path]:
-    """`boss_web.core.*` 的模块名 → 源文件（`adapters/` 是站点实现，不在此列）。"""
+    """`boss_server.core.*` 的模块名 → 源文件（`adapters/` 是站点实现，不在此列）。"""
     out: dict[str, pathlib.Path] = {}
     for path in sorted(CORE.rglob("*.py")):
         if "adapters" in path.parts or path.name == "__init__.py":
             continue
-        rel = path.relative_to(ROOT).with_suffix("")
+        rel = path.relative_to(SERVER.parent).with_suffix("")
         out[".".join(rel.parts)] = path
     return out
 
 
 def _imports_of(path: pathlib.Path, module: str) -> set[str]:
-    """这个文件相对 import 到的兄弟模块名（只有 `boss_web.core.*` 算边）。"""
+    """这个文件相对 import 到的兄弟模块名（只有 `boss_server.core.*` 算边）。"""
     package = module.rsplit(".", 1)[0]
     tree = ast.parse(path.read_text(encoding="utf-8"))
     edges: set[str] = set()
@@ -144,7 +145,7 @@ def _imports_of(path: pathlib.Path, module: str) -> set[str]:
         for _ in range(node.level - 1):
             base = base.rsplit(".", 1)[0] if "." in base else ""
         target = f"{base}.{node.module}" if node.module else base
-        if not target.startswith("boss_web.core"):
+        if not target.startswith("boss_server.core"):
             continue
         edges.add(target)
         if node.module is None:
@@ -246,9 +247,9 @@ ALIAS_PREFIXES: tuple[str, ...] = (
 
 
 def _backend_files() -> list[pathlib.Path]:
-    """`boss_web/` 下的源文件（`static/` 是前端产物，不在此列）。"""
+    """`boss_server/` 下的源文件（`static/` 是前端产物，不在此列）。"""
     return sorted(
-        p for p in (ROOT / "boss_web").rglob("*.py") if "static" not in p.parts
+        p for p in SERVER.rglob("*.py") if "static" not in p.parts
     )
 
 

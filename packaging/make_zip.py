@@ -1,7 +1,7 @@
 """把 `dist\\BossAutoDelivery\\` 打成发行 zip。
 
 产物扁平布局（zip 根 = exe + `_internal/`），解压进哪个目录哪个就是安装目录。
-版本号用正则读 `boss_web/__init__.py`，不 import 包。
+版本号用正则读 `apps/server/src/boss_server/__init__.py`，不 import 包。
 
 Attributes:
     SKIP_DIR_NAMES: 不进发行包的目录名。
@@ -30,11 +30,11 @@ REQUIRED_MEMBERS = (EXE_NAME, "_internal/base_library.zip")
 
 
 def read_version() -> str:
-    """从 `boss_web/__init__.py` 里正则抠出版本号；读不到时抛 `SystemExit`。"""
-    text = (ROOT / "boss_web" / "__init__.py").read_text(encoding="utf-8")
+    """从 `apps/server/src/boss_server/__init__.py` 里正则抠出版本号；读不到时抛 `SystemExit`。"""
+    text = (ROOT / "apps" / "server" / "src" / "boss_server" / "__init__.py").read_text(encoding="utf-8")
     m = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', text, re.M)
     if not m:
-        raise SystemExit("读不到 boss_web/__init__.py 里的 __version__")
+        raise SystemExit("读不到 apps/server/src/boss_server/__init__.py 里的 __version__")
     return m.group(1)
 
 

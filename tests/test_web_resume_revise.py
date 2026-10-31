@@ -9,8 +9,8 @@ from fastapi.testclient import TestClient
 
 from boss_jobs.models import Job, PageResult
 from boss_jobs.store import JobStore
-from boss_web.app import create_app
-from boss_web.services import resume_revision as RR
+from boss_server.app import create_app
+from boss_server.services import resume_revision as RR
 
 
 def make_job(jid: str = "id-1", *, job_desc: str = "职责 A", **kw) -> Job:
@@ -117,7 +117,7 @@ def test_generate_revision_ok():
                     {"section": "技能标签", "type": "keyword", "summary": "补高并发", "reason": "对齐 JD"}
                 ],
             }
-            from boss_web.services.llm_client import ChatResult
+            from boss_server.services.llm_client import ChatResult
             return ChatResult(json.dumps(payload, ensure_ascii=False), None)
 
     res = RR.generate_revision(resume_id="rs_x", jobs=[make_job("a")], llm=FakeLLM())
@@ -137,7 +137,7 @@ def test_generate_revision_rejects_hallucination_empty():
 
         def chat_with_metadata(self, messages, **kw):
             """回 `revised_md` 为空串的 JSON。"""
-            from boss_web.services.llm_client import ChatResult
+            from boss_server.services.llm_client import ChatResult
             return ChatResult(json.dumps({"revised_md": ""}, ensure_ascii=False), None)
 
     boss_db.acquire().execute(
@@ -171,11 +171,11 @@ def test_api_revise_start_and_save(client, monkeypatch):
     """走通 start → 生成（假 LLM）→ save 写盘 + 入库。"""
     rid, job_ids = _seed(client)
 
-    from boss_web.services.llm_config_store import LLMConfig, save_config
+    from boss_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
-    import boss_web.services.resume_revision_task as RRT
+    import boss_server.services.resume_revision_task as RRT
 
     captured = {}
 

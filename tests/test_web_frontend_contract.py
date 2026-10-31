@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pytest
 
-STATIC = Path(__file__).resolve().parents[1] / "boss_web" / "static"
+STATIC = Path(__file__).resolve().parents[1] / "apps" / "server" / "src" / "boss_server" / "static"
 
 
 def _read(rel: str) -> str:
-    """读旧 SPA（`boss_web/static/legacy/`）下的相对路径文件文本。"""
+    """读旧 SPA（`boss_server/static/legacy/`）下的相对路径文件文本。"""
     path = STATIC / "legacy" / rel
     assert path.is_file(), f"缺少静态文件：legacy/{rel}"
     return path.read_text(encoding="utf-8")
@@ -333,10 +333,10 @@ def test_APIKey保存后不回填输入框(llm_js: str):
 
 def test_后端返回的是掩码Key():
     """验后端返回的是掩码 Key，接口层只吐 masked()，不吐原值。"""
-    src = (STATIC.parents[1] / "boss_web" / "services" / "llm_config_store.py").read_text(encoding="utf-8")
+    src = (STATIC.parent / "services" / "llm_config_store.py").read_text(encoding="utf-8")
     assert "def mask_key" in src
     assert "def masked" in src
-    api = (STATIC.parents[1] / "boss_web" / "api" / "llm.py").read_text(encoding="utf-8")
+    api = (STATIC.parent / "api" / "llm.py").read_text(encoding="utf-8")
     assert "masked()" in api
 
 
@@ -385,7 +385,7 @@ def test_弹窗只在_should_prompt_时出现():
 def test_版本判断只查_gitee():
     """下载入口可以有 GitHub，但版本比较的数据源不能混进 GitHub；弹窗上两个下载入口都要在。"""
     update_js = _read("js/update.js")
-    src = (STATIC.parents[1] / "boss_web" / "services" / "update_check.py").read_text(encoding="utf-8")
+    src = (STATIC.parent / "services" / "update_check.py").read_text(encoding="utf-8")
     assert "gitee.com/api/v5/repos" in src
     assert "api.github.com" not in src
     assert "github.com/repos" not in src
@@ -597,7 +597,7 @@ def test_短信任务不推扫码面板():
 
 def test_后端任务快照带kind():
     """验后端任务快照带 kind。"""
-    src = (STATIC.parents[1] / "boss_web" / "services" / "login_task.py").read_text(encoding="utf-8")
+    src = (STATIC.parent / "services" / "login_task.py").read_text(encoding="utf-8")
     assert '"kind": self.kind' in src
     assert 'kind="qr"' in src
 

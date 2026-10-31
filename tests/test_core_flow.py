@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from boss_web.core.contracts import (
+from boss_server.core.contracts import (
     ApplyGate,
     ApplyReceipt,
     ConversationState,
@@ -20,7 +20,7 @@ from boss_web.core.contracts import (
     SendReceipt,
     SessionRef,
 )
-from boss_web.core.flow import (
+from boss_server.core.flow import (
     CrawlHooks,
     DeliverHooks,
     DeliverTarget,
@@ -28,7 +28,7 @@ from boss_web.core.flow import (
     run_crawl,
     run_deliver,
 )
-from boss_web.core.limits import SiteLimits
+from boss_server.core.limits import SiteLimits
 
 
 class FakeJob:

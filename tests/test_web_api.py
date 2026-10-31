@@ -7,7 +7,7 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_web import create_app
+from boss_server import create_app
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def test_health(client: TestClient):
     """验证 /api/health 回服务名。"""
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["service"] == "boss_web"
+    assert r.json()["service"] == "boss_server"
 
 
 def test_index_serves_spa(client: TestClient):
@@ -46,7 +46,7 @@ def test_slider_refresh_unknown_task_404(client: TestClient):
 def test_slider_refresh_换新挑战重建帮助页(client: TestClient):
     """「重新加载」必须换一张新 challenge：极验票据一次性，重载旧的必然 onError。"""
     from boss_login.verify import SliderChallenge
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     calls: list[int] = []
 
@@ -77,7 +77,7 @@ def test_slider_refresh_换新挑战重建帮助页(client: TestClient):
 
 def test_slider_refresh_without_active_slider_conflicts(client: TestClient):
     """验证没有待验证滑块时刷新冲突 409。"""
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="refresh-2", phone="13800138000")
     lt.login_tasks._tasks[task.task_id] = task
@@ -92,7 +92,7 @@ def test_slider_urls_一律站点作用域(client: TestClient):
     """滑块三条 URL 全是站点作用域，后端自报的入口不得混进 legacy 别名。"""
     from boss_login.verify import SliderChallenge
 
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     def refresher() -> SliderChallenge:
         """换一张新 challenge 的刷新器。"""
@@ -123,7 +123,7 @@ def test_slider_urls_一律站点作用域(client: TestClient):
 
 def test_qr_image_without_payload_404(client: TestClient):
     """验证二维码无 payload 时图片回 404。"""
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-empty", phone="")
     lt.login_tasks._tasks[task.task_id] = task
@@ -136,7 +136,7 @@ def test_qr_image_without_payload_404(client: TestClient):
 
 def test_qr_image_renders_png(client: TestClient):
     """快照里有 payload 就能出 PNG——给前端 <img src> 用。"""
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-img", phone="")
     task.qr_payload = "qr-uuid-1234"
@@ -153,7 +153,7 @@ def test_qr_image_renders_png(client: TestClient):
 
 def test_qr_snapshot_carries_image_url(client: TestClient):
     """验证扫码快照带上图片地址与扫描状态。"""
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-snap", phone="", kind="qr")
     task.qr_payload = "qr-uuid"
@@ -174,7 +174,7 @@ def test_qr_snapshot_carries_image_url(client: TestClient):
 
 def test_qr_conflict_when_sms_running(client: TestClient):
     """同一时刻只跑一个登录任务：短信没跑完就不该另起扫码。"""
-    from boss_web.services import login_task as lt
+    from boss_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="busy", phone="13800138000")
     task.status = lt.ST_NEED_CODE
@@ -393,7 +393,7 @@ def test_未处理的JobError有安全网(client: TestClient):
     from fastapi.testclient import TestClient as TC
 
     from boss_jobs.errors import JobError
-    from boss_web.app import create_app
+    from boss_server.app import create_app
 
     app = create_app()
 
@@ -472,7 +472,7 @@ def test_fetch_descriptions_cancel_when_idle_404(client: TestClient):
 def test_fetch_descriptions_start_then_status(client: TestClient, monkeypatch):
     """起一个补抓任务：没有登录态会在任务里报 error，但接口本身要回。"""
     monkeypatch.setattr(
-        "boss_web.services.desc_task.create_client",
+        "boss_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1})
@@ -488,7 +488,7 @@ def test_fetch_descriptions_start_then_status(client: TestClient, monkeypatch):
 def test_fetch_descriptions_interval_默认1秒(client: TestClient, monkeypatch):
     """不传 interval = 服务端 DETAIL_INTERVAL（1s），防风控；前端进度条要能拿到它。"""
     monkeypatch.setattr(
-        "boss_web.services.desc_task.create_client",
+        "boss_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1})
@@ -499,7 +499,7 @@ def test_fetch_descriptions_interval_默认1秒(client: TestClient, monkeypatch)
 def test_fetch_descriptions_interval_可传(client: TestClient, monkeypatch):
     """验证补抓间隔可显式传入。"""
     monkeypatch.setattr(
-        "boss_web.services.desc_task.create_client",
+        "boss_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1, "interval": 2.5})
@@ -509,10 +509,10 @@ def test_fetch_descriptions_interval_可传(client: TestClient, monkeypatch):
 
 def test_desc_task_interval_夹到02秒下限(monkeypatch):
     """手滑填 0.01s 会被夹到 0.2s——比这更快就是自己敲风控。"""
-    from boss_web.services.desc_task import DescTaskManager
+    from boss_server.services.desc_task import DescTaskManager
 
     monkeypatch.setattr(
-        "boss_web.services.desc_task.create_client",
+        "boss_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     mgr = DescTaskManager()
@@ -523,7 +523,7 @@ def test_desc_task_interval_夹到02秒下限(monkeypatch):
 def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
     """连续 N 次 code 37 = 安全网关整段限速，停整批而不是拿剩下的去探墙。"""
     from boss_jobs.errors import JobApiError
-    from boss_web.services.desc_task import DescTaskManager
+    from boss_server.services.desc_task import DescTaskManager
 
     class AlwaysBrowserCheck:
         """桩客户端：详情接口一律回 code 37。"""
@@ -533,14 +533,14 @@ def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
             raise JobApiError(37, "您的环境存在异常.", raw={})
 
     monkeypatch.setattr(
-        "boss_web.services.desc_task.create_client", lambda **_kw: AlwaysBrowserCheck()
+        "boss_server.services.desc_task.create_client", lambda **_kw: AlwaysBrowserCheck()
     )
     monkeypatch.setattr(
-        "boss_web.services.desc_task.JobStore",
+        "boss_server.services.desc_task.JobStore",
         lambda *a, **k: _StoreWithMissing([_fake_job(i) for i in range(10)]),
     )
     real_sleep = time.sleep
-    monkeypatch.setattr("boss_web.services.desc_task.time.sleep", lambda _s: None)
+    monkeypatch.setattr("boss_server.services.desc_task.time.sleep", lambda _s: None)
 
     mgr = DescTaskManager()
     task = mgr.start(limit=0, interval=0.0)

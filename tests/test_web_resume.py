@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from boss_web.services.resume_store import (
+from boss_server.services.resume_store import (
     extract_basic,
     extract_skills,
     parse_markdown,

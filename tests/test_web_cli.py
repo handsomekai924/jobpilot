@@ -1,4 +1,4 @@
-"""`boss_web` 入口层测试。
+"""`boss_server` 入口层测试。
 
 入口是最容易坏又最不容易被测到的一层：这里真 import 模块、真调 `main()`。
 """
@@ -9,8 +9,8 @@ import socket
 
 import pytest
 
-from boss_web import cli
-from boss_web.services import update_check
+from boss_server import cli
+from boss_server.services import update_check
 
 
 @pytest.fixture(autouse=True)
@@ -175,7 +175,7 @@ def test_横幅先打版本对比占位_测完再补真结果(monkeypatch, capsy
 
 def test_打印行格式固定三行(monkeypatch, capsys):
     """验版本对比控制台固定打印三行。"""
-    from boss_web.services.update_check import format_console_lines
+    from boss_server.services.update_check import format_console_lines
 
     lines = format_console_lines(
         {"current": "1.1.0", "latest": "1.2.0", "has_update": True, "should_prompt": True}
@@ -190,7 +190,7 @@ def test_横幅先打登录状态占位_测完再补真结果(monkeypatch, capsy
     """登录态自检也不能卡住启动：横幅先占位，后台打完 user_info 再补一行。"""
     import threading
 
-    from boss_web.services import session_check
+    from boss_server.services import session_check
 
     monkeypatch.setattr(cli, "_setup_logging", lambda *_a, **_k: None)
     monkeypatch.setattr("uvicorn.Server.run", lambda self: None, raising=False)

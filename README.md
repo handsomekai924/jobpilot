@@ -48,7 +48,7 @@ pip install -r requirements.txt
 **源码版**：
 
 ```bash
-python -m boss_web
+python -m boss_server
 # 默认 http://127.0.0.1:8787 ，浏览器自动打开
 ```
 

@@ -12,9 +12,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from boss_jobs.cdp_stoken import StokenError
-from boss_web import runtime
-from boss_web.app import create_app
-from boss_web.services import app_settings_store, troubleshoot
+from boss_server import runtime
+from boss_server.app import create_app
+from boss_server.services import app_settings_store, troubleshoot
 
 
 @pytest.fixture
@@ -210,7 +210,7 @@ def test_deliver_task_uses_humanize():
     """投递任务的失败文案不该带裸类名。"""
     import inspect
 
-    from boss_web.services import deliver_task
+    from boss_server.services import deliver_task
 
     source = inspect.getsource(deliver_task)
     assert "type(exc).__name__" not in source
@@ -221,7 +221,7 @@ def test_crawl_task_uses_humanize():
     """验抓取任务的报错出口确实走了 `humanize`。"""
     import inspect
 
-    from boss_web.services import crawl_task
+    from boss_server.services import crawl_task
 
     source = inspect.getsource(crawl_task)
     assert "type(exc).__name__" not in source
@@ -235,7 +235,7 @@ def test_runtime_app_data_dir_is_absolute():
 
 def test_greeting_prompt_roundtrip_and_restore(client):
     """验招呼语约束能存能读，空串回到内置默认。"""
-    from boss_web.services.greeting_prompt import GREETING_REQUIREMENT
+    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT
 
     resp = client.get("/api/system/greeting-prompt")
     assert resp.status_code == 200
@@ -299,7 +299,7 @@ def test_greeting_requirement_store_truncates_overlong():
 
 def test_resolve_greeting_requirement_prefers_custom():
     """自定义非空用自定义，空则回落出厂常量。"""
-    from boss_web.services.greeting_prompt import GREETING_REQUIREMENT, resolve_greeting_requirement
+    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT, resolve_greeting_requirement
 
     assert resolve_greeting_requirement() == GREETING_REQUIREMENT
     app_settings_store.apply_greeting_requirement("自定义 {花括号}")

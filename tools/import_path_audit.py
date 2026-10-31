@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DEFAULT_TARGET = "apps/web/src"
 EXEMPT_PREFIX = (
-    "boss_web/static/legacy/",
+    "apps/server/src/boss_server/static/legacy/",
     "boss_jobs/assets/",
 )
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".git", "node_modules", ".idea"}

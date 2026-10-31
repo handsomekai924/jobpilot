@@ -1,0 +1,13 @@
+[tool.uv.workspace]
+members = ["apps/server", "packages/*"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "apps/server/src",
+  "packages/core/src",
+  "packages/platform-base/src",
+  "packages/platform-boss/src",
+  "packages/browser-pool/src",
+  "packages/ai/src",
+  "packages/db/src",
+]

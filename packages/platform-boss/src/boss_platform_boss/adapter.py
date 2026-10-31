@@ -37,7 +37,7 @@ SITE_ID = "boss"
 
 
 def _core_page(result: Any, *, page: int, has_more: bool | None = None) -> PageResult:
-    """把 `boss_jobs.models.PageResult` 换成核心层的一页形状。"""
+    """把 `boss_platform_boss.jobs.models.PageResult` 换成核心层的一页形状。"""
     jobs = tuple(getattr(result, "jobs", ()) or ())
     more = bool(getattr(result, "has_more", False)) if has_more is None else has_more
     return PageResult(items=jobs, page=page, has_more=more)
@@ -105,7 +105,7 @@ class BossAdapter:
         return DeliverFault.UNKNOWN
 
     def fetch_expects(self) -> Any:
-        """拉当前账号的求职期望列表（`boss_jobs.ExpectList`）。"""
+        """拉当前账号的求职期望列表（`boss_platform_boss.jobs.ExpectList`）。"""
         from .jobs.client import create_client
 
         return create_client().fetch_expect_list()

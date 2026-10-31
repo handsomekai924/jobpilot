@@ -731,7 +731,7 @@ def count_greeted_today(
 ) -> int:
     """该站点今天已经发出去的招呼数——每日配额的账。
 
-    账记在 `jobs.last_greeted_at`（`boss_jobs.store.JobStore.update_last_greeted_at`
+    账记在 `jobs.last_greeted_at`（`boss_platform_boss.jobs.store.JobStore.update_last_greeted_at`
     写，`%Y-%m-%d %H:%M:%S`，字典序 == 时间序），所以按 `(site, 当天零点)`
     数行就行。失败/跳过不写这一列，天然只数成功的。
 

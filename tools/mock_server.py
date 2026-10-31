@@ -25,10 +25,19 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
+for _src in reversed((
+    _PROJECT_ROOT / "apps" / "server" / "src",
+    _PROJECT_ROOT / "packages" / "core" / "src",
+    _PROJECT_ROOT / "packages" / "platform-base" / "src",
+    _PROJECT_ROOT / "packages" / "platform-boss" / "src",
+    _PROJECT_ROOT / "packages" / "browser-pool" / "src",
+    _PROJECT_ROOT / "packages" / "ai" / "src",
+    _PROJECT_ROOT / "packages" / "db" / "src",
+)):
+    if str(_src) not in sys.path:
+        sys.path.insert(0, str(_src))
 
-from boss_login.crypto import decrypt_account  # noqa: E402
+from boss_platform_boss.auth.crypto import decrypt_account  # noqa: E402
 
 CODE_TTL_SECONDS = 300
 RESEND_COOLDOWN_SECONDS = 60

@@ -7,12 +7,12 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from boss_filter import (
+from boss_platform_boss.catalog import (
     get_filter_conditions,
     load_search_filter,
     save_search_filter,
 )
-from boss_filter.search import JobSearchFilter
+from boss_platform_boss.catalog.search import JobSearchFilter
 
 router = APIRouter()
 

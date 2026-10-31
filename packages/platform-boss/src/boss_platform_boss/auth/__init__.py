@@ -1,6 +1,6 @@
 """BOSS直聘用户端「手机验证码登录」Python 客户端。
 
->>> from boss_login import create_client
+>>> from boss_platform_boss.auth import create_client
 >>> client = create_client()
 >>> client.send_sms_code("13800138000")          # 下发验证码
 SmsCodeTicket(phone_masked='138****8000', ...)
@@ -9,7 +9,7 @@ LoginResult(token='...', user=UserInfo(...))
 
 配合 CLI 使用更省事：
 
-    python -m boss_login login --phone 13800138000
+    python -m boss_platform_boss.auth login --phone 13800138000
 """
 
 from __future__ import annotations

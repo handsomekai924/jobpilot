@@ -1,7 +1,7 @@
 """职位列表的线上接口客户端。
 
-调的是真实 wapi 路径（见 `boss_jobs.config`），不是界面模拟。
-登录态复用 `boss_login` 落盘的 Cookie；核心是 `JobClient.crawl` 的
+调的是真实 wapi 路径（见 `boss_platform_boss.jobs.config`），不是界面模拟。
+登录态复用 `boss_platform_boss.auth` 落盘的 Cookie；核心是 `JobClient.crawl` 的
 「抓一页 → 立刻清洗 → 立刻入库 → 睡够间隔 → 下一页」。
 """
 
@@ -247,7 +247,7 @@ class JobClient:
         headers: 额外请求头。
         sleeper: 可替换的 sleep（测试里注入 no-op）。
         page_interval: 翻页硬间隔（秒），防风控。
-        stoken_provider: `__zp_stoken__` 自动获取器（见 `boss_jobs.cdp_stoken`）。
+        stoken_provider: `__zp_stoken__` 自动获取器（见 `boss_platform_boss.stoken_cdp`）。
         chat_*: 聊天通道的连接参数，透传给 `ChatSocket`。
     """
 
@@ -1317,7 +1317,7 @@ def http_from_session(
     http: Any | None = None,
     stoken: str | None = None,
 ) -> Any:
-    """用 `boss_login` 落盘的登录态搭一个会话。
+    """用 `boss_platform_boss.auth` 落盘的登录态搭一个会话。
 
     没有可用登录态时抛 `JobApiError`。`__zp_stoken__` 取值顺序：
     显式传入 → 库里的 cookies → 环境变量；都没有就先不带，
@@ -1333,7 +1333,7 @@ def http_from_session(
         raise JobApiError(
             7,
             f"本地没有登录态：状态库 {path} 里没有，或 token/Cookie 都没有。"
-            f"先跑 `python -m boss_login login` 落一份。",
+            f"先跑 `python -m boss_platform_boss.auth login` 落一份。",
         )
 
     sess = http or requests.Session()

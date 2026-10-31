@@ -28,14 +28,14 @@ import uuid
 from collections import deque
 from typing import Any, Callable, Mapping, Sequence
 
-from boss_jobs import create_client
-from boss_jobs.config import (
+from boss_platform_boss.jobs import create_client
+from boss_platform_boss.jobs.config import (
     BROWSER_CHECK_COOLOFF,
     BROWSER_CHECK_GIVEUP,
     DELIVER_INTERVAL,
 )
-from boss_jobs.errors import ChatSendError, JobApiError
-from boss_jobs.store import JobStore
+from boss_platform_boss.jobs.errors import ChatSendError, JobApiError
+from boss_platform_boss.jobs.store import JobStore
 
 from ..errors import ConflictError, NotFoundError, ValidationWebError
 from .resume_store import (
@@ -172,7 +172,7 @@ def enrich_match_greet_state(items: list[dict[str, Any]], *, now: float | None =
         items: match 条目列表。
         now: 判定时刻；省略用当前时间。
     """
-    from boss_jobs.store import JobStore
+    from boss_platform_boss.jobs.store import JobStore
 
     if not items:
         return
@@ -364,7 +364,7 @@ class DeliverTaskManager:
     Args:
         client_factory: 造 `JobClient` 的工厂（测试里注入假的）。
         sleeper: 可替换的 sleep（测试里注入 no-op）。
-        interval: 条间隔（秒），默认 `boss_jobs.config.DELIVER_INTERVAL`；
+        interval: 条间隔（秒），默认 `boss_platform_boss.jobs.config.DELIVER_INTERVAL`；
             `site_settings.throttle_ms` 配了就盖掉它。
     """
 

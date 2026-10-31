@@ -1,4 +1,4 @@
-"""`python -m boss_login` 入口。"""
+"""`python -m boss_platform_boss.auth` 入口。"""
 
 import sys
 

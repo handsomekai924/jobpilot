@@ -14,7 +14,7 @@ from typing import Any
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, Field
 
-from boss_jobs.store import DEFAULT_SITE, JobStore
+from boss_platform_boss.jobs.store import DEFAULT_SITE, JobStore
 
 from ..errors import NotFoundError, ValidationWebError
 from ..services.crawl_task import crawl_tasks

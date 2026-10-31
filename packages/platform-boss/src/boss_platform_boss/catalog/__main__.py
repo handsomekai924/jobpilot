@@ -1,4 +1,4 @@
-"""`python -m boss_filter` 入口。"""
+"""`python -m boss_platform_boss.catalog` 入口。"""
 
 import sys
 

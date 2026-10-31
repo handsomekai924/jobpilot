@@ -27,7 +27,7 @@ class AppSettings:
     """用户级应用设置。
 
     Attributes:
-        chrome_mode: 空串 = 跟随 `boss_jobs` 的默认档位（`hidden`）。
+        chrome_mode: 空串 = 跟随 `boss_browser_pool.cdp` 的默认档位（`hidden`）。
         ignored_update_version: 空串 = 没忽略过任何版本；否则是「忽略水位线」
             的版本号（不带 `v` 前缀）。连续忽略多个版本只留最高那一版，
             比它旧的忽略自动作废。
@@ -53,7 +53,7 @@ class AppSettings:
 
 
 def normalize_chrome_mode(value: Any) -> str:
-    """只接受 `boss_jobs` 认得的档位；其余一律回空串。"""
+    """只接受 `boss_browser_pool.cdp` 认得的档位；其余一律回空串。"""
     from boss_browser_pool.cdp import CHROME_MODES
 
     text = str(value or "").strip().lower()

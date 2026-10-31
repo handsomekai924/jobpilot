@@ -1,9 +1,9 @@
 """筛选条件命令行入口。
 
-    python -m boss_filter show                      # 打接口拿筛选项，打摘要
-    python -m boss_filter show --json               # 摘要按 JSON 输出
-    python -m boss_filter show --fallback           # 不打接口，只用写死表
-    python -m boss_filter export --out filters.json # 导出完整选项表
+    python -m boss_platform_boss.catalog show                      # 打接口拿筛选项，打摘要
+    python -m boss_platform_boss.catalog show --json               # 摘要按 JSON 输出
+    python -m boss_platform_boss.catalog show --fallback           # 不打接口，只用写死表
+    python -m boss_platform_boss.catalog export --out filters.json # 导出完整选项表
 
 接口路径未核实或线上已变更时，用 `--base-url` / `--endpoint-conditions`
 临时覆盖。
@@ -31,12 +31,12 @@ EXIT_USAGE = 2
 def build_parser() -> argparse.ArgumentParser:
     """构造命令行参数解析器。"""
     parser = argparse.ArgumentParser(
-        prog="boss_filter",
+        prog="boss_platform_boss.catalog",
         description="BOSS直聘职位筛选条件获取（城市/求职类型/薪资/经验/学历/行业/规模）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--version", action="version", version=f"boss_filter {__version__}")
+    parser.add_argument("--version", action="version", version=f"boss_platform_boss.catalog {__version__}")
     parser.add_argument("-v", "--verbose", action="store_true", help="输出调试日志")
     parser.add_argument("--base-url", default=BASE_URL, help=f"站点地址（默认 {BASE_URL}）")
     parser.add_argument("--timeout", type=float, default=None, help="请求超时秒数")
@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"✗ 数据解析失败：{exc.message}", file=sys.stderr)
         return EXIT_USAGE
     except FilterApiError as exc:
-        hint = "（登录态可能已失效，先 `python -m boss_login login`）" if exc.is_session_expired else ""
+        hint = "（登录态可能已失效，先 `python -m boss_platform_boss.auth login`）" if exc.is_session_expired else ""
         print(f"✗ 接口返回失败{hint}：{exc.message}", file=sys.stderr)
         return EXIT_ERROR
     except FilterTransportError as exc:

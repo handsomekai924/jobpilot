@@ -12,7 +12,7 @@ Attributes:
     ENDPOINTS["city_group"]: 按 firstChar 分组的城市表，体量比 city.json 小。
     ENDPOINTS["industry"]: 公司行业树（15 分组 + 134 子项，code 为 1000xx）。
     CONDITION_LIST_FIELDS: conditions 响应列表字段 → 模型字段名。
-    DEFAULT_HEADERS: 请求头；Accept/UA 与 `boss_login.config.DEFAULT_HEADERS` 同源。
+    DEFAULT_HEADERS: 请求头；Accept/UA 与 `boss_platform_boss.auth.config.DEFAULT_HEADERS` 同源。
     CODE_SESSION_EXPIRED: 未登录/登录态失效业务码；只有 7 是实测确认的，code 1 不算。
     DEFAULT_SAVED_HTML: 已保存的职位页 HTML（离线来源）。
     HTML_OPTION_PATTERNS: HTML 筛选下拉标记 → (维度字段, 提取正则)。

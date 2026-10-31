@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from boss_browser_pool.cdp import BrowserError
-from boss_jobs.errors import JobError
+from boss_platform_boss.jobs.errors import JobError
 
 from . import config as C
 from .api import api_router
@@ -56,7 +56,7 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(JobError)
     async def _job_error(_: Request, exc: JobError) -> JSONResponse:  # noqa: ANN202
-        """`boss_jobs` 的异常翻成人话，回 502，不掉进兜底 500。"""
+        """`boss_platform_boss.jobs` 的异常翻成人话，回 502，不掉进兜底 500。"""
         logger.warning("职位/采集调用失败：%s", exc)
         return JSONResponse(
             status_code=502,

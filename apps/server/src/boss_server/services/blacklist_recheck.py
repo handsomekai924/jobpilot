@@ -16,7 +16,7 @@ import uuid
 from collections import deque
 from typing import Any, Sequence
 
-from boss_jobs.store import JobStore
+from boss_platform_boss.jobs.store import JobStore
 
 from ..errors import ConflictError, NotFoundError
 from .blacklist import evaluate_company, evaluate_jd, list_enabled_rules, save_hit

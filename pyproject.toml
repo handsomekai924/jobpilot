@@ -2,6 +2,7 @@
 members = ["apps/server", "packages/*"]
 
 [tool.pytest.ini_options]
+testpaths = ["apps/server/tests", "packages"]
 pythonpath = [
   "apps/server/src",
   "packages/core/src",

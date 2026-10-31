@@ -1,10 +1,10 @@
 """BOSS直聘登录命令行入口。
 
-    python -m boss_login login  --phone 13800138000     # 完整流程（发码 → 交互式输入验证码 → 登录）
-    python -m boss_login qr                             # APP 扫码登录（终端/文件出二维码，手机扫）
-    python -m boss_login whoami                         # 查看当前登录用户
-    python -m boss_login logout                         # 退出并清除本地登录态
-    python -m boss_login probe                          # 探测真实接口路径
+    python -m boss_platform_boss.auth login  --phone 13800138000     # 完整流程（发码 → 交互式输入验证码 → 登录）
+    python -m boss_platform_boss.auth qr                             # APP 扫码登录（终端/文件出二维码，手机扫）
+    python -m boss_platform_boss.auth whoami                         # 查看当前登录用户
+    python -m boss_platform_boss.auth logout                         # 退出并清除本地登录态
+    python -m boss_platform_boss.auth probe                          # 探测真实接口路径
 
 接口路径未经离线核实，如线上已变更，用 `--endpoint-send` / `--endpoint-login` 覆盖，
 或先跑 `probe` 确认。
@@ -66,12 +66,12 @@ BANNER = """\
 def build_parser() -> argparse.ArgumentParser:
     """构造命令行解析器（含各子命令）。"""
     parser = argparse.ArgumentParser(
-        prog="boss_login",
+        prog="boss_platform_boss.auth",
         description="BOSS直聘用户端手机验证码登录（Python 实现）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--version", action="version", version=f"boss_login {__version__}")
+    parser.add_argument("--version", action="version", version=f"boss_platform_boss.auth {__version__}")
     _add_global_options(parser, suppress_defaults=False)
 
     sub = parser.add_subparsers(dest="command", required=True)
@@ -426,7 +426,7 @@ def _cmd_whoami(args: argparse.Namespace, client: Any) -> int:
     stored = load_session(args.db)
 
     if not client.is_logged_in():
-        print("✗ 本地没有登录态，请先执行：python -m boss_login login --phone <手机号>")
+        print("✗ 本地没有登录态，请先执行：python -m boss_platform_boss.auth login --phone <手机号>")
         print(f"  查过的位置：{path}")
         if not has_session_row(args.db):
             print("  原因：库里没有登录态——登录流程没有落盘。")
@@ -494,8 +494,8 @@ def _cmd_probe(args: argparse.Namespace, client: Any) -> int:
             print(f"       └ {item['error'][:100]}")
 
     print()
-    print("把可用的路径写回 boss_login/config.py 的 ENDPOINTS，或用参数临时覆盖：")
-    print("  python -m boss_login login --phone <手机号> --endpoint-send <路径>")
+    print("把可用的路径写回 boss_platform_boss.auth/config.py 的 ENDPOINTS，或用参数临时覆盖：")
+    print("  python -m boss_platform_boss.auth login --phone <手机号> --endpoint-send <路径>")
     return EXIT_OK
 
 

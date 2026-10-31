@@ -22,8 +22,8 @@ import uuid
 from collections import deque
 from typing import Any, Mapping
 
-from boss_jobs import CrawlBlacklistContext, create_client
-from boss_jobs.store import JobStore
+from boss_platform_boss.jobs import CrawlBlacklistContext, create_client
+from boss_platform_boss.jobs.store import JobStore
 
 from .. import config as C
 from ..errors import ConflictError, NotFoundError, UpstreamError, ValidationWebError
@@ -79,7 +79,7 @@ def _search_filter_from(
     Returns:
         搜索流条件对象。
     """
-    from boss_filter.search import JobSearchFilter
+    from boss_platform_boss.catalog.search import JobSearchFilter
 
     return JobSearchFilter(
         query=search.get("query", ""),
@@ -451,7 +451,7 @@ class CrawlTaskManager:
             task.phase = "client"
             client = create_client(page_interval=float(params["interval"]))
 
-            from boss_filter.expect import JobExpectFilter
+            from boss_platform_boss.catalog.expect import JobExpectFilter
 
             snapshot_data = params.get("config_snapshot") or {}
             search = snapshot_data.get("search") or {}

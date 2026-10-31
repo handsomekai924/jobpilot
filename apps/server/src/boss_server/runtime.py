@@ -1,6 +1,6 @@
 """运行环境探测：开发模式与打包成 exe 两种形态的路径差异收在一处。
 
-只依赖标准库；环境变量名延迟导入，免得拖进 `boss_jobs` 整条依赖链。
+只依赖标准库；环境变量名延迟导入，免得拖进 `boss_browser_pool.cdp` 整条依赖链。
 打包形态必须先调 `bootstrap` 再碰 store / Chrome。明细见 `notes/boss_server/runtime.md`。
 
 Attributes:

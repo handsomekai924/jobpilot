@@ -1,7 +1,7 @@
 """筛选条件的线上接口客户端。
 
-调的是真实 wapi 路径（见 `boss_filter.config`），不是界面模拟。
-登录态复用 `boss_login` 落盘的 Cookie：筛选接口本身不强制登录，
+调的是真实 wapi 路径（见 `boss_platform_boss.catalog.config`），不是界面模拟。
+登录态复用 `boss_platform_boss.auth` 落盘的 Cookie：筛选接口本身不强制登录，
 但带上登录态能拿到定位城市、也更接近浏览器真实流量。
 """
 

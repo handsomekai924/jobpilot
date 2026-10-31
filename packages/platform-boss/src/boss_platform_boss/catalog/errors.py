@@ -51,7 +51,7 @@ class FilterApiError(FilterError):
         """是否登录态失效。
 
         code 7（实测的「当前登录状态已失效」）或话术里明说登录问题才算；
-        code 1 是业务失败的通用码，不算。与 `boss_jobs.errors.JobApiError.is_session_expired` 同判据。
+        code 1 是业务失败的通用码，不算。与 `boss_platform_boss.jobs.errors.JobApiError.is_session_expired` 同判据。
         """
         return self.code in (7,) or "登录" in self.message
 

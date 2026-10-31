@@ -1,10 +1,10 @@
 """登录态持久化，落进状态库 `data/boss.db` 的 `doc('session')` 行。
 
-按 `__file__` 定位项目根，与当前工作目录无关。
+按仓库根定位状态库，与当前工作目录无关。
 
 Attributes:
     SITE_ID: 登录态归属的站点 id。
-    PROJECT_ROOT: 项目根目录，即 `boss_login/` 的上一级。
+    PROJECT_ROOT: 项目根目录（`boss_core.paths.repo_root()`）。
     DEFAULT_DB_PATH: 状态库路径，环境变量 `BOSS_DB` 可覆盖。
 """
 

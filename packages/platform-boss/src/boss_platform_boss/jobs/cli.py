@@ -1,17 +1,17 @@
 """职位获取命令行入口。
 
-    python -m boss_jobs fetch                      # 分页抓取，每页清洗入库，页间睡 1s
-    python -m boss_jobs fetch --max-pages 3        # 只翻 3 页
-    python -m boss_jobs fetch --interval 2.0       # 页间睡 2 秒（更保守）
-    python -m boss_jobs fetch --db my.db           # 指定状态库路径
-    python -m boss_jobs fetch --filter my.json     # 搜索流：用这份 JSON 条件
-    python -m boss_jobs fetch --expect part_time   # 期望流：兼职期望
-    python -m boss_jobs fetch --expect recommend   # 期望流：推荐（混合）期望
-    python -m boss_jobs fetch --expect expect:<id> # 期望流：指定期望
-    python -m boss_jobs fetch --expect temp:<file> # 期望流：临时期望（expectInfo JSON）
-    python -m boss_jobs stats                      # 看库里的汇总
-    python -m boss_jobs list --city 广州 --limit 20
-    python -m boss_jobs list --json                # 职位按 JSON 输出
+    python -m boss_platform_boss.jobs fetch                      # 分页抓取，每页清洗入库，页间睡 1s
+    python -m boss_platform_boss.jobs fetch --max-pages 3        # 只翻 3 页
+    python -m boss_platform_boss.jobs fetch --interval 2.0       # 页间睡 2 秒（更保守）
+    python -m boss_platform_boss.jobs fetch --db my.db           # 指定状态库路径
+    python -m boss_platform_boss.jobs fetch --filter my.json     # 搜索流：用这份 JSON 条件
+    python -m boss_platform_boss.jobs fetch --expect part_time   # 期望流：兼职期望
+    python -m boss_platform_boss.jobs fetch --expect recommend   # 期望流：推荐（混合）期望
+    python -m boss_platform_boss.jobs fetch --expect expect:<id> # 期望流：指定期望
+    python -m boss_platform_boss.jobs fetch --expect temp:<file> # 期望流：临时期望（expectInfo JSON）
+    python -m boss_platform_boss.jobs stats                      # 看库里的汇总
+    python -m boss_platform_boss.jobs list --city 广州 --limit 20
+    python -m boss_platform_boss.jobs list --json                # 职位按 JSON 输出
 
 登录态默认读状态库 data/boss.db 的 doc('session')。--expect 与 --filter 互斥，
 一次抓取只能走一条检索流。
@@ -60,12 +60,12 @@ EXPECT_SPECS: tuple[str, ...] = (
 def build_parser() -> argparse.ArgumentParser:
     """组装 argparse 解析器（子命令 fetch / stats / list）。"""
     parser = argparse.ArgumentParser(
-        prog="boss_jobs",
+        prog="boss_platform_boss.jobs",
         description="BOSS直聘职位分页获取（即时清洗 + 入库 + 翻页节流）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--version", action="version", version=f"boss_jobs {__version__}")
+    parser.add_argument("--version", action="version", version=f"boss_platform_boss.jobs {__version__}")
     parser.add_argument("-v", "--verbose", action="store_true", help="输出调试日志")
     parser.add_argument("--base-url", default=BASE_URL, help=f"站点地址（默认 {BASE_URL}）")
     parser.add_argument("--timeout", type=float, default=None, help="请求超时秒数")
@@ -153,14 +153,14 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"✗ 登录态失效：{exc.message}\n"
                 f"  状态库：{args.db or DEFAULT_DB_PATH}\n"
-                f"  重新登录：python -m boss_login login",
+                f"  重新登录：python -m boss_platform_boss.auth login",
                 file=sys.stderr,
             )
         elif exc.is_browser_check:
             print(
                 f"✗ 撞上安全网关（code {exc.code}）：{exc.message}\n"
                 f"  缺的是 {STOKEN_COOKIE} 安全网关令牌。本工具会自动拉起 Chrome（CDP）\n"
-                f"  让站点自己算一枚补上并落到状态库（见 boss_jobs.cdp_stoken），\n"
+                f"  让站点自己算一枚补上并落到状态库（见 boss_platform_boss.stoken_cdp），\n"
                 f"  仍被拒多半是登录态失效，或那台 Chrome 站点也不认。\n"
                 f"  急用的话，也可以从浏览器拷一枚塞进状态库 doc('session') 的 cookies，"
                 f"或设 {STOKEN_ENV} 环境变量。",
@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
     except StokenError as exc:
         print(
             f"✗ 取 {STOKEN_COOKIE} 失败：{exc}\n"
-            f"  这枚令牌要真浏览器才生成得出来（Chrome + CDP，见 boss_jobs.cdp_stoken）。\n"
+            f"  这枚令牌要真浏览器才生成得出来（Chrome + CDP，见 boss_platform_boss.stoken_cdp）。\n"
             f"  装好 Google Chrome，或用 {CHROME_BIN_ENV} 指到它的可执行文件；\n"
             f"  也可以手工从浏览器拷一枚塞进状态库 doc('session') 的 cookies，或设 {STOKEN_ENV} 环境变量。",
             file=sys.stderr,

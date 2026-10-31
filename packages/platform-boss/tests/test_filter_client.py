@@ -1,0 +1,464 @@
+"""筛选条件客户端：假会话单元测试 + 假服务端集成测试 + CLI。"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+import requests
+
+import boss_platform_boss.catalog.cli as cli
+from boss_platform_boss.catalog import FilterClient, get_filter_conditions
+from boss_platform_boss.catalog.client import load_industries, parse_conditions_payload
+from boss_platform_boss.catalog.errors import (
+    FilterApiError,
+    FilterDataError,
+    FilterTransportError,
+)
+from tools.mock_server import MOCK_CONDITIONS, MOCK_HOT_CITIES, FILTER_ROUTES
+
+
+class FakeResponse:
+    """假的 HTTP 响应体。"""
+
+    def __init__(self, payload=None, *, status: int = 200, text: str | None = None) -> None:
+        """初始化。"""
+        self.status_code = status
+        self._payload = payload
+        self.text = text if text is not None else json.dumps(payload, ensure_ascii=False)
+
+    def json(self):
+        """返回预置载荷；载荷是异常时直接抛出。"""
+        if isinstance(self._payload, Exception):
+            raise self._payload
+        if self._payload is None:
+            raise ValueError("not json")
+        return self._payload
+
+
+class FakeHttp:
+    """按序回脚本化响应；异常实例直接抛。裸 dict 自动包成 FakeResponse。"""
+
+    def __init__(self, responses) -> None:
+        """初始化。"""
+        self._responses = list(responses)
+        self.calls: list[dict] = []
+        self.headers: dict[str, str] = {}
+
+    def request(self, method, url, **kwargs):
+        """记录一次调用并返回下一条预置响应。"""
+        self.calls.append({"method": method, "url": url, **kwargs})
+        if not self._responses:
+            raise AssertionError(f"没有预置响应可给，却收到了第 {len(self.calls)} 次请求：{url}")
+        item = self._responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item if isinstance(item, FakeResponse) else FakeResponse(item)
+
+    @property
+    def last_url(self) -> str:
+        """最近一次请求的 URL。"""
+        return self.calls[-1]["url"]
+
+
+def only_primary_endpoints() -> dict[str, str]:
+    """关掉条件接口的降级链，让每个用例只打一次请求（或失败一次）。"""
+    return {"recommend_conditions": "", "search_condition": ""}
+
+
+def ok_conditions() -> dict:
+    """构造成功的条件接口响应。"""
+    return {"code": 0, "message": "Success", "zpData": dict(MOCK_CONDITIONS)}
+
+
+def ok_cities() -> dict:
+    """构造成功的城市接口响应（含热门城市与两级树）。"""
+    return {
+        "code": 0,
+        "message": "Success",
+        "zpData": {
+            "hotCityList": MOCK_HOT_CITIES,
+            "cityList": [
+                {
+                    "code": 101280000,
+                    "name": "广东",
+                    "firstChar": "g",
+                    "subLevelModelList": [
+                        {
+                            "code": 101280100,
+                            "name": "广州",
+                            "pinyin": "guangzhou",
+                            "firstChar": "g",
+                            "subLevelModelList": [{"code": 440106, "name": "天河区"}],
+                        }
+                    ],
+                }
+            ],
+        },
+    }
+
+
+def ok_industries() -> dict:
+    """构造成功的行业接口响应。"""
+    return {
+        "code": 0,
+        "message": "Success",
+        "zpData": [
+            {
+                "code": 100000,
+                "name": "互联网/AI",
+                "subLevelModelList": [
+                    {"code": 100020, "name": "互联网"},
+                    {"code": 100001, "name": "电子商务"},
+                ],
+            },
+            {
+                "code": 101400,
+                "name": "电子/通信/半导体",
+                "subLevelModelList": [{"code": 101405, "name": "半导体/芯片"}],
+            },
+        ],
+    }
+
+
+def make_client(responses, **kwargs) -> FilterClient:
+    """用假 HTTP 会话构造客户端，默认不睡不重试且只打主路由。"""
+    kwargs.setdefault("sleeper", lambda _s: None)
+    kwargs.setdefault("retries", 0)
+    kwargs.setdefault("endpoints", only_primary_endpoints())
+    return FilterClient(http=FakeHttp(responses), **kwargs)
+
+
+def json_from_output(text: str) -> dict:
+    """从 stdout 里抠出 JSON：找到第一个 `{` 再解析。"""
+    start = text.find("{")
+    assert start >= 0, f"输出里没有 JSON：{text[:200]!r}"
+    return json.loads(text[start:])
+
+
+class TestParseConditionsPayload:
+    """解析条件接口载荷。"""
+
+    def test_maps_api_fields_to_model_fields(self):
+        """验接口字段映射到模型字段。"""
+        out = parse_conditions_payload(ok_conditions())
+        assert [o.code for o in out["job_types"]] == ["0", "1901", "1903"]
+        assert [o.code for o in out["salaries"]] == ["0", "402", "403", "404", "405", "406", "407"]
+        assert out["salaries"][4].low_salary == 10
+        assert [o.code for o in out["experiences"]][-1] == "107"
+        assert [o.code for o in out["degrees"]][-1] == "205"
+        assert [o.code for o in out["scales"]][-1] == "306"
+        assert out["pay_types"] and out["stages"] and out["part_times"]
+
+    def test_missing_optional_lists_become_empty(self):
+        """验缺可选列表时变空元组。"""
+        out = parse_conditions_payload({"code": 0, "zpData": {"jobTypeList": [{"code": 0, "name": "不限"}]}})
+        assert out["stages"] == ()
+        assert out["job_types"][0].code == "0"
+
+    def test_empty_zpdata_raises(self):
+        """验空 zpData 抛数据错误。"""
+        with pytest.raises(FilterDataError):
+            parse_conditions_payload({"code": 0, "zpData": {}})
+
+    def test_no_known_lists_raises(self):
+        """验没有已知列表时抛数据错误。"""
+        with pytest.raises(FilterDataError):
+            parse_conditions_payload({"code": 0, "zpData": {"mystery": []}})
+
+
+class TestClientTransport:
+    """客户端传输层。"""
+
+    def test_uses_get_with_endpoint_path(self):
+        """验用 GET 打各端点路径。"""
+        http = FakeHttp([ok_conditions(), ok_cities(), ok_industries()])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        client.get_filter_conditions()
+        assert all(c["method"] == "GET" for c in http.calls)
+        assert http.calls[0]["url"].endswith("/wapi/zpgeek/pc/all/filter/conditions.json")
+        assert http.calls[1]["url"].endswith("/wapi/zpCommon/data/city.json")
+        assert http.calls[2]["url"].endswith("/wapi/zpCommon/data/industry.json")
+
+    def test_retries_on_5xx_then_succeeds(self):
+        """验 5xx 后重试成功。"""
+        http = FakeHttp([FakeResponse({}, status=500), ok_conditions(), ok_cities(), ok_industries()])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=1, endpoints=only_primary_endpoints()
+        )
+        cond = client.get_filter_conditions()
+        assert cond.source == "api"
+
+    def test_transport_error_when_all_attempts_fail(self):
+        """验全部尝试失败抛传输错误。"""
+        http = FakeHttp([requests.ConnectionError("boom")])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        with pytest.raises(FilterTransportError):
+            client.fetch_conditions()
+
+    def test_non_json_response_is_transport_error(self):
+        """验非 JSON 响应归为传输错误。"""
+        http = FakeHttp([FakeResponse(None, text="<html>oops</html>")])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        with pytest.raises(FilterTransportError):
+            client.fetch_conditions()
+
+    def test_business_error_raises_api_error(self):
+        """验业务错误码抛 API 错误并带会话过期标记。"""
+        http = FakeHttp([{"code": 7, "message": "当前登录状态已失效", "zpData": {}}])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        with pytest.raises(FilterApiError) as exc_info:
+            client.fetch_conditions()
+        assert exc_info.value.code == 7
+        assert exc_info.value.is_session_expired
+
+    def test_conditions_endpoint_falls_back_to_recommend(self):
+        """主力路由 500 时降到 recommend 那份，而不是整次失败。"""
+        http = FakeHttp([FakeResponse({}, status=500), ok_conditions(), ok_cities(), ok_industries()])
+        client = FilterClient(http=http, sleeper=lambda _s: None, retries=0)
+        cond = client.get_filter_conditions()
+        assert "recommend/conditions" in http.calls[1]["url"]
+        assert cond.job_types
+
+    def test_city_payload_builds_tree(self):
+        """验城市载荷建成树。"""
+        http = FakeHttp([ok_cities()])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        cities = client.fetch_cities()
+        guangzhou = cities["cities"][0].children[0]
+        assert guangzhou.name == "广州"
+        assert guangzhou.pinyin == "guangzhou"
+        assert [c.name for c in guangzhou.children] == ["天河区"]
+        assert [o.code for o in cities["hot_cities"]][0] == "100010000"
+
+    def test_city_payload_without_lists_raises(self):
+        """验城市载荷缺列表抛数据错误。"""
+        http = FakeHttp([{"code": 0, "zpData": {}}])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        with pytest.raises(FilterDataError):
+            client.fetch_cities()
+
+    def test_fetch_hot_cities_only(self):
+        """验只取热门城市。"""
+        http = FakeHttp([{"code": 0, "zpData": {"hotCityList": MOCK_HOT_CITIES}}])
+        client = FilterClient(
+            http=http, sleeper=lambda _s: None, retries=0, endpoints=only_primary_endpoints()
+        )
+        assert len(client.fetch_hot_cities()) == len(MOCK_HOT_CITIES)
+
+
+class TestClientAssembly:
+    """条件组装与降级。"""
+
+    def test_industry_fallback_tables_are_aligned_with_api(self):
+        """写死表是行业接口的兜底，code 要跟 `/wapi/zpCommon/data/industry.json` 一致。"""
+        industries = load_industries()
+        assert len(industries) == 15
+        assert sum(len(g.options) for g in industries) == 134
+        codes = {o.code for g in industries for o in g.options}
+        assert "100020" in codes
+        assert "100206" in codes
+        assert "0" not in codes
+
+    def test_get_filter_conditions_merges_all_sources(self):
+        """验合并全部来源。"""
+        client = make_client([ok_conditions(), ok_cities(), ok_industries()])
+        cond = client.get_filter_conditions()
+        assert cond.source == "api"
+        assert cond.degraded == {}
+        assert cond.cities and cond.job_types and cond.salaries
+        assert cond.industries and cond.scales and cond.degrees and cond.experiences
+
+    def test_api_failure_degrades_to_fallback_table(self):
+        """验接口挂了降到写死表。"""
+        client = make_client([requests.ConnectionError("down")] * 6)
+        cond = client.get_filter_conditions(use_fallback=True)
+        assert cond.source == "fallback"
+        assert set(cond.degraded) == {"conditions", "cities", "industries"}
+        assert cond.job_types and cond.industries
+        assert cond.cities == ()
+        assert cond.hot_cities
+
+    def test_api_failure_without_fallback_raises(self):
+        """验关掉兜底时接口失败直接抛。"""
+        client = make_client([requests.ConnectionError("down")])
+        with pytest.raises(FilterTransportError):
+            client.get_filter_conditions(use_fallback=False)
+
+    def test_partial_failure_keeps_api_data_and_marks_degraded(self):
+        """验部分失败仍留接口数据并标出降级。"""
+        client = make_client([ok_conditions(), requests.ConnectionError("city down"), ok_industries()])
+        cond = client.get_filter_conditions(use_fallback=True)
+        assert cond.degraded == {"cities": "fallback"}
+        assert cond.source == "fallback"
+        assert cond.job_types[1].code == "1901"
+        assert cond.cities == ()
+
+    def test_get_filter_conditions_helper_with_html_path(self, tmp_path: Path):
+        """验 helper 走 HTML 路径也能取出条件。"""
+        html = tmp_path / "page.html"
+        html.write_text(
+            '<li ka="sel-job-rec-jobType-1901"> 全职<i></i></li>'
+            '<li ka="sel-job-rec-salary-405"> 10-20K<i></i></li>'
+            '<li ka="sel-job-rec-exp-104"> 1-3年<i></i></li>'
+            '<li ka="sel-job-rec-degree-203"> 本科<i></i></li>'
+            '<li ka="sel-job-rec-scale-303"> 100-499人<i></i></li>'
+            '<div class="condition-industry-select"><span class="label">X</span>'
+            '<div class="select-list"><a ka="sel-industry-0">互联网<i></i></a></div></div>'
+            '<a ka="empty-filter">清空</a>',
+            encoding="utf-8",
+        )
+        cond = get_filter_conditions(html_path=html)
+        assert cond.source == "html"
+        assert cond.job_types[0].name == "全职"
+
+    def test_default_helper_uses_real_endpoints(self, monkeypatch):
+        """`get_filter_conditions()` 不带参时用线上默认路由（这里只验拼出来的 URL）。"""
+        seen: list[str] = []
+
+        class SpyHttp:
+            """记录请求 URL 的假 HTTP 会话。"""
+
+            headers: dict = {}
+
+            def request(self, method, url, **kwargs):
+                """记录 URL 并按关键词回假响应。"""
+                seen.append(url)
+                if "conditions" in url:
+                    return FakeResponse(ok_conditions())
+                if "industry" in url:
+                    return FakeResponse(ok_industries())
+                return FakeResponse(ok_cities())
+
+        client = FilterClient(http=SpyHttp(), sleeper=lambda _s: None, retries=0)
+        client.get_filter_conditions()
+        assert seen[0].startswith("https://www.zhipin.com/wapi/zpgeek/pc/all/filter/conditions.json")
+
+
+class TestAgainstMockServer:
+    """对假服务端的集成测试。"""
+
+    def test_fetch_conditions_and_cities(self, server: str):
+        """验拉条件与城市。"""
+        client = FilterClient(base_url=server, retries=0, timeout=5.0, sleeper=lambda _s: None)
+        cond = client.get_filter_conditions()
+        assert cond.source == "api"
+        assert [o.name for o in cond.job_types] == ["不限", "全职", "兼职"]
+        assert cond.find_city("101280100").name == "广州"
+        assert cond.find_city("440106").name == "天河区"
+        assert [o.name for o in cond.hot_cities][:2] == ["全国", "北京"]
+
+    def test_conditions_codes_match_live_contract(self, server: str):
+        """验条件码与线上契约一致。"""
+        client = FilterClient(base_url=server, retries=0, timeout=5.0, sleeper=lambda _s: None)
+        parts = client.fetch_conditions()
+        assert [o.code for o in parts["job_types"]] == ["0", "1901", "1903"]
+        assert parts["salaries"][4].low_salary == 10
+
+    def test_mock_server_exposes_all_filter_routes(self, server: str):
+        """验假服务端暴露全部筛选路由。"""
+        for path in FILTER_ROUTES:
+            resp = requests.get(server + path, timeout=5.0)
+            assert resp.status_code == 200, path
+            assert resp.json()["code"] == 0, path
+
+    def test_api_down_falls_back(self, server: str):
+        """验接口宕机时回退写死表。"""
+        import tools.mock_server as mock_server
+
+        mock_server.FILTER_API_DOWN = True
+        try:
+            client = FilterClient(base_url=server, retries=0, timeout=5.0, sleeper=lambda _s: None)
+            cond = client.get_filter_conditions(use_fallback=True)
+        finally:
+            mock_server.FILTER_API_DOWN = False
+        assert cond.source == "fallback"
+        assert cond.job_types and cond.industries
+
+
+def run(argv: list[str]) -> int:
+    """跑 CLI 主入口。"""
+    return cli.main(argv)
+
+
+class TestCli:
+    """CLI 输出与导出。"""
+
+    def test_show_fallback_prints_seven_dimensions(self, capsys):
+        """验兜底输出七个维度。"""
+        assert run(["show", "--fallback"]) == 0
+        out = capsys.readouterr().out
+        for label in ("求职类型", "薪资待遇", "工作经验", "学历要求", "公司行业", "公司规模"):
+            assert label in out
+
+    def test_show_json_is_exportable(self, capsys):
+        """验 JSON 输出可再解析。"""
+        assert run(["show", "--fallback", "--json"]) == 0
+        data = json.loads(capsys.readouterr().out)
+        assert data["source"] == "fallback"
+        assert data["jobType"][1]["code"] == "1901"
+        assert data["salary"][4]["lowSalary"] == 10
+
+    def test_show_detail_lists_option_codes(self, capsys):
+        """验 detail 列出选项码。"""
+        assert run(["show", "--fallback", "--detail"]) == 0
+        out = capsys.readouterr().out
+        assert "1901" in out and "全职" in out
+        assert "10-20K" in out
+
+    def test_export_writes_file(self, tmp_path: Path, capsys):
+        """验 export 写文件。"""
+        target = tmp_path / "out" / "filters.json"
+        assert run(["export", "--fallback", "--out", str(target)]) == 0
+        assert target.is_file()
+        data = json.loads(target.read_text(encoding="utf-8"))
+        assert data["source"] == "fallback"
+        assert len(data["industry"]) == 15
+
+    def test_export_to_stdout(self, capsys):
+        """验 export 可打到 stdout。"""
+        assert run(["export", "--fallback"]) == 0
+        assert json.loads(capsys.readouterr().out)["source"] == "fallback"
+
+    def test_show_against_mock_server(self, server: str, capsys):
+        """验对假服务端 show JSON。"""
+        assert run(["--base-url", server, "show", "--json"]) == 0
+        data = json_from_output(capsys.readouterr().out)
+        assert data["source"] == "api"
+        assert [c["name"] for c in data["city"]][:2] == ["北京", "广东"]
+
+    def test_endpoint_override(self, server: str, capsys):
+        """验端点可被命令行覆盖。"""
+        assert run(
+            [
+                "--base-url",
+                server,
+                "--endpoint-conditions",
+                "/wapi/zpgeek/search/job/condition.json",
+                "--endpoint-city",
+                "/wapi/zpCommon/data/city.json",
+                "show",
+                "--json",
+            ]
+        ) == 0
+        data = json_from_output(capsys.readouterr().out)
+        assert data["jobType"]
+
+    def test_all_subcommands_registered(self):
+        """验子命令都已注册。"""
+        parser = cli.build_parser()
+        for name in ("show", "export"):
+            assert parser.parse_args([name])

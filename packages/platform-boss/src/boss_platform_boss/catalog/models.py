@@ -53,7 +53,7 @@ class FilterOption:
 
     @classmethod
     def from_tuple(cls, row: tuple) -> "FilterOption":
-        """从 `boss_filter.tables` 的常量行构造。
+        """从 `boss_platform_boss.catalog.tables` 的常量行构造。
 
         行形状：`(code, name)` 或薪资档的 `(code, name, low, high)`。
         """
@@ -254,5 +254,5 @@ def options_from_api(items: Any) -> tuple[FilterOption, ...]:
 
 
 def options_from_rows(rows: Iterable[tuple]) -> tuple[FilterOption, ...]:
-    """把 `boss_filter.tables` 的常量行拍成 `FilterOption` 元组。"""
+    """把 `boss_platform_boss.catalog.tables` 的常量行拍成 `FilterOption` 元组。"""
     return tuple(FilterOption.from_tuple(row) for row in rows)

@@ -118,7 +118,7 @@ def _pick_target_jobs(
     Returns:
         `(jobs, target_kind, target_json)`；岗位最多取 10，一个都没有时抛 `ValidationWebError`。
     """
-    from boss_jobs.store import JobStore
+    from boss_platform_boss.jobs.store import JobStore
 
     with JobStore() as store:
         if crawl_task_id:
@@ -438,7 +438,7 @@ def revision_regenerate(revision_id: str) -> dict[str, Any]:
     crawl_task_id = rev.get("crawl_task_id") or ""
     job_ids = [str(i) for i in (target.get("job_ids") or []) if i]
 
-    from boss_jobs.store import JobStore
+    from boss_platform_boss.jobs.store import JobStore
 
     with JobStore() as store:
         jobs = []

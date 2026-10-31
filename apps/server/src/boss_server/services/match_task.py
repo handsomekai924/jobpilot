@@ -38,7 +38,7 @@ from boss_ai.matching import (
     match_one as _ai_match_one,
     resume_brief as _resume_brief,
 )
-from boss_jobs.models import Job
+from boss_platform_boss.jobs.models import Job
 
 from .. import config as C
 from ..errors import ConflictError, NotFoundError, UpstreamError, ValidationWebError
@@ -461,7 +461,7 @@ def _pick_jobs(task: MatchTask) -> list[Job]:
     Returns:
         职位列表。
     """
-    from boss_jobs.store import JobStore
+    from boss_platform_boss.jobs.store import JobStore
 
     with JobStore() as store:
         if task.crawl_task_id:
@@ -730,7 +730,7 @@ def _load_job(encrypt_job_id: str) -> Job | None:
     Returns:
         职位或 `None`。
     """
-    from boss_jobs.store import JobStore
+    from boss_platform_boss.jobs.store import JobStore
 
     with JobStore() as store:
         return store.get_job(encrypt_job_id)

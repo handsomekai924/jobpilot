@@ -1,0 +1,308 @@
+"""环境自检 / Chrome 引导 / 错误人话化。
+
+重点测两件事：`humanize` 对真实 `StokenError` 文案逐条命中，以及界面上不会露出原文。
+
+Attributes:
+    REAL_MESSAGES: 抄自 `boss_platform_boss/stoken_cdp.py` 的真实异常原文；那边改措辞这里就该红。
+"""
+
+from __future__ import annotations
+
+import pytest
+from fastapi.testclient import TestClient
+
+from boss_platform_boss.stoken import StokenError
+from boss_server import runtime
+from boss_server.app import create_app
+from boss_server.services import app_settings_store, troubleshoot
+
+
+@pytest.fixture
+def client():
+    """提供应用测试客户端。"""
+    return TestClient(create_app(), raise_server_exceptions=False)
+
+
+REAL_MESSAGES = [
+    "找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。",
+    "BOSS_CHROME_BIN=C:\\nope\\chrome.exe 指的文件不存在",
+    "连不上 CDP（ws://127.0.0.1:9222/devtools/browser/8f3c-...）：握手被拒",
+    "调试口没开（试过 9222~9224）。端口 9222 一直没开\n"
+    "常见原因：端口被其他程序占着，或安全软件拦了 Chrome 的调试口。",
+    "建 Chrome 专属 profile 失败 C:\\x\\.chrome_profile：[WinError 5] 拒绝访问",
+    "拉不起 Chrome（C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe）：[WinError 2]",
+    "等了 40s 也没等到站点写出 __zp_stoken__。多半是登录态没灌进去（``doc('session')`` 过期？）",
+    "CDP 等回包失败（Storage.getCookies）：连接被对端关闭",
+    "要走 CDP 得装 websocket-client：pip install websocket-client",
+]
+
+
+@pytest.mark.parametrize("raw", REAL_MESSAGES)
+def test_humanize_never_returns_the_raw_technical_text(raw):
+    """验 `humanize` 把真实技术原文翻译掉，不留原文。"""
+    out = troubleshoot.humanize(StokenError(raw))
+
+    assert out != raw, f"没翻译：{raw}"
+    for leak in ("ws://", "StokenError", "WinError", "cdp_stoken", "__zp_stoken__", "Storage."):
+        assert leak not in out, f"翻完还漏了 {leak}：{out}"
+    assert len(out) > 10
+
+
+def test_humanize_keeps_unknown_messages_verbatim():
+    """认不出来就原样返回——宁可露线索，也别吞掉。"""
+    assert troubleshoot.humanize("某个没见过的错") == "某个没见过的错"
+
+
+def test_humanize_accepts_plain_string():
+    """验 `humanize` 连普通字符串也认得「找不到 Chrome」并翻译。"""
+    assert troubleshoot.humanize("找不到 Chrome：装个 Google Chrome") != "找不到 Chrome：装个 Google Chrome"
+
+
+def test_humanize_is_case_sensitive_for_env_names():
+    """环境变量名是识别的钥匙，大小写写错就认不出来了——钉住现状。"""
+    assert "chrome" in troubleshoot.humanize("找不到 Chrome：xxx").lower()
+
+
+def test_humanize_本地没登录态指向登录页():
+    """`http_from_session` 的原文叫人跑命令行，网页用户该被指到「登录」页。"""
+    raw = (
+        "本地没有登录态：状态库 F:\\boss\\data\\boss.db 里没有，"
+        "或 token/Cookie 都没有。先跑 `python -m boss_platform_boss.auth login` 落一份。"
+    )
+    out = troubleshoot.humanize(raw)
+
+    assert out != raw
+    assert "「登录」页" in out
+    assert "python -m boss_platform_boss.auth" not in out
+    assert "boss.db" not in out, "状态库路径对用户没意义，不该露出来"
+
+
+def test_health_reports_paths(client, tmp_path):
+    """验 `/api/system/health` 报出各数据路径。"""
+    body = client.get("/api/system/health").json()
+
+    assert body["frozen"] is False, "测试跑在源码态"
+    assert body["data_dir"]
+    assert body["db"]
+    assert body["writable"] is True
+    assert body["temp_run"] is False
+
+
+def test_chrome_status_reports_found(client, monkeypatch):
+    """验 `/api/system/chrome` 报出找到的 Chrome 路径。"""
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", lambda: r"C:\fake\chrome.exe")
+    body = client.get("/api/system/chrome").json()
+
+    assert body["found"] is True
+    assert body["path"] == r"C:\fake\chrome.exe"
+    assert body["mode"] in body["modes"]
+
+
+def test_chrome_status_gives_guidance_when_missing(client, monkeypatch):
+    """没装 Chrome 是第一大劝退点，返回的必须是能照做的中文。"""
+
+    def boom():
+        """抛预置异常，供测试验证翻译出口。"""
+        raise StokenError("找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。")
+
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
+    body = client.get("/api/system/chrome").json()
+
+    assert body["found"] is False
+    assert "Chrome 下载" in body["message"]
+    assert "BOSS_CHROME_BIN" not in body["message"]
+
+
+def test_chrome_mode_roundtrip_persists(client, monkeypatch):
+    """验 Chrome 窗口档位写入后能读回并持久化。"""
+    from boss_browser_pool.cdp import CHROME_MODE_ENV
+
+    resp = client.post("/api/system/chrome/mode", json={"mode": "visible"})
+    assert resp.status_code == 200
+    assert resp.json()["mode"] == "visible"
+    assert app_settings_store.load_settings().chrome_mode == "visible"
+
+    import os
+
+    assert os.environ.get(CHROME_MODE_ENV) == "visible"
+    monkeypatch.delenv(CHROME_MODE_ENV, raising=False)
+
+
+def test_chrome_mode_rejects_unknown_value(client):
+    """验未知的 Chrome 窗口档位被 422 拒掉。"""
+    resp = client.post("/api/system/chrome/mode", json={"mode": "全屏"})
+    assert resp.status_code == 422
+    assert "不认识的窗口档位" in resp.json()["message"]
+
+
+def test_chrome_mode_empty_restores_default(client, monkeypatch):
+    """验档位传空串能恢复默认值。"""
+    from boss_browser_pool.cdp import CHROME_MODE_ENV
+
+    monkeypatch.setenv(CHROME_MODE_ENV, "visible")
+    resp = client.post("/api/system/chrome/mode", json={"mode": ""})
+
+    assert resp.status_code == 200
+    import os
+
+    assert CHROME_MODE_ENV not in os.environ
+
+
+def test_open_chrome_translates_failure(client, monkeypatch):
+    """拉不起 Chrome 时要报人话，而不是把 StokenError 原文甩出来。"""
+
+    def boom(**kwargs):
+        """抛预置异常，供测试验证翻译出口。"""
+        raise StokenError("拉不起 Chrome（C:\\x\\chrome.exe）：[WinError 2] 找不到文件")
+
+    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", boom)
+    resp = client.post("/api/system/chrome/open")
+
+    assert resp.status_code == 503
+    body = resp.json()
+    assert body["code"] == "environment"
+    assert "WinError" not in body["message"]
+
+
+def test_open_chrome_success_message(client, monkeypatch):
+    """验打开 Chrome 成功时给的是人话提示。"""
+    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", lambda **kwargs: None)
+    resp = client.post("/api/system/chrome/open")
+
+    assert resp.status_code == 200
+    assert "可见窗口" in resp.json()["message"]
+
+
+def test_stoken_error_becomes_friendly_503(client, monkeypatch):
+    """同步请求里漏出来的 StokenError 也要被翻译。"""
+
+    def boom():
+        """抛预置异常，供测试验证翻译出口。"""
+        raise StokenError("连不上 CDP（ws://127.0.0.1:9222/devtools/browser/abc）：握手被拒")
+
+    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
+    resp = client.post("/api/system/chrome/open")
+
+    body = resp.json()
+    assert resp.status_code == 503
+    assert "ws://" not in body["message"]
+    assert body["code"] == "environment"
+
+
+def test_unhandled_exception_does_not_leak_traceback(client, monkeypatch):
+    """兜底处理器：任何没预料到的异常都回中文，不把 traceback 甩给用户。"""
+
+    def boom(*_args, **_kwargs):
+        """抛预置异常，供测试验证翻译出口。"""
+        raise RuntimeError("内部炸了：secret-token-xyz")
+
+    monkeypatch.setattr("boss_db.resolve_db_path", boom)
+    resp = client.get("/api/system/health")
+
+    assert resp.status_code == 500
+    body = resp.json()
+    assert body["code"] == "internal"
+    assert "secret-token-xyz" not in body["message"]
+    assert "RuntimeError" not in body["message"]
+
+
+def test_deliver_task_uses_humanize():
+    """投递任务的失败文案不该带裸类名。"""
+    import inspect
+
+    from boss_server.services import deliver_task
+
+    source = inspect.getsource(deliver_task)
+    assert "type(exc).__name__" not in source
+    assert "humanize(exc)" in source
+
+
+def test_crawl_task_uses_humanize():
+    """验抓取任务的报错出口确实走了 `humanize`。"""
+    import inspect
+
+    from boss_server.services import crawl_task
+
+    source = inspect.getsource(crawl_task)
+    assert "type(exc).__name__" not in source
+    assert "humanize(exc)" in source
+
+
+def test_runtime_app_data_dir_is_absolute():
+    """验 `app_data_dir` 返回绝对路径。"""
+    assert runtime.app_data_dir().is_absolute()
+
+
+def test_greeting_prompt_roundtrip_and_restore(client):
+    """验招呼语约束能存能读，空串回到内置默认。"""
+    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT
+
+    resp = client.get("/api/system/greeting-prompt")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["custom"] == ""
+    assert body["is_default"] is True
+    assert body["requirement"] == GREETING_REQUIREMENT
+    assert body["default"] == GREETING_REQUIREMENT
+
+    custom = "写 80 字，风格 {轻松}，不要『我们』"
+    resp = client.put("/api/system/greeting-prompt", json={"requirement": custom})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["custom"] == custom
+    assert body["requirement"] == custom
+    assert body["is_default"] is False
+
+    resp = client.put("/api/system/greeting-prompt", json={"requirement": ""})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["custom"] == ""
+    assert body["is_default"] is True
+    assert body["requirement"] == GREETING_REQUIREMENT
+    assert app_settings_store.load_settings().greeting_requirement == ""
+
+
+def test_greeting_prompt_keeps_sibling_settings(client):
+    """改招呼语不许冲掉 Chrome 档位与忽略版本水位线。"""
+    app_settings_store.apply_chrome_mode("visible")
+    app_settings_store.apply_ignored_update_version("1.2.0")
+
+    resp = client.put("/api/system/greeting-prompt", json={"requirement": "自定义约束"})
+    assert resp.status_code == 200
+
+    settings = app_settings_store.load_settings()
+    assert settings.greeting_requirement == "自定义约束"
+    assert settings.chrome_mode == "visible"
+    assert settings.ignored_update_version == "1.2.0"
+
+    assert client.put("/api/system/greeting-prompt", json={"requirement": ""}).status_code == 200
+    settings = app_settings_store.load_settings()
+    assert settings.chrome_mode == "visible"
+    assert settings.ignored_update_version == "1.2.0"
+
+
+def test_greeting_prompt_rejects_too_long(client):
+    """超 500 字直接 422，不落库。"""
+    limit = app_settings_store.GREETING_REQUIREMENT_MAX_LEN
+    resp = client.put("/api/system/greeting-prompt", json={"requirement": "字" * (limit + 1)})
+    assert resp.status_code == 422
+    assert app_settings_store.load_settings().greeting_requirement == ""
+
+
+def test_greeting_requirement_store_truncates_overlong():
+    """绕过接口直写设置时，超长也要截断，别把状态库撑爆。"""
+    saved = app_settings_store.apply_greeting_requirement(
+        "字" * (app_settings_store.GREETING_REQUIREMENT_MAX_LEN + 300)
+    )
+    assert len(saved) == app_settings_store.GREETING_REQUIREMENT_MAX_LEN
+
+
+def test_resolve_greeting_requirement_prefers_custom():
+    """自定义非空用自定义，空则回落出厂常量。"""
+    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT, resolve_greeting_requirement
+
+    assert resolve_greeting_requirement() == GREETING_REQUIREMENT
+    app_settings_store.apply_greeting_requirement("自定义 {花括号}")
+    assert resolve_greeting_requirement() == "自定义 {花括号}"
+    app_settings_store.apply_greeting_requirement("")
+    assert resolve_greeting_requirement() == GREETING_REQUIREMENT

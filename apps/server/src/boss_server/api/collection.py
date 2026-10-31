@@ -17,7 +17,7 @@ from ..services.collection_config_store import (
 )
 from ..services.blacklist_recheck import recheck_tasks
 from .filters import SearchFilterBody, _filter_payload
-from boss_filter.search import JobSearchFilter
+from boss_platform_boss.catalog.search import JobSearchFilter
 
 router = APIRouter()
 
@@ -98,7 +98,7 @@ class RecheckBody(BaseModel):
 @router.get("/collection/config")
 def get_collection_config() -> dict[str, Any]:
     """读库里的搜索条件与采集配置。"""
-    from boss_filter import load_search_filter
+    from boss_platform_boss.catalog import load_search_filter
 
     return {"search": _filter_payload(load_search_filter()), "collection": load_config().to_dict()}
 
@@ -106,8 +106,8 @@ def get_collection_config() -> dict[str, Any]:
 @router.get("/collection/expects")
 def get_collection_expects() -> dict[str, Any]:
     """在线拉当前账号的求职期望列表（`mix` / `expects` / `partTime`）；失败抛 `UpstreamError`。"""
-    from boss_jobs import create_client
-    from boss_jobs.errors import JobError
+    from boss_platform_boss.jobs import create_client
+    from boss_platform_boss.jobs.errors import JobError
 
     from ..services.troubleshoot import humanize
 
@@ -139,7 +139,7 @@ def get_collection_expects() -> dict[str, Any]:
 @router.put("/collection/config")
 def put_collection_config(body: CollectionBody) -> dict[str, Any]:
     """写库里的搜索条件与采集配置；`encrypt_expect_id` 搜索流与期望流共用同一份。"""
-    from boss_filter import save_search_filter
+    from boss_platform_boss.catalog import save_search_filter
 
     data = body.model_dump()
     search = JobSearchFilter(
@@ -159,7 +159,7 @@ def put_collection_config(body: CollectionBody) -> dict[str, Any]:
 @router.post("/collection/config/reset")
 def reset_collection_config() -> dict[str, Any]:
     """把搜索条件与采集配置重置为默认。"""
-    from boss_filter import save_search_filter
+    from boss_platform_boss.catalog import save_search_filter
 
     f = JobSearchFilter()
     save_search_filter(f)

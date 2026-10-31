@@ -149,7 +149,7 @@ class JobExpectFilter:
         `city` 默认取混合期望的 location。
 
         Args:
-            expects: 期望列表（`boss_jobs.models.ExpectList`）。
+            expects: 期望列表（`boss_platform_boss.jobs.models.ExpectList`）。
             kind: `recommend` / `part_time` / `expect`。
             city: 覆盖城市 code；不传则推荐 tab 用混合期望的 location。
             **filters: 透传给本类的其余筛选字段。

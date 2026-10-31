@@ -1,6 +1,6 @@
 """兜底来源：写死的选项表 + 解析已保存 HTML。
 
-接口不可用时用 `boss_filter.tables` 的写死表；`parse_html_conditions`
+接口不可用时用 `boss_platform_boss.catalog.tables` 的写死表；`parse_html_conditions`
 可现场从 `.saved_web` 页面再解析一遍，用来校对写死表或离线凑一份。
 """
 

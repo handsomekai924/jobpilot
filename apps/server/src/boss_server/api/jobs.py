@@ -12,7 +12,7 @@ from typing import Any
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel, Field
 
-from boss_jobs.store import JobStore
+from boss_platform_boss.jobs.store import JobStore
 
 from ..errors import NotFoundError, ValidationWebError
 from ..services.desc_task import desc_tasks

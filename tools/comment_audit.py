@@ -3,7 +3,7 @@
 用法：
 
     python tools/comment_audit.py                  # 全仓
-    python tools/comment_audit.py boss_jobs        # 指定路径
+    python tools/comment_audit.py packages/platform-boss  # 指定路径
 
 退出码 1 = 还有 SPHINX_ATTR / BANNER / DELETE_ME 该删没删。
 """

@@ -363,7 +363,7 @@ class ZhipinLoginClient:
                 f"  Cookie 里现有的键：{sorted(cookies) or '（空）'}\n"
                 "  真实站点的登录响应体本来就没有 token，鉴权靠 Set-Cookie；"
                 "这里没收到 Cookie，说明登录那步没换到登录态。\n"
-                "  若连路由都不确定，用 `python -m boss_login probe` 再确认一次。",
+                "  若连路由都不确定，用 `python -m boss_platform_boss.auth probe` 再确认一次。",
                 raw=response.data,
             )
         if not token and not any(name in cookies for name in C.AUTH_COOKIES):

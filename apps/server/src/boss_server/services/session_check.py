@@ -94,7 +94,7 @@ def check_now(
     Args:
         session_path: 状态库路径；省略 = 默认库。
         client_factory: 造客户端的钩子（测试注入假客户端）。默认
-            `boss_login.create_client`。
+            `boss_platform_boss.auth.create_client`。
     """
     result = _run_check(session_path=session_path, client_factory=client_factory)
     _announce_session_changed()
@@ -118,8 +118,8 @@ def _run_check(
     client_factory: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
     """`check_now` 的实现体：只管查库测真伪，不发广播。"""
-    from boss_login.errors import BossLoginError
-    from boss_login.session import clear_session, load_session, save_session
+    from boss_platform_boss.auth.errors import BossLoginError
+    from boss_platform_boss.auth.session import clear_session, load_session, save_session
 
     stored = load_session(session_path)
     if stored.is_empty:
@@ -135,7 +135,7 @@ def _run_check(
 
     factory = client_factory
     if factory is None:
-        from boss_login import create_client as factory  # noqa: PLC0415 - 避免包外拖依赖
+        from boss_platform_boss.auth import create_client as factory  # noqa: PLC0415 - 避免包外拖依赖
 
     try:
         client = factory(session_path=session_path) if session_path is not None else factory()
@@ -185,7 +185,7 @@ def _handle_failure(
     session_path: Any,
 ) -> dict[str, Any]:
     """自检失败：只有「话术点名登录失效」才清库，其余一律原样保留。"""
-    from boss_login.session import clear_session
+    from boss_platform_boss.auth.session import clear_session
 
     text = str(exc)
     if not looks_like_session_expired(text):

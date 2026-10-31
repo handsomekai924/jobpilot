@@ -21,10 +21,10 @@ import uuid
 from collections import deque
 from typing import Any
 
-from boss_jobs import create_client
-from boss_jobs.config import BROWSER_CHECK_COOLOFF, BROWSER_CHECK_GIVEUP, DETAIL_INTERVAL
-from boss_jobs.errors import JobApiError
-from boss_jobs.store import JobStore
+from boss_platform_boss.jobs import create_client
+from boss_platform_boss.jobs.config import BROWSER_CHECK_COOLOFF, BROWSER_CHECK_GIVEUP, DETAIL_INTERVAL
+from boss_platform_boss.jobs.errors import JobApiError
+from boss_platform_boss.jobs.store import JobStore
 
 from ..errors import ConflictError, NotFoundError
 from .blacklist import RuleMatch, evaluate_jd, list_enabled_rules, save_hit

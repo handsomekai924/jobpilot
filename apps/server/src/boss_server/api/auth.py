@@ -152,13 +152,13 @@ def slider_solution(task_id: str, body: SliderSolutionBody) -> dict[str, Any]:
 def logout() -> dict[str, Any]:
     """登出：尽量清远端会话，并清本地登录态。"""
     try:
-        from boss_login import create_client
+        from boss_platform_boss.auth import create_client
 
         client = create_client(load_stored=True)
         client.logout()
     except Exception:  # noqa: BLE001 - 远端登出失败也要清本地
         pass
-    from boss_login.session import clear_session
+    from boss_platform_boss.auth.session import clear_session
 
     try:
         clear_session()

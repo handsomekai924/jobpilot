@@ -103,7 +103,7 @@ class JobSource(Protocol):
         """翻页迭代；翻页策略是站点语义（BOSS 的 hasMore 第 1 页不可信、页间硬睡）——站点自己管。"""
 
     def fetch_detail(self, ref: JobRef) -> Any:
-        """抓一条职位详情；返回形状站点私有（BOSS = `boss_jobs.JobDetail`）。"""
+        """抓一条职位详情；返回形状站点私有（BOSS = `boss_platform_boss.jobs.JobDetail`）。"""
 
 
 @runtime_checkable

@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TARGET = "apps/web/src"
 EXEMPT_PREFIX = (
     "apps/server/src/boss_server/static/legacy/",
-    "boss_jobs/assets/",
+    "packages/platform-boss/src/boss_platform_boss/assets/",
 )
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".git", "node_modules", ".idea"}
 EXTS = {".ts", ".tsx", ".js", ".jsx", ".mjs", ".vue"}

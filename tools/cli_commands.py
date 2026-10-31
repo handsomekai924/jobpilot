@@ -5,7 +5,7 @@
 
     python tools/cli_commands.py                # 人读表格
     python tools/cli_commands.py --json         # 机器可读
-    python tools/cli_commands.py --module boss_filter
+    python tools/cli_commands.py --module boss_platform_boss.catalog
     python tools/cli_commands.py --options      # 连选项一起列
 """
 
@@ -14,12 +14,22 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
-import pkgutil
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+#: workspace 的源码根；各包的 `cli.py` 按目录位置发现，不写死模块名。
+SRC_ROOTS = (
+    ROOT / "apps" / "server" / "src",
+    ROOT / "packages" / "core" / "src",
+    ROOT / "packages" / "platform-base" / "src",
+    ROOT / "packages" / "platform-boss" / "src",
+    ROOT / "packages" / "browser-pool" / "src",
+    ROOT / "packages" / "ai" / "src",
+    ROOT / "packages" / "db" / "src",
+)
 
 
 @dataclass(frozen=True)
@@ -140,23 +150,24 @@ def walk_parser(parser: argparse.ArgumentParser, name: str, help_text: str = "")
 
 
 def discover_modules(only: str | None = None) -> list[ModuleCli]:
-    """在项目根下找带 `cli.build_parser` 的包，逐个挖命令。
+    """在 workspace 源码根下找带 `cli.build_parser` 的包，逐个挖命令。
 
     Args:
-        only: 只看这个模块名（如 `boss_filter`）；不给就全看。
+        only: 只看这个模块名（如 `boss_platform_boss.catalog`）；不给就全看。
+
+    Returns:
+        按模块名排序的 CLI 概览；导入/构造失败的模块直接跳过。
     """
-    root_str = str(ROOT)
-    if root_str not in sys.path:
-        sys.path.insert(0, root_str)
+    for src in reversed(SRC_ROOTS):
+        if str(src) not in sys.path:
+            sys.path.insert(0, str(src))
 
     found: list[ModuleCli] = []
-    for info in sorted(pkgutil.iter_modules([root_str]), key=lambda m: m.name):
-        if only and info.name != only:
-            continue
-        if not info.ispkg:
+    for name in _candidate_modules():
+        if only and name != only:
             continue
         try:
-            cli = importlib.import_module(f"{info.name}.cli")
+            cli = importlib.import_module(f"{name}.cli")
         except Exception:
             continue
         build = getattr(cli, "build_parser", None)
@@ -164,8 +175,21 @@ def discover_modules(only: str | None = None) -> list[ModuleCli]:
             continue
         parser = build()
         doc = (sys.modules[cli.__name__].__doc__ or "").strip().splitlines()
-        found.append(walk_parser(parser, info.name, doc[0] if doc else ""))
+        found.append(walk_parser(parser, name, doc[0] if doc else ""))
     return found
+
+
+def _candidate_modules() -> list[str]:
+    """各源码根下含 `cli.py` 的包模块名（如 `boss_platform_boss.jobs`）。"""
+    names: list[str] = []
+    for src in SRC_ROOTS:
+        if not src.is_dir():
+            continue
+        for cli_path in src.rglob("cli.py"):
+            if "__pycache__" in cli_path.parts:
+                continue
+            names.append(".".join(cli_path.parent.relative_to(src).parts))
+    return sorted(names)
 
 
 def _fmt_option(opt: Option) -> str:
@@ -224,7 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--json", action="store_true", help="按 JSON 输出")
     parser.add_argument("--options", action="store_true", help="连选项一起列")
-    parser.add_argument("--module", default=None, help="只看这个模块（如 boss_filter）")
+    parser.add_argument("--module", default=None, help="只看这个模块（如 boss_platform_boss.catalog）")
     return parser
 
 

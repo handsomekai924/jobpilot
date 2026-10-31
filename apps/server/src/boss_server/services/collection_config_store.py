@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Any
 
 import boss_db
-from boss_filter import load_search_filter, save_search_filter
-from boss_filter.search import JobSearchFilter
+from boss_platform_boss.catalog import load_search_filter, save_search_filter
+from boss_platform_boss.catalog.search import JobSearchFilter
 
 logger = logging.getLogger(__name__)
 

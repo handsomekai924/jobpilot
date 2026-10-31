@@ -100,7 +100,7 @@ class DeliveryCaps:
 
 @dataclass(frozen=True)
 class SearchCriteria:
-    """通用检索维度；code 语义沿用 `boss_filter`（字符串 code，空 = 站点默认）。
+    """通用检索维度；code 语义沿用 `boss_platform_boss.catalog`（字符串 code，空 = 站点默认）。
 
     站点差异由 `Catalog.unsupported()` 声明，UI 置灰不硬塞。
     """

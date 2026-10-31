@@ -163,7 +163,7 @@ class JobApiError(JobError):
     def is_browser_check(self) -> bool:
         """True 表示撞上安全网关（code 37「浏览器环境异常」）。
 
-        缺的是 `__zp_stoken__` 令牌；令牌由 `boss_jobs.stoken` / `boss_jobs.cdp_stoken`
+        缺的是 `__zp_stoken__` 令牌；令牌由 `boss_platform_boss.stoken` / `boss_platform_boss.stoken_cdp`
         自动补，算完重试即可。
         """
         return self.code == C.CODE_BROWSER_CHECK

@@ -3,7 +3,7 @@
 用法：
 
     python tools/docstring_audit.py                # 全仓
-    python tools/docstring_audit.py boss_jobs      # 指定路径
+    python tools/docstring_audit.py packages/platform-boss  # 指定路径
 
 退出码 1 = 有 MISSING 或 RST 残留；过长只告警。
 
@@ -23,9 +23,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".saved_web", ".scratch", ".git", "node_modules", ".idea"}
 
 CLI_EXEMPT = {
-    "boss_filter/cli.py",
-    "boss_jobs/cli.py",
-    "boss_login/cli.py",
+    "packages/platform-boss/src/boss_platform_boss/catalog/cli.py",
+    "packages/platform-boss/src/boss_platform_boss/jobs/cli.py",
+    "packages/platform-boss/src/boss_platform_boss/auth/cli.py",
     "tools/cli_commands.py",
 }
 

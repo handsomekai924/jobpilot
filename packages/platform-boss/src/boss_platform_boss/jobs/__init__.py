@@ -3,14 +3,14 @@
 每条职位保留（岗位名称 / 公司名称 / 工作地点 / 薪资待遇 /
 工作经验要求 / 学历要求 / 公司行业 / 公司规模）。清洗入库同步按页做，中途断了
 已到手的页不会丢；页间默认硬睡 1 秒（`--interval` 可调）把频率压到人手滚动的量级。
-登录态复用 `boss_login` 落盘的 `doc('session')`。
+登录态复用 `boss_platform_boss.auth` 落盘的 `doc('session')`。
 
-    python -m boss_jobs fetch                 # 翻页抓，每页洗完就入库
-    python -m boss_jobs fetch --max-pages 3
-    python -m boss_jobs stats
-    python -m boss_jobs list --city 广州
+    python -m boss_platform_boss.jobs fetch                 # 翻页抓，每页洗完就入库
+    python -m boss_platform_boss.jobs fetch --max-pages 3
+    python -m boss_platform_boss.jobs stats
+    python -m boss_platform_boss.jobs list --city 广州
 
-    from boss_jobs import create_client, open_store
+    from boss_platform_boss.jobs import create_client, open_store
     with open_store() as store:               # 默认 data/boss.db
         report = client.crawl(store=store)    # 抓一页存一页，页间睡 1 秒
 """

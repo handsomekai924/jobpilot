@@ -438,7 +438,8 @@ export function WorkbenchSection({
               </>
             )}
           </Box>
-        </Surface>
+          </Surface>
+        </ScrollArea>
       </Box>
 
       {/* ---------------- 右栏：任务进度 + 匹配结果 ---------------- */}
@@ -517,6 +518,7 @@ export function WorkbenchSection({
             ))}
           </Box>
         )}
+        </ScrollArea>
       </Box>
     </Box>
   );

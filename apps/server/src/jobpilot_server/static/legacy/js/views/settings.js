@@ -100,7 +100,7 @@ export async function renderSettings(root) {
    *
    * 缓存与忽略水位线的细节见 `notes/jobpilot_server/static/legacy/js/settings.md`。
    *
-   * @param {Event} e `boss:update` 事件，`detail` 为检测结果
+   * @param {Event} e `jobpilot:update` 事件，`detail` 为检测结果
    */
   function onUpdateDot(e) {
     const dot = root.querySelector(".settings-tab-dot");
@@ -108,7 +108,7 @@ export async function renderSettings(root) {
     const d = (e && e.detail) || {};
     dot.hidden = !Boolean(d.has_update && d.should_prompt);
   }
-  window.addEventListener("boss:update", onUpdateDot);
+  window.addEventListener("jobpilot:update", onUpdateDot);
   const cached = peekUpdateStatus();
   if (cached) {
     onUpdateDot({ detail: cached });
@@ -132,9 +132,9 @@ export async function renderSettings(root) {
     });
   });
   await show("ai");
-  /** 卸载时移除 boss:update 监听并销毁当前面板。 */
+  /** 卸载时移除 jobpilot:update 监听并销毁当前面板。 */
   return () => {
-    window.removeEventListener("boss:update", onUpdateDot);
+    window.removeEventListener("jobpilot:update", onUpdateDot);
     if (typeof paneDispose === "function") {
       try { paneDispose(); } catch {}
     }

@@ -8,7 +8,9 @@ import { createAppleTheme } from "@/theme/muiTheme";
 import type { ThemeMode } from "@/theme/tokens";
 
 /** 与 legacy 前端共用的主题键：共存期两套 UI 主题同步。 */
-const STORAGE_KEY = "orbit-theme";
+const STORAGE_KEY = "jobpilot-theme";
+/** 旧版主题键，只读不写，老用户的选择不至于丢。 */
+const LEGACY_STORAGE_KEY = "orbit-theme";
 
 /** 主题模式上下文值。 */
 interface ThemeModeContextValue {
@@ -22,7 +24,7 @@ const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 /** 读初始模式：持久化优先，其次系统偏好，兜底 dark。 */
 function readInitialMode(): ThemeMode {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (saved === "light" || saved === "dark") return saved;
     if (window.matchMedia?.("(prefers-color-scheme: light)").matches) return "light";
   } catch {

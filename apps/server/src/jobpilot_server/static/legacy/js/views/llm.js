@@ -191,7 +191,7 @@ export async function renderLLM(root, onDirty = () => {}) {
           · 给 HR 写一句开场白
         </p>
         <div class="banner info mt-16">
-          Key 只存在你电脑上的 data/boss.db 里，请求直接从本机发到你填的地址。
+          Key 只存在你电脑上的 data/jobpilot.db 里，请求直接从本机发到你填的地址。
         </div>
       </div>
     </div>

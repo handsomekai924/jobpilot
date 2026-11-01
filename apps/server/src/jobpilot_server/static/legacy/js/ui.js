@@ -1,8 +1,12 @@
 /** 通用 UI 工具：toast / modal / 主题 / 长任务面板 */
 
+/** 主题键与新版前端共用；旧键只读，老用户的选择不至于丢。 */
+const THEME_KEY = "jobpilot-theme";
+const LEGACY_THEME_KEY = "orbit-theme";
+
 /** 从 localStorage / 系统偏好恢复主题写回 `<html>`；返回 `"light"` 或 `"dark"`。 */
 export function initTheme() {
-  const saved = localStorage.getItem("orbit-theme");
+  const saved = localStorage.getItem(THEME_KEY) || localStorage.getItem(LEGACY_THEME_KEY);
   const theme = saved === "light" || saved === "dark"
     ? saved
     : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
@@ -19,7 +23,7 @@ export function currentTheme() {
 export function toggleTheme() {
   const next = currentTheme() === "light" ? "dark" : "light";
   document.documentElement.setAttribute("data-theme", next);
-  try { localStorage.setItem("orbit-theme", next); } catch { }
+  try { localStorage.setItem(THEME_KEY, next); } catch { }
   return next;
 }
 

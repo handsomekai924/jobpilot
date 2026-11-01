@@ -89,7 +89,7 @@ export async function renderLogin(root) {
         </div>
 
         <div id="step-done" class="hidden">
-          <div class="banner info">✓ 登录成功，会话已写入 <span class="mono">data/boss.db</span>（与命令行 <span class="mono">python -m boss_login</span> 共用）。</div>
+          <div class="banner info">✓ 登录成功，会话已写入 <span class="mono">data/jobpilot.db</span>（与命令行 <span class="mono">python -m jobpilot_platform_boss.auth</span> 共用）。</div>
           <div class="btn-row">
             <a class="btn primary" href="#/jobs">去抓职位</a>
             <button class="btn danger" id="btn-logout">退出登录</button>
@@ -125,7 +125,7 @@ export async function renderLogin(root) {
           </div>
 
           <div id="qr-done" class="hidden">
-            <div class="banner info">✓ 扫码登录成功，会话已写入 <span class="mono">data/boss.db</span>。</div>
+            <div class="banner info">✓ 扫码登录成功，会话已写入 <span class="mono">data/jobpilot.db</span>。</div>
             <div class="btn-row">
               <a class="btn primary" href="#/jobs">去抓职位</a>
               <button class="btn danger" id="btn-logout-qr">退出登录</button>

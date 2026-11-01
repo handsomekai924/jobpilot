@@ -27,7 +27,7 @@ def test_index_serves_spa(client: TestClient):
     """验证根路径吐出 SPA 首页。"""
     r = client.get("/")
     assert r.status_code == 200
-    assert "BOSS" in r.text
+    assert "JobPilot" in r.text
 
 
 def test_auth_status(client: TestClient):

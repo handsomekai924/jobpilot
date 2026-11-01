@@ -1,4 +1,4 @@
-"""`jobpilot_server` — BOSS 直聘控制台的后端 API 服务。
+"""`jobpilot_server` — 多平台求职控制台的后端 API 服务。
 
 把登录 / 抓取 / 筛选 / LLM / 简历分析收进一套 HTTP 接口，能力层全部复用
 `jobpilot_platform_boss.auth` / `jobpilot_platform_boss.jobs` / `jobpilot_platform_boss.catalog`，本包只做编排与展示。

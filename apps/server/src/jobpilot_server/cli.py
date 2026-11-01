@@ -111,7 +111,7 @@ def _banner(url: str, info: dict[str, str]) -> None:
     from . import __version__
 
     print("=" * 60)
-    print(f"  BOSS 自动投递助手已启动  v{__version__}")
+    print(f"  JobPilot 自动投递助手已启动  v{__version__}")
     print(f"  接口地址     {url}")
     print(f"  接口文档     {url}/api/docs")
     if is_frozen():

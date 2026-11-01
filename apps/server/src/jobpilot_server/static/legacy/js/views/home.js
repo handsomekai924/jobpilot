@@ -6,7 +6,7 @@ import { fmtTime, toast } from "../ui.js";
 /**
  * 渲染工作台：会话 / 职位 / AI / 简历卡片 + 环境自检。
  *
- * 会话卡片订阅舰桥的 `boss:session` 广播，避免只在渲染时取一次状态就卡在「离线」。
+ * 会话卡片订阅舰桥的 `jobpilot:session` 广播，避免只在渲染时取一次状态就卡在「离线」。
  * 采集等任务的进度不在这画，也不放跳转按钮——任务中心的唯一入口在顶栏。
  *
  * @param {HTMLElement} root 挂载容器
@@ -154,7 +154,7 @@ export async function renderHome(root) {
   }
 
   const onSession = (e) => paintSession(e.detail);
-  window.addEventListener("boss:session", onSession);
+  window.addEventListener("jobpilot:session", onSession);
   api.get("/api/auth/status").then(paintSession).catch(() => {});
 
   api.get("/api/jobs/stats").then((s) => {
@@ -285,6 +285,6 @@ export async function renderHome(root) {
   }).catch(() => {});
 
   return () => {
-    window.removeEventListener("boss:session", onSession);
+    window.removeEventListener("jobpilot:session", onSession);
   };
 }

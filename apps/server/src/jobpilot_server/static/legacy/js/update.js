@@ -11,7 +11,9 @@ const WAIT_LIMIT_MS = 10 * 60 * 1000;
 /** 「更新完成」提示停留多久再刷新——够看清更新到了哪一版，又不至于干等 */
 const RELOAD_DELAY_MS = 1500;
 /** 记「这个标签页已经处理过更新回执」的键（必须跟着标签页活过刷新，所以用 sessionStorage） */
-const DONE_SEEN_KEY = "boss:update-done-seen";
+const DONE_SEEN_KEY = "jobpilot:update-done-seen";
+/** 旧版键，只读兼容：升级后同一次更新别重复提示 */
+const LEGACY_DONE_SEEN_KEY = "boss:update-done-seen";
 
 /** 已经 toast 过的版本号——同一个版本不许反复提醒 */
 let notifiedVersion = "";
@@ -33,7 +35,7 @@ let lastStatus = null;
 export function applyUpdateStatus(status) {
   if (!status) return;
   lastStatus = status;
-  window.dispatchEvent(new CustomEvent("boss:update", { detail: status }));
+  window.dispatchEvent(new CustomEvent("jobpilot:update", { detail: status }));
 }
 
 /**
@@ -358,7 +360,8 @@ function showUpdateDone(done) {
  */
 function doneAlreadyShown(key) {
   try {
-    return sessionStorage.getItem(DONE_SEEN_KEY) === key;
+    return sessionStorage.getItem(DONE_SEEN_KEY) === key
+      || sessionStorage.getItem(LEGACY_DONE_SEEN_KEY) === key;
   } catch {
     return false;
   }

@@ -51,7 +51,7 @@ export function TopBar({
       }}
     >
       <Typography sx={{ ...typeScale.m, fontWeight: 700, letterSpacing: "-0.2px", mr: 1 }}>
-        招聘中枢
+        JobPilot
       </Typography>
 
       {inline ? (

@@ -24,7 +24,7 @@ export async function renderSettingsUpdate(root) {
     <div class="settings-scroll">
       <div class="update-summary" id="upd-summary"></div>
       <div class="divider"></div>
-      <div class="card-sub mb-8">更新日志 <span class="muted">（%TEMP%\\BossAutoDelivery-update\\，不用自己打开）</span></div>
+      <div class="card-sub mb-8">更新日志 <span class="muted">（%TEMP%\\JobPilot-update\\，不用自己打开）</span></div>
       <div class="card-sub" id="lbl-update-log">update.log</div>
       <pre class="update-log-view" id="log-update">加载中…</pre>
       <div class="card-sub" id="lbl-progress-log">progress.log</div>
@@ -205,8 +205,8 @@ export async function renderSettingsUpdate(root) {
         has_update: d.has_update,
         should_prompt: d.should_prompt,
         ignored: d.ignored,
-        gitee_url: "https://gitee.com/w-kev/boss-automatic-delivery/releases",
-        github_url: "https://github.com/handsomekai924/boss-automatic-delivery/releases",
+        gitee_url: "https://gitee.com/w-kev/jobpilot/releases",
+        github_url: "https://github.com/handsomekai924/jobpilot/releases",
         zip_asset: d.zip_asset,
         can_self_update: d.can_self_update,
       },
@@ -219,7 +219,7 @@ export async function renderSettingsUpdate(root) {
     const d = p.diagnostics || {};
     const lines = [];
     const push = (k, v) => lines.push(`${k}：${v == null || v === "" ? "无" : v}`);
-    lines.push("=== BossAutoDelivery 诊断信息 ===");
+    lines.push("=== JobPilot 诊断信息 ===");
     push("导出时间", new Date().toLocaleString("zh-CN"));
     push("当前版本", d.current ? `v${d.current}` : "未知");
     push("最新版本", d.latest ? `v${d.latest}` : "（未测到）");
@@ -277,7 +277,7 @@ export async function renderSettingsUpdate(root) {
   root.querySelector("#upd-apply").addEventListener("click", openDialog);
   root.querySelector("#upd-open").addEventListener("click", openDialog);
 
-  /** `boss:update` 广播进来时，就地改诊断字段并重画摘要/横幅/按钮。 */
+  /** `jobpilot:update` 广播进来时，就地改诊断字段并重画摘要/横幅/按钮。 */
   const onUpdate = (e) => {
     const status = (e && e.detail) || {};
     if (!payload) payload = {};
@@ -298,12 +298,12 @@ export async function renderSettingsUpdate(root) {
     renderBanner(payload, null);
     syncButtons(payload);
   };
-  window.addEventListener("boss:update", onUpdate);
+  window.addEventListener("jobpilot:update", onUpdate);
 
   await loadAll();
 
   return () => {
-    window.removeEventListener("boss:update", onUpdate);
+    window.removeEventListener("jobpilot:update", onUpdate);
   };
 }
 

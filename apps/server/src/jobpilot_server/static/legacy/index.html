@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BOSS 自动投递助手</title>
+<title>JobPilot 自动投递助手</title>
 <script>
-  /* 无闪烁主题初始化：先于样式应用 data-theme */
+  /* 无闪烁主题初始化：先于样式应用 data-theme（与新版共用 jobpilot-theme 键，兼容旧 orbit-theme） */
   (function () {
     try {
-      var saved = localStorage.getItem("orbit-theme");
+      var saved = localStorage.getItem("jobpilot-theme") || localStorage.getItem("orbit-theme");
       var theme = saved === "light" || saved === "dark"
         ? saved
         : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
@@ -28,7 +28,7 @@
   <header class="bridge">
     <a class="brand" href="#/">
       <span class="brand-orb" aria-hidden="true"></span>
-      <span class="brand-text">BOSS<em>ORBIT</em></span>
+      <span class="brand-text">JobPilot</span>
     </a>
     <nav class="stages" id="stages" aria-label="主导航">
       <a href="#/login"  data-stage="login"><i aria-hidden="true"></i><span>登录</span></a>
@@ -43,8 +43,8 @@
       <a class="bridge-tasks" href="#/tasks" id="bridge-tasks" title="任务中心">
         任务<span class="badge hidden" id="bridge-tasks-badge">0</span>
       </a>
-      <a class="flex" href="https://gitee.com/w-kev/boss-automatic-delivery" target="_blank" title="前往gitee" class="giteIconv"><img src="https://gitee.com/w-kev/boss-automatic-delivery/badge/star.svg"></a>
-      <a class="flex" href="https://github.com/handsomekai924/boss-automatic-delivery" target="_blank" title="前往github" class="giteIconv"><img src="https://img.shields.io/github/stars/handsomekai924/boss-automatic-delivery?style=plastic&amp;logo=GitHub"></a>
+      <a class="flex" href="https://gitee.com/w-kev/jobpilot" target="_blank" title="前往gitee" class="giteIconv"><img src="https://gitee.com/w-kev/jobpilot/badge/star.svg"></a>
+      <a class="flex" href="https://github.com/handsomekai924/jobpilot" target="_blank" title="前往github" class="giteIconv"><img src="https://img.shields.io/github/stars/handsomekai924/jobpilot?style=plastic&amp;logo=GitHub"></a>
       <div class="bridge-status" id="bridge-status">
         <span class="signal" id="signal-session" title="登录状态" aria-hidden="true"></span>
         <span class="signal-label" id="signal-session-label">会话检测中</span>

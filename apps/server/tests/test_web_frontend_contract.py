@@ -77,14 +77,14 @@ def test_settings路由存在且llm是兼容别名(app_js: str):
 
 def test_舰桥刷新时广播会话状态(app_js: str):
     """首页「会话」卡片不能只在渲染时取一次——首屏那次失败就一直「离线」。"""
-    assert 'new CustomEvent("boss:session"' in app_js
+    assert 'new CustomEvent("jobpilot:session"' in app_js
 
 
 def test_首页订阅会话广播():
     """验首页订阅会话广播。"""
     home = _read("js/views/home.js")
-    assert 'addEventListener("boss:session"' in home
-    assert 'removeEventListener("boss:session"' in home
+    assert 'addEventListener("jobpilot:session"' in home
+    assert 'removeEventListener("jobpilot:session"' in home
 
 
 def test_系统配置是两栏目录(settings_js: str):

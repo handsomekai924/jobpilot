@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BOSS 自动投递助手</title>
+<title>JobPilot 自动投递助手</title>
 <script>
-  /* 无闪烁主题初始化：先于样式应用 data-theme（与 legacy 共用 orbit-theme 键，共存期主题同步） */
+  /* 无闪烁主题初始化：先于样式应用 data-theme（与 legacy 共用 jobpilot-theme 键，兼容旧 orbit-theme） */
   (function () {
     try {
-      var saved = localStorage.getItem("orbit-theme");
+      var saved = localStorage.getItem("jobpilot-theme") || localStorage.getItem("orbit-theme");
       var theme = saved === "light" || saved === "dark"
         ? saved
         : (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");

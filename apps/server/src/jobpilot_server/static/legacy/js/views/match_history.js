@@ -15,7 +15,7 @@ export async function renderHistory(pane, state, helpers) {
     <div class="flex between center gap-12 wrap mb-16">
       <div>
         <h2 class="card-title">分析历史</h2>
-        <div class="card-sub" id="history-sub">data/boss.db · analysis 表</div>
+        <div class="card-sub" id="history-sub">data/jobpilot.db · analysis 表</div>
       </div>
       <button class="btn sm" id="btn-refresh-history">刷新</button>
     </div>

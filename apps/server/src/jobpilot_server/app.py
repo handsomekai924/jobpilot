@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """组装 FastAPI 应用：挂 `/api` 路由、静态资源与异常壳。"""
     app = FastAPI(
-        title="BOSS 控制台",
+        title="JobPilot 控制台",
         version=__import__("jobpilot_server", fromlist=["__version__"]).__version__,
         docs_url="/api/docs",
         redoc_url=None,

@@ -104,11 +104,11 @@ export async function navigate() {
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
 }
 
-/** 刷新舰桥会话信号球，并广播 `boss:session` 给首页卡片（首屏 / WS 降级用）。 */
+/** 刷新舰桥会话信号球，并广播 `jobpilot:session` 给首页卡片（首屏 / WS 降级用）。 */
 export async function refreshBridge() {
   try {
     const st = await api.get("/api/auth/status");
-    window.dispatchEvent(new CustomEvent("boss:session", { detail: st }));
+    window.dispatchEvent(new CustomEvent("jobpilot:session", { detail: st }));
     paintSession(st);
   } catch {
     const dot = document.getElementById("signal-session");
@@ -151,7 +151,7 @@ function startUnifiedWs() {
     liveTasks.clear();
     tasks.forEach(ingestTask);
     const session = (m.data && m.data.session) || {};
-    window.dispatchEvent(new CustomEvent("boss:session", { detail: session }));
+    window.dispatchEvent(new CustomEvent("jobpilot:session", { detail: session }));
     paintSession(session);
   });
   ws.on("task.snapshot", (m) => {
@@ -169,7 +169,7 @@ function startUnifiedWs() {
   });
   ws.on("session.changed", (m) => {
     const session = (m.data && m.data.session) || m.data || {};
-    window.dispatchEvent(new CustomEvent("boss:session", { detail: session }));
+    window.dispatchEvent(new CustomEvent("jobpilot:session", { detail: session }));
     paintSession(session);
   });
   ws.on("ws.status", () => syncBridgeFallback());

@@ -504,7 +504,7 @@ describe("ResumesPage 简历优化", () => {
 
     const scopeRow = screen.getByTestId("revise-scope-row");
     expect(within(scopeRow).getByLabelText("爬取批次")).toBeInTheDocument();
-    expect(within(scopeRow).getByLabelText("搜索职位")).toBeInTheDocument();
+    expect(within(scopeRow).getByLabelText("搜索职位 / 公司")).toBeInTheDocument();
 
     await waitFor(() => {
       const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls;

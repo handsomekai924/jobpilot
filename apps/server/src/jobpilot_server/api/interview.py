@@ -182,11 +182,11 @@ def list_generation_jobs(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ) -> dict[str, Any]:
-    """出题页岗位列表：按抓取记录筛选 + 职位名模糊匹配。
+    """出题页岗位列表：按抓取记录筛选 + 职位名或公司名模糊匹配。
 
     Args:
         crawl_task_id: 只看这次抓取里的岗位；空 = 全部岗位。
-        title: 职位名称模糊匹配。
+        title: 职位名称或公司名称模糊匹配。
         limit: 每页条数。
         offset: 偏移。
 
@@ -201,8 +201,9 @@ def list_generation_jobs(
         )
         args.append(crawl_task_id.strip())
     if title.strip():
-        where.append("j.job_name LIKE ?")
-        args.append(f"%{title.strip()}%")
+        where.append("(j.job_name LIKE ? OR j.brand_name LIKE ?)")
+        pattern = f"%{title.strip()}%"
+        args.extend((pattern, pattern))
     where_sql = " AND ".join(where)
 
     conn = jobpilot_db.acquire()

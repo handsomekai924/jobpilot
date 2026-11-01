@@ -28,6 +28,7 @@ Thumbs.db
 .saved_web/
 .scratch/
 docs/
+.dev/
 
 # 用户点名的导出物（`python -m jobpilot_platform_boss.catalog export --out filters.json` 的示例名）
 filters.json

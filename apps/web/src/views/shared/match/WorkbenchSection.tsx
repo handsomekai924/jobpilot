@@ -329,9 +329,9 @@ export function WorkbenchSection({
               sx={{ flex: "1 1 140px", minWidth: 140 }}
             />
             <TextField
-              label="搜职位名"
+              label="搜职位 / 公司"
               type="search"
-              placeholder="按职位名模糊匹配…"
+              placeholder="按职位名或公司名模糊匹配…"
               value={jobQuery}
               onChange={(e) => setJobQuery(e.target.value)}
               sx={{ flex: "1 1 140px", minWidth: 140 }}

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import random
+import ssl
 import string
 import threading
 import time
@@ -308,7 +309,8 @@ class ChatSocket:
         if self.credentials.cookie:
             headers["Cookie"] = self.credentials.cookie
         client.ws_set_options(path=self.path, headers=headers)
-        client.tls_set()
+        # Avoid paho's default lookup of PROTOCOL_TLSv1_2, removed in Python 3.15.
+        client.tls_set(tls_version=ssl.PROTOCOL_TLS_CLIENT)
         client.username_pw_set(f"{self.credentials.token}|0", self.credentials.wt)
         client.reconnect_delay_set(
             min_delay=C.CHAT_RECONNECT_MIN, max_delay=C.CHAT_RECONNECT_MAX

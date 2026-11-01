@@ -5,7 +5,9 @@ paho 客户端用假替身注入，只验帧编得与站点逐字节对齐、发
 
 from __future__ import annotations
 
+import ssl
 import sys
+from types import ModuleType
 
 import pytest
 
@@ -58,6 +60,20 @@ class FakePahoClient:
         self.disconnected = False
         self.loop_stopped = False
         self._mid = 0
+        self.tls_version = None
+
+    def ws_set_options(self, **kwargs):
+        """记录 WebSocket 配置。"""
+
+    def tls_set(self, *, tls_version):
+        """记录显式 TLS 协议。"""
+        self.tls_version = tls_version
+
+    def username_pw_set(self, username, password):
+        """记录 MQTT 认证配置。"""
+
+    def reconnect_delay_set(self, *, min_delay, max_delay):
+        """接收重连设置。"""
 
     def connect(self, host, port, keepalive=60):
         """记录连接参数。"""
@@ -341,6 +357,26 @@ def test_缺_paho_依赖时报一句能照做的提示(monkeypatch):
     with pytest.raises(ChatSendError) as ei:
         sock._make_paho_client()
     assert "paho-mqtt" in str(ei.value)
+
+
+def test_paho_TLS_显式使用当前_python支持的协议(monkeypatch):
+    """避免旧版 paho 默认访问已移除的 ssl.PROTOCOL_TLSv1_2。"""
+    fake_paho = FakePahoClient()
+    paho = ModuleType("paho")
+    paho.__path__ = []
+    mqtt_package = ModuleType("paho.mqtt")
+    mqtt_package.__path__ = []
+    mqtt_client = ModuleType("paho.mqtt.client")
+    mqtt_client.CallbackAPIVersion = type("CallbackAPIVersion", (), {"VERSION2": 2})
+    mqtt_client.MQTTv31 = 3
+    mqtt_client.Client = lambda *args, **kwargs: fake_paho
+    monkeypatch.setitem(sys.modules, "paho", paho)
+    monkeypatch.setitem(sys.modules, "paho.mqtt", mqtt_package)
+    monkeypatch.setitem(sys.modules, "paho.mqtt.client", mqtt_client)
+
+    client = ChatSocket(CREDS)._make_paho_client()
+
+    assert client.tls_version == ssl.PROTOCOL_TLS_CLIENT
 
 
 def test_正文帧不带_retain_标志():

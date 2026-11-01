@@ -456,7 +456,7 @@ describe("MatchPage 工作台布局与搜索范围", () => {
 
     const scopeRow = screen.getByTestId("match-scope-row");
     expect(within(scopeRow).getByLabelText("抓取批次")).toBeInTheDocument();
-    expect(within(scopeRow).getByLabelText("搜职位名")).toBeInTheDocument();
+    expect(within(scopeRow).getByLabelText("搜职位 / 公司")).toBeInTheDocument();
   });
 });
 

@@ -315,9 +315,9 @@ export function ReviseSection({
               sx={{ minWidth: 280 }}
             />
             <TextField
-              label="搜索职位"
+              label="搜索职位 / 公司"
               type="search"
-              placeholder="按职位名过滤…"
+              placeholder="按职位名或公司名过滤…"
               value={jobQuery}
               onChange={(e) => { setJobPage(0); setJobQuery(e.target.value); }}
               sx={{ flex: "1 1 220px", maxWidth: 420 }}

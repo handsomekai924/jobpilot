@@ -223,7 +223,7 @@ export function GenerateSection({
           sx={{ minWidth: 220 }}
         />
         <TextField
-          label="职位名称"
+          label="职位 / 公司名称"
           type="search"
           placeholder="模糊匹配…"
           value={titleInput}

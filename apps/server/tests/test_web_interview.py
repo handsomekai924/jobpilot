@@ -460,7 +460,7 @@ def test_api_generate_unknown_analysis(client):
 
 
 def test_api_generation_jobs_filter(client):
-    """出题页岗位列表：抓取记录筛选 + 职位名模糊匹配 + 出题状态。"""
+    """出题页岗位列表：抓取记录筛选 + 职位名/公司名模糊匹配 + 出题状态。"""
     _seed_analysis()
     import jobpilot_db
 
@@ -504,6 +504,11 @@ def test_api_generation_jobs_filter(client):
     data = r.json()
     assert data["total"] == 1
     assert data["items"][0]["encrypt_job_id"] == "j2"
+
+    r = client.get("/api/interview/jobs?title=示例科技")
+    data = r.json()
+    assert data["total"] == 2
+    assert {item["encrypt_job_id"] for item in data["items"]} == {"j1", "j2"}
 
     r = client.get("/api/interview/jobs?title=没有这个职位")
     assert r.json()["total"] == 0

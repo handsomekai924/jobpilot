@@ -228,6 +228,16 @@ def test_deliver_happy_path_sends_and_writes_back():
     assert row["deliver_error"] == ""
 
 
+def test_deliver_deduplicates_selected_job_ids():
+    """选中清单里同一职位重复出现时，只发送一次。"""
+    client = FakeGreetClient()
+    snap, _ = _run_deliver([_match("j1")], ["j1", "j1"], client)
+
+    assert snap["status"] == "done"
+    assert (snap["total"], snap["done"], snap["ok"]) == (1, 1, 1)
+    assert [call["encrypt_job_id"] for call in client.calls] == ["j1"]
+
+
 def test_deliver_skips_within_30_day_cooldown():
     """30 天内发过（`delivered_at` 是最近）→ 跳过、不打请求，原因写清楚。"""
     client = FakeGreetClient()

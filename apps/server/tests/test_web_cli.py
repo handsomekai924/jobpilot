@@ -226,15 +226,21 @@ def test_横幅先打登录状态占位_测完再补真结果(monkeypatch, capsy
     assert "未登录" in out
 
 
-def test_开发模式不自动打开浏览器_只打印接口与文档地址(monkeypatch, capsys):
+def test_开发模式发布实际端口供前端代理使用(monkeypatch, capsys, tmp_path):
     """源码启动时前后端分开跑：后端只报接口地址，别去开一个没有前端的端口。"""
     opened: list[str] = []
     monkeypatch.setattr(cli, "_setup_logging", lambda *_a, **_k: None)
-    monkeypatch.setattr("uvicorn.Server.run", lambda self: None, raising=False)
+    monkeypatch.setattr(cli.C, "PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(cli, "pick_port", lambda *_a, **_k: 8799)
     monkeypatch.setattr(cli, "is_frozen", lambda: False)
     monkeypatch.setattr(update_check, "schedule_startup_check", lambda on_done=None: None)
     monkeypatch.setattr(cli.webbrowser, "open", lambda url: opened.append(url))
+
+    def run_server(_server):
+        """服务运行期间端口文件应存在，退出后应清除。"""
+        assert (tmp_path / ".dev" / "server-port").read_text(encoding="ascii").strip() == "8799"
+
+    monkeypatch.setattr("uvicorn.Server.run", run_server, raising=False)
 
     assert cli.main([]) == 0
     out = capsys.readouterr().out
@@ -242,6 +248,7 @@ def test_开发模式不自动打开浏览器_只打印接口与文档地址(mon
     assert "接口地址     http://127.0.0.1:8799" in out
     assert "接口文档     http://127.0.0.1:8799/api/docs" in out
     assert "控制台地址" not in out
+    assert not (tmp_path / ".dev" / "server-port").exists()
 
 
 def test_打包版启动自动打开浏览器(monkeypatch, capsys):

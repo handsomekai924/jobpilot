@@ -423,6 +423,7 @@ class DeliverTaskManager:
         """
         if mode not in {"all", "selected", "manual"}:
             raise ValueError("mode 必须是 all、selected 或 manual")
+        job_ids = list(dict.fromkeys(job_ids))
         request = {
             "analysis_id": analysis_id,
             "job_ids": list(job_ids),

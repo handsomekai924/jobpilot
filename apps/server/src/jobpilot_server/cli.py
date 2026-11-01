@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 import webbrowser
+from pathlib import Path
 
 from . import config as C
 from .runtime import bootstrap, is_frozen, log_dir
@@ -69,6 +70,27 @@ def pick_port(host: str, preferred: int, tries: int = 15) -> int:
     with socket.socket() as sock:
         sock.bind((host, 0))
         return int(sock.getsockname()[1])
+
+
+def _publish_dev_port(port: int) -> Path | None:
+    """发布源码服务实际端口，供 Vite 开发代理读取。"""
+    if is_frozen():
+        return None
+    path = C.PROJECT_ROOT / ".dev" / "server-port"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"{port}\n", encoding="ascii")
+    return path
+
+
+def _clear_dev_port(path: Path | None, port: int) -> None:
+    """只清理本进程写入的端口文件，避免覆盖后来启动的服务。"""
+    if path is None:
+        return
+    try:
+        if path.read_text(encoding="ascii").strip() == str(port):
+            path.unlink()
+    except OSError:
+        pass
 
 
 def _restore_app_settings() -> None:
@@ -311,5 +333,9 @@ def main(argv: list[str] | None = None) -> int:
         ).start()
 
     _banner(url, info)
-    server.run()
+    dev_port_file = _publish_dev_port(port)
+    try:
+        server.run()
+    finally:
+        _clear_dev_port(dev_port_file, port)
     return 0

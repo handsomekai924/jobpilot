@@ -1,6 +1,6 @@
 """BOSS直聘职位筛选条件获取。
 
-接口不可用时退回项目内写死表。搜索条件的用户配置落在状态库 `data/boss.db`。
+接口不可用时退回项目内写死表。搜索条件的用户配置落在状态库 `data/jobpilot.db`。
 """
 
 from __future__ import annotations

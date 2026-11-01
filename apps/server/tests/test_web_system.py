@@ -24,8 +24,8 @@ def client():
 
 
 REAL_MESSAGES = [
-    "找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。",
-    "BOSS_CHROME_BIN=C:\\nope\\chrome.exe 指的文件不存在",
+    "找不到 Chrome：装个 Google Chrome，或用 JOBPILOT_CHROME_BIN 指到 chrome 可执行文件。",
+    "JOBPILOT_CHROME_BIN=C:\\nope\\chrome.exe 指的文件不存在",
     "连不上 CDP（ws://127.0.0.1:9222/devtools/browser/8f3c-...）：握手被拒",
     "调试口没开（试过 9222~9224）。端口 9222 一直没开\n"
     "常见原因：端口被其他程序占着，或安全软件拦了 Chrome 的调试口。",
@@ -103,14 +103,14 @@ def test_chrome_status_gives_guidance_when_missing(client, monkeypatch):
 
     def boom():
         """抛预置异常，供测试验证翻译出口。"""
-        raise StokenError("找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。")
+        raise StokenError("找不到 Chrome：装个 Google Chrome，或用 JOBPILOT_CHROME_BIN 指到 chrome 可执行文件。")
 
     monkeypatch.setattr("jobpilot_browser_pool.cdp.find_chrome", boom)
     body = client.get("/api/system/chrome").json()
 
     assert body["found"] is False
     assert "Chrome 下载" in body["message"]
-    assert "BOSS_CHROME_BIN" not in body["message"]
+    assert "JOBPILOT_CHROME_BIN" not in body["message"]
 
 
 def test_chrome_mode_roundtrip_persists(client, monkeypatch):

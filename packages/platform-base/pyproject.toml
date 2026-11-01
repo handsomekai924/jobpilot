@@ -1,6 +1,6 @@
 [project]
 name = "jobpilot-platform-base"
-version = "1.2.5"
+version = "2.0.0"
 description = "站点适配器基座与注册表"
 requires-python = ">=3.12"
 dependencies = ["jobpilot-core"]

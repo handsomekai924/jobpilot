@@ -144,7 +144,7 @@ def create_client(
     """创建客户端，并把上次保存的 Cookie / token 注入会话。
 
     Args:
-        session_path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        session_path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
         load_stored: 为 `False` 时忽略本地登录态，强制走新的登录流程。
         **client_kwargs: 透传给 `ZhipinLoginClient`。
 
@@ -174,7 +174,7 @@ def persist_login(
     Args:
         client: 已登录的客户端，用于兜底取 Cookie。
         result: 登录回执。
-        session_path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        session_path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         状态库路径。

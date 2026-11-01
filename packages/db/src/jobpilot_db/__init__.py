@@ -1,7 +1,7 @@
 """统一状态库（SQLite）。
 
 单例文档进 `doc` 整包 JSON，简历/分析/职位建真表。路径覆盖：显式 `path` →
-环境变量 `BOSS_DB` → `data/boss.db`；用户点名的 JSON 文件读写不走这里。
+环境变量 `JOBPILOT_DB` → `data/jobpilot.db`；用户点名的 JSON 文件读写不走这里。
 
 Attributes:
     SITE_SHARED: 共用 doc 键的站点值；不带站点语义（LLM / 应用设置这类全局配置）。
@@ -36,9 +36,9 @@ PROJECT_ROOT: Final[Path] = repo_root()
 
 DATA_DIR: Final[Path] = default_data_dir()
 
-DEFAULT_DB_PATH: Final[Path] = DATA_DIR / "boss.db"
+DEFAULT_DB_PATH: Final[Path] = DATA_DIR / "jobpilot.db"
 
-DB_ENV: Final[str] = "BOSS_DB"
+DB_ENV: Final[str] = "JOBPILOT_DB"
 
 SCHEMA_DOC: Final[str] = "schema"
 
@@ -58,7 +58,12 @@ DOC_SITE_SCOPED: Final[frozenset[str]] = frozenset({DOC_SESSION, DOC_SEARCH_FILT
 
 _MIGRATED_FLAG: Final[str] = "legacy_imported"
 
-_DEPRECATED_ENV: Final[tuple[str, ...]] = ("BOSS_SEARCH_FILTER", "BOSS_STOKEN_STORE")
+_DEPRECATED_ENV: Final[tuple[str, ...]] = (
+    "JOBPILOT_SEARCH_FILTER",
+    "JOBPILOT_STOKEN_STORE",
+    "BOSS_SEARCH_FILTER",
+    "BOSS_STOKEN_STORE",
+)
 _warned_env: set[str] = set()
 
 _DOC_DDL = """
@@ -318,8 +323,9 @@ CREATE TABLE IF NOT EXISTS resume_site_map (
 
 
 def resolve_db_path(path: Path | str | None = None) -> Path:
-    """显式 `path` → `BOSS_DB` → `data/boss.db`；`:memory:` 原样透传。
+    """显式 `path` → `JOBPILOT_DB` → `data/jobpilot.db`；`:memory:` 原样透传。
 
+    默认分支首次解析时会把旧版 `boss.db` 迁移过来；迁移失败不阻塞，继续用新库。
     调用时才解析，不把默认值冻在签名里——测试只改一个环境变量就能全局隔离。
     """
     for env in _DEPRECATED_ENV:
@@ -331,6 +337,9 @@ def resolve_db_path(path: Path | str | None = None) -> Path:
     env = os.environ.get(DB_ENV)
     if env:
         return Path(":memory:") if env == ":memory:" else Path(env)
+    from .legacy import migrate_legacy_database
+
+    migrate_legacy_database(DEFAULT_DB_PATH)
     return DEFAULT_DB_PATH
 
 

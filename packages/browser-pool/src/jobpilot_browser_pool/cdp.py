@@ -53,19 +53,19 @@ class BrowserError(RuntimeError):
     """浏览器生命周期或 CDP 收发失败。"""
 
 
-CDP_PORT_ENV: str = "BOSS_CDP_PORT"
+CDP_PORT_ENV: str = "JOBPILOT_CDP_PORT"
 DEFAULT_CDP_PORT: int = 9222
 
-CHROME_BIN_ENV: str = "BOSS_CHROME_BIN"
+CHROME_BIN_ENV: str = "JOBPILOT_CHROME_BIN"
 
-CHROME_PROFILE_ENV: str = "BOSS_CHROME_PROFILE"
+CHROME_PROFILE_ENV: str = "JOBPILOT_CHROME_PROFILE"
 DEFAULT_CHROME_PROFILE: Path = default_data_dir().parent / ".chrome_profile"
 
-CHROME_KEEP_ENV: str = "BOSS_CDP_KEEP"
+CHROME_KEEP_ENV: str = "JOBPILOT_CDP_KEEP"
 
-CHROME_CLOSE_ON_EXIT_ENV: str = "BOSS_CDP_CLOSE_ON_EXIT"
+CHROME_CLOSE_ON_EXIT_ENV: str = "JOBPILOT_CDP_CLOSE_ON_EXIT"
 
-CHROME_MODE_ENV: str = "BOSS_CHROME_MODE"
+CHROME_MODE_ENV: str = "JOBPILOT_CHROME_MODE"
 
 CHROME_MODES: tuple[str, ...] = ("visible", "offscreen", "hidden")
 
@@ -334,7 +334,7 @@ def _on_sigterm(signum: int, _frame: Any) -> None:
 def close_launched_browsers(*, timeout: float = 5.0) -> int:
     """把本进程拉起来的 Chrome 全关掉，返回关了几台。
 
-    进程退出时由 `atexit` 自动调一次（`BOSS_CDP_CLOSE_ON_EXIT=0` 关掉这个行为）。
+    进程退出时由 `atexit` 自动调一次（`JOBPILOT_CDP_CLOSE_ON_EXIT=0` 关掉这个行为）。
     先走 CDP `Browser.close` 让它自己退，没退就杀进程。复用现成调试口那种一律不碰。
     """
     with _launched_lock:

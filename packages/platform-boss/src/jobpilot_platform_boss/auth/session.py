@@ -1,11 +1,11 @@
-"""登录态持久化，落进状态库 `data/boss.db` 的 `doc('session')` 行。
+"""登录态持久化，落进状态库 `data/jobpilot.db` 的 `doc('session')` 行。
 
 按仓库根定位状态库，与当前工作目录无关。
 
 Attributes:
     SITE_ID: 登录态归属的站点 id。
     PROJECT_ROOT: 项目根目录（`jobpilot_core.paths.repo_root()`）。
-    DEFAULT_DB_PATH: 状态库路径，环境变量 `BOSS_DB` 可覆盖。
+    DEFAULT_DB_PATH: 状态库路径，环境变量 `JOBPILOT_DB` 可覆盖。
 """
 
 from __future__ import annotations

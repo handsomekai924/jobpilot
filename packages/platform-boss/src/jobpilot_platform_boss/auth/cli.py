@@ -152,7 +152,7 @@ def _add_global_options(parser: argparse.ArgumentParser, *, suppress_defaults: b
     parser.add_argument(
         "--db",
         default=None if not suppress_defaults else default,
-        help=f"状态库路径（默认 {DEFAULT_DB_PATH}，可用环境变量 BOSS_DB 覆盖）",
+        help=f"状态库路径（默认 {DEFAULT_DB_PATH}，可用环境变量 JOBPILOT_DB 覆盖）",
     )
     parser.add_argument(
         "--timeout",

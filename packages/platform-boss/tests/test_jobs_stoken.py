@@ -257,8 +257,8 @@ def test_compute_stoken_node失败带stderr(monkeypatch, tmp_path):
 
 
 def test_find_node_认环境变量(monkeypatch):
-    """验 `BOSS_NODE_BIN` 优先生效。"""
-    monkeypatch.setenv("BOSS_NODE_BIN", r"D:\node\node.exe")
+    """验 `JOBPILOT_NODE_BIN` 优先生效。"""
+    monkeypatch.setenv("JOBPILOT_NODE_BIN", r"D:\node\node.exe")
     assert find_node() == r"D:\node\node.exe"
 
 

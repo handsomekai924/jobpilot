@@ -17,7 +17,7 @@ Attributes:
     DEFAULT_SAVED_HTML: 已保存的职位页 HTML（离线来源）。
     HTML_OPTION_PATTERNS: HTML 筛选下拉标记 → (维度字段, 提取正则)。
     HTML_INDUSTRY_MARKER: 行业下拉整块（含分组标签）的定位标记。
-    DEFAULT_DB_PATH: 状态库路径（搜索条件在 `doc('search_filter')`）；`BOSS_DB` 可覆盖。
+    DEFAULT_DB_PATH: 状态库路径（搜索条件在 `doc('search_filter')`）；`JOBPILOT_DB` 可覆盖。
 """
 
 from __future__ import annotations

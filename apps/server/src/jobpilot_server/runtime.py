@@ -6,21 +6,27 @@
 Attributes:
     DATA_DIR_NAME: 数据目录名。
     APP_DIR_NAME: 退回用户目录时用的子目录名。
+    LEGACY_APP_DIR_NAME: 旧版本在用户目录下的子目录名，仅用于迁移识别。
     APP_DATA_ENV: 覆盖数据目录的环境变量名。
 """
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import tempfile
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 DATA_DIR_NAME = "data"
 
-APP_DIR_NAME = "BossAutoDelivery"
+APP_DIR_NAME = "JobPilot"
 
-APP_DATA_ENV = "BOSS_APP_DATA"
+LEGACY_APP_DIR_NAME = "BossAutoDelivery"
+
+APP_DATA_ENV = "JOBPILOT_APP_DATA"
 
 
 def is_frozen() -> bool:
@@ -64,13 +70,25 @@ def app_data_dir() -> Path:
     return executable_dir() / DATA_DIR_NAME
 
 
-def fallback_data_dir() -> Path:
-    """exe 同目录写不了时的备选（`%LOCALAPPDATA%\\BossAutoDelivery\\data`）。"""
+def _user_app_dir(name: str = APP_DIR_NAME) -> Path:
+    """用户目录下的应用文件夹：Windows 用 `%LOCALAPPDATA%`，其他平台用家目录点目录。"""
     if os.name == "nt":
         base = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
         root = Path(base) if base else Path.home() / "AppData" / "Local"
-        return root / APP_DIR_NAME / DATA_DIR_NAME
-    return Path.home() / f".{APP_DIR_NAME.lower()}" / DATA_DIR_NAME
+        return root / name
+    return Path.home() / f".{name.lower()}"
+
+
+def fallback_data_dir() -> Path:
+    """exe 同目录写不了时的备选；新目录还没建、旧目录已有数据时沿用旧目录。"""
+    current = _user_app_dir() / DATA_DIR_NAME
+    if current.is_dir():
+        return current
+    legacy = _user_app_dir(LEGACY_APP_DIR_NAME) / DATA_DIR_NAME
+    if legacy.is_dir():
+        logger.info("新用户目录还没建，沿用旧版数据目录：%s", legacy)
+        return legacy
+    return current
 
 
 def temp_data_dir() -> Path:
@@ -118,13 +136,41 @@ def _env_names() -> tuple[str, str]:
     return DB_ENV, CHROME_PROFILE_ENV
 
 
+def _migrate_database(data: Path) -> dict[str, str]:
+    """把旧 `boss.db` 一次性迁到 `data/jobpilot.db`，返回可打日志的摘要。"""
+    from jobpilot_db.legacy import migrate_legacy_database
+
+    result = migrate_legacy_database(data / "jobpilot.db")
+    info = {"db_migrated": "1" if result.migrated else "0", "db_migration": result.reason}
+    if result.migrated:
+        info["db_migrated_from"] = str(result.source)
+        info["db_migrated_rows"] = str(result.rows)
+    return info
+
+
+def _chrome_profile_path(data: Path) -> Path:
+    """Chrome profile 目录；新版目录没有而旧版用户目录有，就直接复用旧目录。"""
+    current = data / "chrome_profile"
+    if current.is_dir():
+        return current
+    legacy = _user_app_dir(LEGACY_APP_DIR_NAME) / DATA_DIR_NAME / "chrome_profile"
+    if legacy.is_dir():
+        logger.info("复用旧版 Chrome profile：%s", legacy)
+        return legacy
+    return current
+
+
 def bootstrap(*, force: bool = False) -> dict[str, str]:
     """把数据目录钉进环境变量；返回一份可打日志 / 可给界面看的摘要。
 
     开发态什么都不设，除非显式 `force=True` 或设了 `APP_DATA_ENV`；
     打包态一律设为 `<exe 同目录>/data/`，写不进去就退到用户目录。
     用 `setdefault`：用户（或测试）显式设过的环境变量优先。
+    钉住数据目录时才迁移旧 `boss.db`；开发态交由 `resolve_db_path()` 按需触发。
     """
+    from jobpilot_core.paths import apply_legacy_env
+
+    apply_legacy_env()
     expected = app_data_dir()
     info: dict[str, str] = {
         "frozen": "1" if is_frozen() else "0",
@@ -137,8 +183,9 @@ def bootstrap(*, force: bool = False) -> dict[str, str]:
 
     data = ensure_writable(expected)
     db_env, profile_env = _env_names()
-    os.environ.setdefault(db_env, str(data / "boss.db"))
-    os.environ.setdefault(profile_env, str(data / "chrome_profile"))
+    info.update(_migrate_database(data))
+    os.environ.setdefault(db_env, str(data / "jobpilot.db"))
+    os.environ.setdefault(profile_env, str(_chrome_profile_path(data)))
     (data / "logs").mkdir(parents=True, exist_ok=True)
 
     info.update(

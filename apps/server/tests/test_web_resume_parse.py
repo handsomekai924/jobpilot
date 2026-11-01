@@ -197,7 +197,7 @@ def db(tmp_path, monkeypatch):
     """提供隔离的临时 BOSS 数据库。"""
     import jobpilot_db
 
-    monkeypatch.setenv("BOSS_DB", str(tmp_path / "t.db"))
+    monkeypatch.setenv("JOBPILOT_DB", str(tmp_path / "t.db"))
     jobpilot_db.close_all()
     yield
     jobpilot_db.close_all()

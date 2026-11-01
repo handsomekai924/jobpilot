@@ -133,7 +133,7 @@ class JobStore:
     """状态库里的职位表。
 
     Args:
-        path: 库文件路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 库文件路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
             `":memory:"` 走内存库（测试用）。
     """
 
@@ -889,7 +889,7 @@ def _now() -> str:
 
 
 def open_store(path: Path | str | None = None) -> JobStore:
-    """按默认库（或指定路径）打开职位表。省略 `path` 就是 `BOSS_DB` / `data/boss.db`。"""
+    """按默认库（或指定路径）打开职位表。省略 `path` 就是 `JOBPILOT_DB` / `data/jobpilot.db`。"""
     return JobStore(path)
 
 

@@ -4,7 +4,7 @@
 
 Attributes:
     _RULES: `(原文特征串, 给用户看的话)`。顺序敏感，第一条命中为准，更具体的排前面；
-        「找不到 Chrome」必须排在「BOSS_CHROME_BIN」之前，详见
+        「找不到 Chrome」必须排在「JOBPILOT_CHROME_BIN」之前，详见
         `notes/jobpilot_server/services/troubleshoot.md`。
 """
 
@@ -27,7 +27,7 @@ _RULES: tuple[tuple[str, str], ...] = (
         "装完回到「首页」点一下「重新检测」，不用重启程序。",
     ),
     (
-        "BOSS_CHROME_BIN",
+        "JOBPILOT_CHROME_BIN",
         "程序里设了一个指向 Chrome 的路径，但那个文件不存在。"
         "请把「首页 → 环境自检」里的 Chrome 路径设置改回「自动检测」。",
     ),

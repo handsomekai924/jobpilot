@@ -18,13 +18,16 @@ def _clean_cache():
     jobpilot_db.close_all()
 
 
-def test_resolve_默认是_data_jobpilot_db():
-    """验默认库路径是 data/boss.db。"""
+def test_resolve_默认是_data_jobpilot_db(monkeypatch):
+    """验默认库路径是 data/jobpilot.db。"""
     import os
 
+    from jobpilot_db import legacy
+
     os.environ.pop(jobpilot_db.DB_ENV, None)
+    monkeypatch.setattr(legacy, "migrate_legacy_database", lambda _target: None)
     assert jobpilot_db.resolve_db_path() == jobpilot_db.DEFAULT_DB_PATH
-    assert jobpilot_db.DEFAULT_DB_PATH.name == "boss.db"
+    assert jobpilot_db.DEFAULT_DB_PATH.name == "jobpilot.db"
     assert jobpilot_db.DEFAULT_DB_PATH.parent.name == "data"
 
 

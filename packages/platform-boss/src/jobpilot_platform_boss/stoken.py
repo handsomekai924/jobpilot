@@ -43,7 +43,7 @@ HELPER_COOKIES: tuple[str, ...] = ("__zp_sseed__", "__zp_sname__", "__zp_sts__")
 
 DEFAULT_CACHE_DIR: Path = Path(tempfile.gettempdir()) / "boss_security_js"
 
-NODE_BIN_ENV: str = "BOSS_NODE_BIN"
+NODE_BIN_ENV: str = "JOBPILOT_NODE_BIN"
 
 __all__ = [
     "HELPER_COOKIES",
@@ -114,7 +114,7 @@ def parse_challenge(payload: Mapping[str, Any] | None) -> StokenChallenge | None
 
 
 def find_node() -> str:
-    """定位 Node 可执行文件。优先 `BOSS_NODE_BIN`，否则从 PATH 找。"""
+    """定位 Node 可执行文件。优先 `JOBPILOT_NODE_BIN`，否则从 PATH 找。"""
     env = os.environ.get(NODE_BIN_ENV, "").strip()
     if env:
         return env

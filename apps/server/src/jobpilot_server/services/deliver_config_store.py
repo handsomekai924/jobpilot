@@ -1,4 +1,4 @@
-"""投递配置存取：状态库 `data/boss.db` 的 `doc('deliver_config')`。
+"""投递配置存取：状态库 `data/jobpilot.db` 的 `doc('deliver_config')`。
 
 目前只有一项——一键投递的评分阈值 `min_score`（默认 70）：匹配分 ≥ 它的
 岗位才进「一键发送全部」。整包存 JSON、读时归一化、坏值不报错只回默认。
@@ -59,7 +59,7 @@ def load_config(path: Path | str | None = None) -> DeliverConfig:
     """读状态库里的投递配置；没有 / 坏了 → 默认配置（不报错）。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     try:
         raw = jobpilot_db.doc_get_raw(jobpilot_db.DOC_DELIVER_CONFIG, path)
@@ -83,7 +83,7 @@ def save_config(cfg: DeliverConfig, path: Path | str | None = None) -> Path:
 
     Args:
         cfg: 待保存的配置，保存前会归一化。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         实际写入的库路径。
@@ -98,7 +98,7 @@ def update_config(payload: dict[str, Any], path: Path | str | None = None) -> De
 
     Args:
         payload: 只包含要改字段的字典。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     current = load_config(path)
     if payload.get("min_score") is not None:

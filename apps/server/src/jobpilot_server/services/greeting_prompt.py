@@ -18,7 +18,7 @@ def resolve_greeting_requirement(path: Path | str | None = None) -> str:
     """取当前生效的招呼语约束：用户自定义优先，空则用出厂默认。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         要插进提示词的约束文本。

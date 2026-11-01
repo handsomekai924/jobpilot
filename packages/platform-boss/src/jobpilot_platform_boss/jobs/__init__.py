@@ -11,7 +11,7 @@
     python -m jobpilot_platform_boss.jobs list --city 广州
 
     from jobpilot_platform_boss.jobs import create_client, open_store
-    with open_store() as store:               # 默认 data/boss.db
+    with open_store() as store:               # 默认 data/jobpilot.db
         report = client.crawl(store=store)    # 抓一页存一页，页间睡 1 秒
 """
 

@@ -1,4 +1,4 @@
-"""LLM 配置存取：状态库 `data/boss.db` 的 `doc('llm_config')`，API 回显时打码。
+"""LLM 配置存取：状态库 `data/jobpilot.db` 的 `doc('llm_config')`，API 回显时打码。
 
 可配置的只有 api_key / base_url / model 三项；采样与超时参数是系统固定值，
 读写都会被强制成常量，界面和接口都改不动。配置类型与采样常量以本模块
@@ -86,7 +86,7 @@ def load_config(path: Path | str | None = None) -> LLMConfig:
     """读状态库里的 LLM 配置；没有 / 坏了 → 空配置（不报错）。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     try:
         raw = jobpilot_db.doc_get_raw(jobpilot_db.DOC_LLM_CONFIG, path)
@@ -111,7 +111,7 @@ def save_config(cfg: LLMConfig, path: Path | str | None = None) -> Path:
 
     Args:
         cfg: 要保存的配置。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     resolved = jobpilot_db.doc_set(jobpilot_db.DOC_LLM_CONFIG, cfg.normalize().to_dict(), path)
     logger.info("LLM 配置已保存到 %s", resolved)

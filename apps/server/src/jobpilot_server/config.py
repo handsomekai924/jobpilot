@@ -1,10 +1,10 @@
 """网页控制台的路径与默认参数。
 
-状态全在状态库 `data/boss.db`（见 `jobpilot_db`），这里只留静态资源与运行参数。
+状态全在状态库 `data/jobpilot.db`（见 `jobpilot_db`），这里只留静态资源与运行参数。
 
 Attributes:
     PROJECT_ROOT: 项目根目录，与 cwd 无关；打包成 exe 后指向 PyInstaller 解包目录。
-    DATA_DIR: 运行时数据目录（状态库 `boss.db` 所在处）。
+    DATA_DIR: 运行时数据目录（状态库 `jobpilot.db` 所在处）。
     STATIC_DIR: 静态资源目录。
     LOGIN_WAIT_TIMEOUT: 登录任务等验证码 / 滑块的人工上限（秒）。
     ANALYZE_INTERVAL: 简历分析时单次 LLM 调用之间的硬间隔（秒），压限流。

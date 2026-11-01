@@ -26,6 +26,18 @@ def _fake_gitee(monkeypatch):
     update_check.reset_cache()
 
 
+@pytest.fixture(autouse=True)
+def _no_real_migration(monkeypatch):
+    """入口测试会解析默认库路径；别让它把开发机仓库里的旧库真的迁走。"""
+    from jobpilot_db import legacy
+
+    monkeypatch.setattr(
+        legacy,
+        "migrate_legacy_database",
+        lambda target: legacy.MigrationResult(False, None, target, "no_source"),
+    )
+
+
 def _occupy(host: str = "127.0.0.1") -> socket.socket:
     """占住一个空闲端口，返回已 listen 的 socket。"""
     sock = socket.socket()

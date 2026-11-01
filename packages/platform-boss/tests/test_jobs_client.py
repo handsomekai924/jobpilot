@@ -546,7 +546,7 @@ def test_stoken_从session_json来(tmp_path):
 
 def test_stoken_从环境变量兜底(tmp_path, monkeypatch):
     """验会话无 stoken 时用环境变量兜底。"""
-    monkeypatch.setenv("BOSS_ZP_STOKEN", "TOKEN-FROM-ENV")
+    monkeypatch.setenv("JOBPILOT_ZP_STOKEN", "TOKEN-FROM-ENV")
     path = write_session(tmp_path, {"wt2": "x"})
     fake = FakeHttp([])
     http_from_session(path, http=fake)
@@ -555,7 +555,7 @@ def test_stoken_从环境变量兜底(tmp_path, monkeypatch):
 
 def test_stoken_显式参数优先级最高(tmp_path, monkeypatch):
     """验显式 stoken 优先于会话和环境变量。"""
-    monkeypatch.setenv("BOSS_ZP_STOKEN", "TOKEN-FROM-ENV")
+    monkeypatch.setenv("JOBPILOT_ZP_STOKEN", "TOKEN-FROM-ENV")
     path = write_session(tmp_path, {"__zp_stoken__": "TOKEN-FROM-SESSION"})
     fake = FakeHttp([])
     http_from_session(path, http=fake, stoken="TOKEN-FROM-ARG")
@@ -564,7 +564,7 @@ def test_stoken_显式参数优先级最高(tmp_path, monkeypatch):
 
 def test_stoken_都没有就不带它(tmp_path, monkeypatch):
     """验三处都没有 stoken 时不写 Cookie。"""
-    monkeypatch.delenv("BOSS_ZP_STOKEN", raising=False)
+    monkeypatch.delenv("JOBPILOT_ZP_STOKEN", raising=False)
     path = write_session(tmp_path, {"wt2": "x"})
     fake = FakeHttp([])
     http_from_session(path, http=fake)
@@ -591,7 +591,7 @@ def test_换新令牌时不会留下同名旧Cookie(tmp_path, monkeypatch):
 
 def test_stoken_会话里有就不会被环境变量盖掉(tmp_path, monkeypatch):
     """验会话里的 stoken 不被环境变量覆盖。"""
-    monkeypatch.setenv("BOSS_ZP_STOKEN", "TOKEN-FROM-ENV")
+    monkeypatch.setenv("JOBPILOT_ZP_STOKEN", "TOKEN-FROM-ENV")
     path = write_session(tmp_path, {"__zp_stoken__": "TOKEN-FROM-SESSION"})
     fake = FakeHttp([])
     http_from_session(path, http=fake)

@@ -160,7 +160,7 @@ class StokenStore:
     塞不进过期时间。取出的 token 会另外镜像进 `doc('session')`。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
 
     def __init__(self, path: Path | str | None = None) -> None:
@@ -208,7 +208,7 @@ class CdpStokenProvider:
 
     Attributes:
         http: 带 `cookies` 的会话；里面的登录 Cookie 会被灌进 Chrome。
-        store: 过期账本；不传就用 `BOSS_DB` 的 `doc('stoken')`。
+        store: 过期账本；不传就用 `JOBPILOT_DB` 的 `doc('stoken')`。
         session_path: 镜像进 `doc('session')` 的库路径；`None` = 不镜像。
         page_url: 跑站点 JS 取令牌的页面；空 = 站点职位页。
         timeout: 等站点写出 token 的超时（秒）。

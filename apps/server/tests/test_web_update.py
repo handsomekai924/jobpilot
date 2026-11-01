@@ -248,17 +248,14 @@ def test_忽略之后来了更新的版本照样提示(monkeypatch):
 
 def test_连续忽略多个版本只留最高水位(monkeypatch):
     """验连续忽略只留最高水位。"""
-    update_check.save_ignored_version("1.2.0")
-    update_check.save_ignored_version("1.3.0")
-    assert update_check.load_ignored_version() == "1.3.0"
+    update_check.save_ignored_version("9.1.0")
+    update_check.save_ignored_version("9.2.0")
+    assert update_check.load_ignored_version() == "9.2.0"
 
-    _fake_gitee(monkeypatch, [_release("v1.2.5")])
+    _fake_gitee(monkeypatch, [_release("v9.2.0")])
     assert update_check.build_status(force=True)["should_prompt"] is False
 
-    _fake_gitee(monkeypatch, [_release("v1.3.0")])
-    assert update_check.build_status(force=True)["should_prompt"] is False
-
-    _fake_gitee(monkeypatch, [_release("v1.4.0")])
+    _fake_gitee(monkeypatch, [_release("v9.3.0")])
     assert update_check.build_status(force=True)["should_prompt"] is True
 
 

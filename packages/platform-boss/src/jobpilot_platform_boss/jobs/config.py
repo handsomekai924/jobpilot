@@ -56,7 +56,7 @@ ZP_TOKEN_HEADER: Final[str] = "zp_token"
 
 CHAT_REMIND_CONFIRM_CID: Final[int] = 1
 
-STOKEN_ENV: Final[str] = "BOSS_ZP_STOKEN"
+STOKEN_ENV: Final[str] = "JOBPILOT_ZP_STOKEN"
 
 DEFAULT_TIMEOUT: Final[float] = 10.0
 

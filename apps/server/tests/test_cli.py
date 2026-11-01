@@ -105,7 +105,7 @@ class TestEntrypoint:
 
         assert PROJECT_ROOT == repo_root(), "PROJECT_ROOT 应该是仓库根"
         assert DEFAULT_DB_PATH == jobpilot_db.DEFAULT_DB_PATH
-        assert DEFAULT_DB_PATH == PROJECT_ROOT / "data" / "boss.db"
+        assert DEFAULT_DB_PATH == PROJECT_ROOT / "data" / "jobpilot.db"
         assert DEFAULT_DB_PATH.is_absolute()
         assert not str(DEFAULT_DB_PATH).startswith(str(Path.home()))
 

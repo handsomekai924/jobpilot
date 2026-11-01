@@ -356,7 +356,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
 
 
 def filter_path(path: Path | str | None = None) -> Path:
-    """状态库路径：显式参数 → `BOSS_DB` → `data/boss.db`。
+    """状态库路径：显式参数 → `JOBPILOT_DB` → `data/jobpilot.db`。
 
     搜索条件是库里的一行（`doc('search_filter')`）；用户点名的 JSON 文件
     走 `search_filter_from_file`。

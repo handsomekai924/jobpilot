@@ -73,7 +73,7 @@ def create_app() -> FastAPI:
                 "ok": False,
                 "code": "internal",
                 "message": "程序内部出了点问题，已经记进日志了。"
-                "关掉重开一次通常就好；还是不行的话，把「数据目录」里 logs\\boss.log 发给开发者。",
+                "关掉重开一次通常就好；还是不行的话，把「数据目录」里 logs\\jobpilot.log 发给开发者。",
             },
         )
 

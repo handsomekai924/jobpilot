@@ -128,7 +128,7 @@ def load_config(path: Path | str | None = None) -> CollectionConfig:
     """读状态库里的采集配置；没有 / 坏了 → 默认配置（不报错）。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     try:
         raw = jobpilot_db.doc_get_raw(jobpilot_db.DOC_COLLECTION_CONFIG, path)
@@ -165,7 +165,7 @@ def save_config(cfg: CollectionConfig, path: Path | str | None = None) -> Collec
 
     Args:
         cfg: 待保存的配置。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         归一化后的配置。
@@ -180,7 +180,7 @@ def update_config(payload: dict[str, Any], path: Path | str | None = None) -> Co
 
     Args:
         payload: 要改的字段，可嵌在 `crawl` 下。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     current = load_config(path)
     data = current.to_dict()
@@ -194,7 +194,7 @@ def reset_config(path: Path | str | None = None) -> CollectionConfig:
     """恢复默认采集配置。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     return save_config(CollectionConfig(), path)
 
@@ -235,7 +235,7 @@ def load_snapshot(
     """给 worker 一次性读齐当前搜索、采集设置与启用中的黑名单规则。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
         site: 只取这个站点生效的黑名单规则（含全站规则）；`None` = 不切。
 
     Returns:

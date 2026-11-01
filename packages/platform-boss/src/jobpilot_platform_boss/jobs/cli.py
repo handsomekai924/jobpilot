@@ -13,7 +13,7 @@
     python -m jobpilot_platform_boss.jobs list --city 广州 --limit 20
     python -m jobpilot_platform_boss.jobs list --json                # 职位按 JSON 输出
 
-登录态默认读状态库 data/boss.db 的 doc('session')。--expect 与 --filter 互斥，
+登录态默认读状态库 data/jobpilot.db 的 doc('session')。--expect 与 --filter 互斥，
 一次抓取只能走一条检索流。
 """
 
@@ -73,7 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--db",
         default=None,
-        help=f"状态库路径（默认 {DEFAULT_DB_PATH}，可用环境变量 BOSS_DB 覆盖）",
+        help=f"状态库路径（默认 {DEFAULT_DB_PATH}，可用环境变量 JOBPILOT_DB 覆盖）",
     )
 
     sub = parser.add_subparsers(dest="command", required=True)

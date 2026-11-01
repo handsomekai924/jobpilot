@@ -1,6 +1,6 @@
 [project]
 name = "jobpilot-ai"
-version = "1.2.5"
+version = "2.0.0"
 description = "通用 AI 能力（LLM / 简历 / 面试 / 匹配）"
 requires-python = ">=3.12"
 dependencies = [

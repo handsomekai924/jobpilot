@@ -107,7 +107,7 @@ def save_settings(settings: AppSettings, path: Path | str | None = None) -> Path
 
     Args:
         settings: 待保存的设置。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         实际写入的库路径。
@@ -131,7 +131,7 @@ def apply_chrome_mode(mode: str, path: Path | str | None = None) -> AppSettings:
 
     Args:
         mode: 目标档位；不认识的值会被收成空串。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     from jobpilot_browser_pool.cdp import CHROME_MODE_ENV
 
@@ -149,7 +149,7 @@ def apply_ignored_update_version(version: str, path: Path | str | None = None) -
 
     Args:
         version: 要忽略到的版本号。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         归一化后的水位线版本号。
@@ -163,7 +163,7 @@ def apply_greeting_requirement(text: str, path: Path | str | None = None) -> str
 
     Args:
         text: 自定义约束文本；超长截断到 500 字。
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
 
     Returns:
         归一化后的自定义文本（空串 = 用默认）。
@@ -176,7 +176,7 @@ def restore_on_startup(path: Path | str | None = None) -> AppSettings:
     """启动时把存过的档位写回环境变量，必须在任何 Chrome 启动之前跑。
 
     Args:
-        path: 状态库路径；省略 = `BOSS_DB` = `data/boss.db`。
+        path: 状态库路径；省略 = `JOBPILOT_DB` = `data/jobpilot.db`。
     """
     settings = load_settings(path)
     if settings.chrome_mode:

@@ -82,14 +82,14 @@ def _restore_app_settings() -> None:
 
 
 def _setup_logging(level: str) -> None:
-    """配置控制台 + `data/logs/boss.log` 日志。"""
+    """配置控制台 + `data/logs/jobpilot.log` 日志。"""
     handlers: list[logging.Handler] = [logging.StreamHandler()]
     try:
         from logging.handlers import RotatingFileHandler
 
         handlers.append(
             RotatingFileHandler(
-                log_dir() / "boss.log", maxBytes=1 << 20, backupCount=3, encoding="utf-8"
+                log_dir() / "jobpilot.log", maxBytes=1 << 20, backupCount=3, encoding="utf-8"
             )
         )
     except OSError:  # pragma: no cover - 磁盘满 / 权限问题
@@ -145,6 +145,21 @@ def _print_version_status(status: dict) -> None:
     sys.stdout.flush()
 
 
+def _print_migration_status(info: dict[str, str]) -> None:
+    """把旧库迁移结果按行打到控制台。"""
+    reason = info.get("db_migration", "")
+    if info.get("db_migrated") == "1":
+        source = info.get("db_migrated_from", "旧库")
+        rows = info.get("db_migrated_rows", "0")
+        print(f"旧库迁移     已从 {source} 迁移（{rows} 行），旧文件保留")
+    elif reason == "target_exists":
+        print("旧库迁移     新库已存在，跳过")
+    elif reason == "no_source":
+        print("旧库迁移     没找到旧库，跳过")
+    else:
+        print(f"旧库迁移     {reason or '未执行'}")
+
+
 def _self_check(info: dict[str, str]) -> int:
     """打印路径 / 环境自检结果；前端资源缺失时返回 1。
 
@@ -175,6 +190,7 @@ def _self_check(info: dict[str, str]) -> int:
     print(f"  旧壳 legacy {legacy_index}  【{'正常' if legacy_index.is_file() else '缺失！'}】")
     print(f"数据目录     {info.get('data_dir', C.DATA_DIR)}")
     print(f"状态库       {jobpilot_db.resolve_db_path()}")
+    _print_migration_status(info)
     print(f"日志目录     {log_dir()}")
 
     try:

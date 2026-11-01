@@ -1,7 +1,7 @@
 """简历原文与分析结果的落库。
 
 原文存 `resume` 行的 `content_md`，解析结果进 `meta`；匹配分析存 `analysis` 行。
-库是 `data/boss.db`——跟登录态 / 搜索条件 / 职位同一个。
+库是 `data/jobpilot.db`——跟登录态 / 搜索条件 / 职位同一个。
 
 Attributes:
     SECTION_ALIASES: 章节标题别名 → 规范名。

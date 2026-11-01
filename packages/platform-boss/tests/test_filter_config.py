@@ -22,10 +22,13 @@ from jobpilot_platform_boss.catalog.search import (
 
 
 def test_filter_path_默认是_data_jobpilot_db(tmp_path, monkeypatch):
-    """缺省路径落在 `data/boss.db`。"""
+    """缺省路径落在 `data/jobpilot.db`。"""
+    from jobpilot_db import legacy
+
     monkeypatch.delenv(jobpilot_db.DB_ENV, raising=False)
+    monkeypatch.setattr(legacy, "migrate_legacy_database", lambda _target: None)
     assert filter_path() == jobpilot_db.DEFAULT_DB_PATH
-    assert filter_path().name == "boss.db"
+    assert filter_path().name == "jobpilot.db"
     assert filter_path().parent.name == "data"
 
 

@@ -19,9 +19,11 @@ from jobpilot_server import runtime
 
 
 @pytest.fixture(autouse=True)
-def _env_copy(monkeypatch):
-    """用环境副本跑，免得污染别的测试。"""
-    monkeypatch.setattr(os, "environ", os.environ.copy())
+def _env_copy(monkeypatch, tmp_path):
+    """用环境副本跑，并清掉旧版变量，免得读到开发机上的真实数据。"""
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("BOSS_", "JOBPILOT_"))}
+    monkeypatch.setattr(os, "environ", env)
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
 
 
 def _fake_frozen(monkeypatch, tmp_path: Path, *, exe_dir: Path | None = None) -> Path:
@@ -30,7 +32,7 @@ def _fake_frozen(monkeypatch, tmp_path: Path, *, exe_dir: Path | None = None) ->
     meipass.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "_MEIPASS", str(meipass), raising=False)
-    monkeypatch.setattr(sys, "executable", str((exe_dir or tmp_path / "app") / "BossAutoDelivery.exe"))
+    monkeypatch.setattr(sys, "executable", str((exe_dir or tmp_path / "app") / "JobPilot.exe"))
     return meipass
 
 
@@ -94,7 +96,7 @@ def test_ensure_writable_falls_back_to_user_dir(monkeypatch, tmp_path):
     blocked.parent.mkdir()
     blocked.write_text("我是个文件，不是目录", encoding="utf-8")
 
-    assert runtime.ensure_writable(blocked) == tmp_path / "local" / "BossAutoDelivery" / "data"
+    assert runtime.ensure_writable(blocked) == tmp_path / "local" / "JobPilot" / "data"
 
 
 def test_ensure_writable_falls_back_to_temp(monkeypatch, tmp_path):
@@ -104,11 +106,28 @@ def test_ensure_writable_falls_back_to_temp(monkeypatch, tmp_path):
 
     blocked = tmp_path / "blocked"
     blocked.write_text("文件", encoding="utf-8")
-    local = tmp_path / "local" / "BossAutoDelivery" / "data"
+    local = tmp_path / "local" / "JobPilot" / "data"
     local.parent.mkdir(parents=True)
     local.write_text("也是文件", encoding="utf-8")
 
-    assert runtime.ensure_writable(blocked) == tmp_path / "tmp" / "BossAutoDelivery" / "data"
+    assert runtime.ensure_writable(blocked) == tmp_path / "tmp" / "JobPilot" / "data"
+
+
+def test_fallback_data_dir_reuses_legacy_install(monkeypatch, tmp_path):
+    """新版用户目录还没建、旧版已有数据时，别再另起一份新目录。"""
+    legacy = tmp_path / "local" / "BossAutoDelivery" / "data"
+    legacy.mkdir(parents=True)
+
+    assert runtime.fallback_data_dir() == legacy
+
+
+def test_fallback_data_dir_prefers_new_install(monkeypatch, tmp_path):
+    """新版目录一旦存在就用自己的，不再回头找旧版。"""
+    current = tmp_path / "local" / "JobPilot" / "data"
+    current.mkdir(parents=True)
+    (tmp_path / "local" / "BossAutoDelivery" / "data").mkdir(parents=True)
+
+    assert runtime.fallback_data_dir() == current
 
 
 def test_bootstrap_dev_is_noop(monkeypatch, tmp_path):
@@ -123,6 +142,7 @@ def test_bootstrap_dev_is_noop(monkeypatch, tmp_path):
     assert CHROME_PROFILE_ENV not in os.environ
     assert info["frozen"] == "0"
     assert info["data_dir"] == str(runtime.resource_root() / "data")
+    assert "db_migrated" not in info
 
 
 def test_bootstrap_frozen_pins_portable_paths(monkeypatch, tmp_path):
@@ -136,7 +156,7 @@ def test_bootstrap_frozen_pins_portable_paths(monkeypatch, tmp_path):
     info = runtime.bootstrap()
 
     data = exe_dir / "data"
-    assert os.environ[DB_ENV] == str(data / "boss.db")
+    assert os.environ[DB_ENV] == str(data / "jobpilot.db")
     assert os.environ[CHROME_PROFILE_ENV] == str(data / "chrome_profile")
     assert info["portable"] == "1"
     assert (data / "logs").is_dir()
@@ -165,7 +185,21 @@ def test_bootstrap_marks_non_portable_when_falling_back(monkeypatch, tmp_path):
     info = runtime.bootstrap()
 
     assert info["portable"] == "0"
-    assert info["data_dir"] == str(tmp_path / "local" / "BossAutoDelivery" / "data")
+    assert info["data_dir"] == str(tmp_path / "local" / "JobPilot" / "data")
+
+
+def test_bootstrap_reuses_legacy_chrome_profile(monkeypatch, tmp_path):
+    """新版还没建 profile、旧版已经登录过时，直接复用旧 profile，不要求重新扫码。"""
+    legacy_profile = tmp_path / "local" / "BossAutoDelivery" / "data" / "chrome_profile"
+    legacy_profile.mkdir(parents=True)
+    exe_dir = tmp_path / "Desktop"
+    exe_dir.mkdir()
+    _fake_frozen(monkeypatch, tmp_path, exe_dir=exe_dir)
+    monkeypatch.delenv(CHROME_PROFILE_ENV, raising=False)
+
+    runtime.bootstrap()
+
+    assert os.environ[CHROME_PROFILE_ENV] == str(legacy_profile)
 
 
 def test_bootstrap_force_runs_in_dev(monkeypatch, tmp_path):
@@ -177,7 +211,7 @@ def test_bootstrap_force_runs_in_dev(monkeypatch, tmp_path):
 
     runtime.bootstrap(force=True)
 
-    assert os.environ[DB_ENV] == str(tmp_path / "elsewhere" / "boss.db")
+    assert os.environ[DB_ENV] == str(tmp_path / "elsewhere" / "jobpilot.db")
 
 
 def test_is_temp_run_flags_zip_preview(monkeypatch, tmp_path):

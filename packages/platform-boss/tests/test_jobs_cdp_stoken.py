@@ -352,13 +352,13 @@ def test_find_chrome_认环境变量(tmp_path: Path, monkeypatch):
     """验证 `find_chrome` 认环境变量。"""
     fake = tmp_path / "chrome.exe"
     fake.write_text("stub", encoding="utf-8")
-    monkeypatch.setenv("BOSS_CHROME_BIN", str(fake))
+    monkeypatch.setenv("JOBPILOT_CHROME_BIN", str(fake))
     assert find_chrome() == str(fake)
 
 
 def test_find_chrome_环境变量指空文件就报错(tmp_path: Path, monkeypatch):
     """验证 `find_chrome` 环境变量指空文件就报错。"""
-    monkeypatch.setenv("BOSS_CHROME_BIN", str(tmp_path / "没这东西.exe"))
+    monkeypatch.setenv("JOBPILOT_CHROME_BIN", str(tmp_path / "没这东西.exe"))
     with pytest.raises(StokenError):
         find_chrome()
 
@@ -371,13 +371,13 @@ def test_档位_默认是hidden():
 
 def test_档位_认环境变量(monkeypatch):
     """验证档位就认环境变量。"""
-    monkeypatch.setenv("BOSS_CHROME_MODE", "VISIBLE")
+    monkeypatch.setenv("JOBPILOT_CHROME_MODE", "VISIBLE")
     assert cdp._mode() == "visible"
 
 
 def test_档位_写错了退回默认(monkeypatch):
     """验证档位就写错了退回默认。"""
-    monkeypatch.setenv("BOSS_CHROME_MODE", "隐形")
+    monkeypatch.setenv("JOBPILOT_CHROME_MODE", "隐形")
     assert cdp._mode() == cdp.DEFAULT_CHROME_MODE
 
 
@@ -762,7 +762,7 @@ def test_退出_钩子默认挂上(monkeypatch, launched):
     """验证退出就钩子默认挂上。"""
     hooked: list = []
     monkeypatch.setattr(cdp.atexit, "register", lambda fn: hooked.append(fn))
-    monkeypatch.delenv("BOSS_CDP_CLOSE_ON_EXIT", raising=False)
+    monkeypatch.delenv("JOBPILOT_CDP_CLOSE_ON_EXIT", raising=False)
     cdp._install_exit_hooks()
     assert hooked == [cdp.close_launched_browsers]
 
@@ -771,7 +771,7 @@ def test_退出_可以关掉这个行为(monkeypatch, launched):
     """验证退出就可以关掉这个行为。"""
     hooked: list = []
     monkeypatch.setattr(cdp.atexit, "register", lambda fn: hooked.append(fn))
-    monkeypatch.setenv("BOSS_CDP_CLOSE_ON_EXIT", "0")
+    monkeypatch.setenv("JOBPILOT_CDP_CLOSE_ON_EXIT", "0")
     cdp._install_exit_hooks()
     assert hooked == []
 
@@ -828,7 +828,7 @@ def test_退出_关掉开关就不挂控制台钩子(monkeypatch, launched):
     """验证退出就关掉开关就不挂控制台钩子。"""
     installed: list = []
     monkeypatch.setattr(cdp, "_install_console_handler", lambda: installed.append(1))
-    monkeypatch.setenv("BOSS_CDP_CLOSE_ON_EXIT", "0")
+    monkeypatch.setenv("JOBPILOT_CDP_CLOSE_ON_EXIT", "0")
     cdp._install_exit_hooks()
     assert installed == []
 

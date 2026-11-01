@@ -1,4 +1,4 @@
-"""APP 扫码登录流程的离线单测：假会话覆盖 `boss_platform_boss.auth.qrcode` 状态机。"""
+"""APP 扫码登录流程的离线单测：假会话覆盖 `jobpilot_platform_boss.auth.qrcode` 状态机。"""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from boss_platform_boss.auth import (
+from jobpilot_platform_boss.auth import (
     AccountBlocked,
     ApiError,
     AppScanLogin,
@@ -16,8 +16,8 @@ from boss_platform_boss.auth import (
     ZhipinLoginClient,
     run_qr_login,
 )
-from boss_platform_boss.auth import config as C
-from boss_platform_boss.auth.qrcode import _in_limit_range
+from jobpilot_platform_boss.auth import config as C
+from jobpilot_platform_boss.auth.qrcode import _in_limit_range
 
 
 class FakeCookies:
@@ -373,7 +373,7 @@ class TestDispatch:
         login.dispatch(fingerprint="fp-plain")
         fp = http.last_params["fp"]
         assert fp != "fp-plain"
-        from boss_platform_boss.auth.crypto import decrypt_text
+        from jobpilot_platform_boss.auth.crypto import decrypt_text
 
         assert decrypt_text(fp) == "fp-plain"
 
@@ -521,28 +521,28 @@ class TestRender:
 
     def test_png_magic(self):
         """验 PNG 输出带文件魔数。"""
-        from boss_platform_boss.auth.qrcode import render_qr_png
+        from jobpilot_platform_boss.auth.qrcode import render_qr_png
 
         png = render_qr_png("qr-uuid")
         assert png[:8] == b"\x89PNG\r\n\x1a\n"
 
     def test_svg_is_markup(self):
         """验 SVG 输出是标记文本。"""
-        from boss_platform_boss.auth.qrcode import render_qr_svg
+        from jobpilot_platform_boss.auth.qrcode import render_qr_svg
 
         svg = render_qr_svg("qr-uuid")
         assert svg.lstrip().startswith("<svg")
 
     def test_terminal_returns_string_not_none(self):
         """验终端图形返回非空字符串而不是 `None`。"""
-        from boss_platform_boss.auth.qrcode import render_qr_terminal
+        from jobpilot_platform_boss.auth.qrcode import render_qr_terminal
 
         art = render_qr_terminal("qr-uuid")
         assert isinstance(art, str) and art.strip()
 
     def test_empty_payload_rejected(self):
         """验空载荷被拒绝。"""
-        from boss_platform_boss.auth.qrcode import render_qr_png
+        from jobpilot_platform_boss.auth.qrcode import render_qr_png
 
         with pytest.raises(ValueError):
             render_qr_png("")

@@ -7,10 +7,10 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import JobStore
-from boss_server.app import create_app
-from boss_server.services import resume_revision as RR
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import JobStore
+from jobpilot_server.app import create_app
+from jobpilot_server.services import resume_revision as RR
 
 
 def make_job(jid: str = "id-1", *, job_desc: str = "职责 A", **kw) -> Job:
@@ -96,9 +96,9 @@ def test_assemble_target_block_big_aggregates():
 
 def test_generate_revision_ok():
     """假 LLM：生成出修改稿 + changes。"""
-    import boss_db
+    import jobpilot_db
 
-    boss_db.acquire().execute(
+    jobpilot_db.acquire().execute(
         "INSERT INTO resume (resume_id, title, source_name, created_at, content_md, meta) "
         "VALUES (?, ?, ?, ?, ?, ?)",
         ("rs_x", "x.md", "x.md", 1.0, SAMPLE, "{}"),
@@ -117,7 +117,7 @@ def test_generate_revision_ok():
                     {"section": "技能标签", "type": "keyword", "summary": "补高并发", "reason": "对齐 JD"}
                 ],
             }
-            from boss_server.services.llm_client import ChatResult
+            from jobpilot_server.services.llm_client import ChatResult
             return ChatResult(json.dumps(payload, ensure_ascii=False), None)
 
     res = RR.generate_revision(resume_id="rs_x", jobs=[make_job("a")], llm=FakeLLM())
@@ -128,7 +128,7 @@ def test_generate_revision_ok():
 
 def test_generate_revision_rejects_hallucination_empty():
     """空修改稿 → 报错。"""
-    import boss_db
+    import jobpilot_db
 
     class FakeLLM:
         """回空修改稿、用来触发幻觉校验的假 LLM。"""
@@ -137,10 +137,10 @@ def test_generate_revision_rejects_hallucination_empty():
 
         def chat_with_metadata(self, messages, **kw):
             """回 `revised_md` 为空串的 JSON。"""
-            from boss_server.services.llm_client import ChatResult
+            from jobpilot_server.services.llm_client import ChatResult
             return ChatResult(json.dumps({"revised_md": ""}, ensure_ascii=False), None)
 
-    boss_db.acquire().execute(
+    jobpilot_db.acquire().execute(
         "INSERT INTO resume (resume_id, title, source_name, created_at, content_md, meta) "
         "VALUES (?, ?, ?, ?, ?, ?)",
         ("rs_1", "x.md", "x.md", 1.0, SAMPLE, "{}"),
@@ -171,11 +171,11 @@ def test_api_revise_start_and_save(client, monkeypatch):
     """走通 start → 生成（假 LLM）→ save 写盘 + 入库。"""
     rid, job_ids = _seed(client)
 
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
-    import boss_server.services.resume_revision_task as RRT
+    import jobpilot_server.services.resume_revision_task as RRT
 
     captured = {}
 

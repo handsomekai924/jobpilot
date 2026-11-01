@@ -7,10 +7,10 @@ import time
 
 import pytest
 
-from boss_platform_boss.auth.errors import BossLoginError, SessionExpired, TransportError
-from boss_platform_boss.auth.models import UserInfo
-from boss_platform_boss.auth.session import load_session, save_session, StoredSession
-from boss_server.services import session_check
+from jobpilot_platform_boss.auth.errors import BossLoginError, SessionExpired, TransportError
+from jobpilot_platform_boss.auth.models import UserInfo
+from jobpilot_platform_boss.auth.session import load_session, save_session, StoredSession
+from jobpilot_server.services import session_check
 
 
 class FakeClient:
@@ -265,7 +265,7 @@ def test_auth_status_carries_check_result():
     """首屏会话卡片要能区分「库里没有」和「启动时验过、确实失效」。"""
     from fastapi.testclient import TestClient
 
-    from boss_server.app import create_app
+    from jobpilot_server.app import create_app
 
     session_check.reset_cache()
     client = TestClient(create_app())
@@ -278,7 +278,7 @@ def test_auth_status_carries_check_result():
 
 def test_auth_status_logged_in_false_when_check_says_expired(tmp_path):
     """清库失败的边角：自检说过期就不能再让界面报「已登录」。"""
-    from boss_server.services.login_task import login_tasks
+    from jobpilot_server.services.login_task import login_tasks
 
     path = tmp_path / "boss.db"
     save_session(
@@ -300,7 +300,7 @@ def test_api_responses_are_not_cached():
     """/api/auth/status 被浏览器缓存过一次「未登录」，登录后首屏就一直显示离线。"""
     from fastapi.testclient import TestClient
 
-    from boss_server.app import create_app
+    from jobpilot_server.app import create_app
 
     client = TestClient(create_app())
     resp = client.get("/api/auth/status")
@@ -309,7 +309,7 @@ def test_api_responses_are_not_cached():
 
 def test_自检落定广播_session_changed(tmp_path, monkeypatch):
     """自检完要推一帧 session.changed，信号球不用谁再来问。"""
-    from boss_server.services import task_runtime
+    from jobpilot_server.services import task_runtime
 
     sent: list[tuple[str, dict]] = []
 
@@ -328,8 +328,8 @@ def test_登出会广播_session_changed(monkeypatch):
     """登出清完本地登录态要推一帧 session.changed，会话卡跟着变离线。"""
     from fastapi.testclient import TestClient
 
-    from boss_server.app import create_app
-    from boss_server.services import task_runtime
+    from jobpilot_server.app import create_app
+    from jobpilot_server.services import task_runtime
 
     sent: list[str] = []
     monkeypatch.setattr(task_runtime.hub, "broadcast", lambda m, d, **k: sent.append(m))

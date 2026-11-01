@@ -13,8 +13,8 @@ import ast
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-SERVER = ROOT / "apps" / "server" / "src" / "boss_server"
-CORE = ROOT / "packages" / "core" / "src" / "boss_core"
+SERVER = ROOT / "apps" / "server" / "src" / "jobpilot_server"
+CORE = ROOT / "packages" / "core" / "src" / "jobpilot_core"
 FLOW = SERVER / "orchestration" / "flow.py"
 SERVICES = SERVER / "services"
 
@@ -124,7 +124,7 @@ def test_共享规则的输入不是洞():
 
 
 def _core_modules() -> dict[str, pathlib.Path]:
-    """`boss_core.*` 的模块名 → 源文件。"""
+    """`jobpilot_core.*` 的模块名 → 源文件。"""
     out: dict[str, pathlib.Path] = {}
     for path in sorted(CORE.rglob("*.py")):
         if "adapters" in path.parts or path.name == "__init__.py":
@@ -135,7 +135,7 @@ def _core_modules() -> dict[str, pathlib.Path]:
 
 
 def _imports_of(path: pathlib.Path, module: str) -> set[str]:
-    """这个文件相对 import 到的兄弟模块名（只有 `boss_core.*` 算边）。"""
+    """这个文件相对 import 到的兄弟模块名（只有 `jobpilot_core.*` 算边）。"""
     package = module.rsplit(".", 1)[0]
     tree = ast.parse(path.read_text(encoding="utf-8"))
     edges: set[str] = set()
@@ -146,7 +146,7 @@ def _imports_of(path: pathlib.Path, module: str) -> set[str]:
         for _ in range(node.level - 1):
             base = base.rsplit(".", 1)[0] if "." in base else ""
         target = f"{base}.{node.module}" if node.module else base
-        if not target.startswith("boss_core"):
+        if not target.startswith("jobpilot_core"):
             continue
         edges.add(target)
         if node.module is None:
@@ -247,7 +247,7 @@ ALIAS_PREFIXES: tuple[str, ...] = (
 
 
 def _backend_files() -> list[pathlib.Path]:
-    """`boss_server/` 下的源文件（`static/` 是前端产物，不在此列）。"""
+    """`jobpilot_server/` 下的源文件（`static/` 是前端产物，不在此列）。"""
     return sorted(
         p for p in SERVER.rglob("*.py") if "static" not in p.parts
     )

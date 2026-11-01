@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-import boss_db
-from boss_platform_boss.catalog.search import (
+import jobpilot_db
+from jobpilot_platform_boss.catalog.search import (
     JobSearchFilter,
     filter_path,
     load_search_filter,
@@ -21,23 +21,23 @@ from boss_platform_boss.catalog.search import (
 )
 
 
-def test_filter_path_默认是_data_boss_db(tmp_path, monkeypatch):
+def test_filter_path_默认是_data_jobpilot_db(tmp_path, monkeypatch):
     """缺省路径落在 `data/boss.db`。"""
-    monkeypatch.delenv(boss_db.DB_ENV, raising=False)
-    assert filter_path() == boss_db.DEFAULT_DB_PATH
+    monkeypatch.delenv(jobpilot_db.DB_ENV, raising=False)
+    assert filter_path() == jobpilot_db.DEFAULT_DB_PATH
     assert filter_path().name == "boss.db"
     assert filter_path().parent.name == "data"
 
 
 def test_filter_path_认环境变量(tmp_path, monkeypatch):
     """认 `DB_ENV` 环境变量指定的库路径。"""
-    monkeypatch.setenv(boss_db.DB_ENV, str(tmp_path / "x.db"))
+    monkeypatch.setenv(jobpilot_db.DB_ENV, str(tmp_path / "x.db"))
     assert filter_path() == tmp_path / "x.db"
 
 
 def test_filter_path_显式参数优先(tmp_path, monkeypatch):
     """显式传入的路径优先于环境变量。"""
-    monkeypatch.setenv(boss_db.DB_ENV, "from-env.db")
+    monkeypatch.setenv(jobpilot_db.DB_ENV, "from-env.db")
     assert filter_path(tmp_path / "explicit.db") == tmp_path / "explicit.db"
 
 
@@ -52,14 +52,14 @@ def test_load_库里没有_留空不报错(tmp_path):
 def test_load_空payload_也留空(tmp_path):
     """空 payload 读成全不限。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, "", p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, "", p, site="boss")
     assert load_search_filter(p).is_blank
 
 
 def test_load_空对象_全不限(tmp_path):
     """空对象读成全不限。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, {}, p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, {}, p, site="boss")
     f = load_search_filter(p)
     assert f.is_blank
     assert f.to_params() == {"page": "1", "pageSize": "15", "scene": "1"}
@@ -68,8 +68,8 @@ def test_load_空对象_全不限(tmp_path):
 def test_load_键都在但值都空_等于不限(tmp_path):
     """键齐全但值都空时按不限处理。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(
-        boss_db.DOC_SEARCH_FILTER,
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_SEARCH_FILTER,
         {
             "query": "",
             "city": "",
@@ -87,8 +87,8 @@ def test_load_键都在但值都空_等于不限(tmp_path):
 def test_load_单选与多选都收(tmp_path):
     """单选与多选字段都能装配进条件。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(
-        boss_db.DOC_SEARCH_FILTER,
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_SEARCH_FILTER,
         {
             "query": "python",
             "city": "101280100",
@@ -121,8 +121,8 @@ def test_load_单选与多选都收(tmp_path):
 def test_load_多选兼容逗号串(tmp_path):
     """多选兼容逗号串写法。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(
-        boss_db.DOC_SEARCH_FILTER, {"experience": "104,105", "degree": "209"}, p, site="boss")
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_SEARCH_FILTER, {"experience": "104,105", "degree": "209"}, p, site="boss")
     f = load_search_filter(p)
     assert f.experience == ("104", "105")
     assert f.degree == ("209",)
@@ -131,7 +131,7 @@ def test_load_多选兼容逗号串(tmp_path):
 def test_load_snake_case_也认(tmp_path):
     """snake_case 键名同样可读。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, {"job_type": "1902", "pay_type": ["1"]}, p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, {"job_type": "1902", "pay_type": ["1"]}, p, site="boss")
     f = load_search_filter(p)
     assert f.job_type == "1902"
     assert f.pay_type == ("1",)
@@ -140,7 +140,7 @@ def test_load_snake_case_也认(tmp_path):
 def test_load_多余键不炸(tmp_path):
     """多余键忽略；`page` 走运行期默认。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, {"query": "go", "乱写的键": 1, "page": 3}, p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, {"query": "go", "乱写的键": 1, "page": 3}, p, site="boss")
     f = load_search_filter(p)
     assert f.query == "go"
     assert f.page == 1
@@ -149,7 +149,7 @@ def test_load_多余键不炸(tmp_path):
 def test_load_pageSize_不是数字就报清楚(tmp_path):
     """`pageSize` 非数字时报出字段名。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, {"pageSize": "十"}, p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, {"pageSize": "十"}, p, site="boss")
     with pytest.raises(ValueError, match="pageSize"):
         load_search_filter(p)
 
@@ -157,7 +157,7 @@ def test_load_pageSize_不是数字就报清楚(tmp_path):
 def test_load_不是JSON就报清楚(tmp_path):
     """非 JSON payload 报「不是合法 JSON」。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, "{不是 json", p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, "{不是 json", p, site="boss")
     with pytest.raises(ValueError, match="不是合法 JSON"):
         load_search_filter(p)
 
@@ -165,7 +165,7 @@ def test_load_不是JSON就报清楚(tmp_path):
 def test_load_不是对象就报清楚(tmp_path):
     """JSON 不是对象时报「JSON 对象」。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_SEARCH_FILTER, "[1, 2]", p, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_SEARCH_FILTER, "[1, 2]", p, site="boss")
     with pytest.raises(ValueError, match="JSON 对象"):
         load_search_filter(p)
 
@@ -184,7 +184,7 @@ def test_save_再读回来是同一个条件(tmp_path):
         page_size=20,
     )
     p = save_search_filter(src, tmp_path / "boss.db")
-    assert boss_db.doc_get(boss_db.DOC_SEARCH_FILTER, p, site="boss")["jobType"] == "1901"
+    assert jobpilot_db.doc_get(jobpilot_db.DOC_SEARCH_FILTER, p, site="boss")["jobType"] == "1901"
     back = load_search_filter(p)
     assert back == src
 
@@ -192,7 +192,7 @@ def test_save_再读回来是同一个条件(tmp_path):
 def test_save_空条件写出来是空值(tmp_path):
     """空条件写出空值字段。"""
     p = save_search_filter(JobSearchFilter(), tmp_path / "empty.db")
-    data = boss_db.doc_get(boss_db.DOC_SEARCH_FILTER, p, site="boss")
+    data = jobpilot_db.doc_get(jobpilot_db.DOC_SEARCH_FILTER, p, site="boss")
     assert data["query"] == "" and data["city"] == ""
     assert data["experience"] == [] and data["scale"] == []
     assert load_search_filter(p).is_blank
@@ -217,7 +217,7 @@ def test_from_file_不写库(tmp_path):
     p.write_text('{"query": "go"}', encoding="utf-8")
     search_filter_from_file(p)
     db = tmp_path / "boss.db"
-    assert boss_db.doc_get(boss_db.DOC_SEARCH_FILTER, db, site="boss") is None
+    assert jobpilot_db.doc_get(jobpilot_db.DOC_SEARCH_FILTER, db, site="boss") is None
 
 
 def test_from_file_不存在就报清楚(tmp_path):

@@ -10,9 +10,9 @@ import io
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_server.api.resume import MAX_BINARY_BYTES
-from boss_server.app import create_app
-from boss_server.services import document_text as dt
+from jobpilot_server.api.resume import MAX_BINARY_BYTES
+from jobpilot_server.app import create_app
+from jobpilot_server.services import document_text as dt
 
 
 def make_docx(*, with_table: bool = True, empty: bool = False) -> bytes:

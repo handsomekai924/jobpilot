@@ -11,12 +11,12 @@ from pathlib import Path
 
 import pytest
 
-import boss_browser_pool.cdp as cdp
-import boss_db
-from boss_browser_pool.cdp import find_chrome
-from boss_platform_boss.stoken import STOKEN_MAX_AGE
-from boss_platform_boss.stoken import StokenError
-from boss_platform_boss.stoken_cdp import (
+import jobpilot_browser_pool.cdp as cdp
+import jobpilot_db
+from jobpilot_browser_pool.cdp import find_chrome
+from jobpilot_platform_boss.stoken import STOKEN_MAX_AGE
+from jobpilot_platform_boss.stoken import StokenError
+from jobpilot_platform_boss.stoken_cdp import (
     RENEW_COOLDOWN,
     CdpStokenProvider,
     StokenRecord,
@@ -115,20 +115,20 @@ def test_账本_读写往返(tmp_path: Path):
     again = store.load()
     assert again is not None and again.token == "0138S"
     assert store.path == db
-    assert boss_db.doc_get_raw(boss_db.DOC_STOKEN, db, site="boss") is not None
+    assert jobpilot_db.doc_get_raw(jobpilot_db.DOC_STOKEN, db, site="boss") is not None
 
 
 def test_账本_坏payload当没有(tmp_path: Path):
     """验证账本就坏 payload 当没有。"""
     db = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_STOKEN, "不是 JSON", db, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_STOKEN, "不是 JSON", db, site="boss")
     assert StokenStore(db).load() is None
 
 
 def test_账本_非对象当没有(tmp_path: Path):
     """验证账本就非对象当没有。"""
     db = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_STOKEN, "[1, 2]", db, site="boss")
+    jobpilot_db.doc_set(jobpilot_db.DOC_STOKEN, "[1, 2]", db, site="boss")
     assert StokenStore(db).load() is None
 
 
@@ -309,7 +309,7 @@ def test_ensure_会话对象不能写cookie就报错(tmp_path: Path):
 
 def test_ensure_镜像进登录态(tmp_path: Path):
     """取到的 token 要写回 `doc('session')`，让 http_from_session 老规矩继续生效。"""
-    from boss_platform_boss.auth.session import StoredSession, load_session, save_session
+    from jobpilot_platform_boss.auth.session import StoredSession, load_session, save_session
 
     session_db = tmp_path / "session.db"
     save_session(
@@ -345,7 +345,7 @@ def test_不镜像时不碰登录态(tmp_path: Path):
         acquire=lambda: "0138X",
     )
     p.ensure()
-    assert boss_db.doc_get_raw(boss_db.DOC_SESSION, session_db, site="boss") is None
+    assert jobpilot_db.doc_get_raw(jobpilot_db.DOC_SESSION, session_db, site="boss") is None
 
 
 def test_find_chrome_认环境变量(tmp_path: Path, monkeypatch):
@@ -837,7 +837,7 @@ def test_落盘记录带过期时间(tmp_path: Path):
     """`doc('stoken')` 必须有 expires_at，否则下次 fetch 判不了过期。"""
     p = provider(tmp_path)
     p.ensure()
-    payload = boss_db.doc_get(boss_db.DOC_STOKEN, tmp_path / "boss.db", site="boss")
+    payload = jobpilot_db.doc_get(jobpilot_db.DOC_STOKEN, tmp_path / "boss.db", site="boss")
     assert payload is not None
     assert payload["token"] == "0138NEW"
     assert payload["expires_at"] > time.time()

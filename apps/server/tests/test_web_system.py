@@ -3,7 +3,7 @@
 重点测两件事：`humanize` 对真实 `StokenError` 文案逐条命中，以及界面上不会露出原文。
 
 Attributes:
-    REAL_MESSAGES: 抄自 `boss_platform_boss/stoken_cdp.py` 的真实异常原文；那边改措辞这里就该红。
+    REAL_MESSAGES: 抄自 `jobpilot_platform_boss/stoken_cdp.py` 的真实异常原文；那边改措辞这里就该红。
 """
 
 from __future__ import annotations
@@ -11,10 +11,10 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_platform_boss.stoken import StokenError
-from boss_server import runtime
-from boss_server.app import create_app
-from boss_server.services import app_settings_store, troubleshoot
+from jobpilot_platform_boss.stoken import StokenError
+from jobpilot_server import runtime
+from jobpilot_server.app import create_app
+from jobpilot_server.services import app_settings_store, troubleshoot
 
 
 @pytest.fixture
@@ -67,13 +67,13 @@ def test_humanize_本地没登录态指向登录页():
     """`http_from_session` 的原文叫人跑命令行，网页用户该被指到「登录」页。"""
     raw = (
         "本地没有登录态：状态库 F:\\boss\\data\\boss.db 里没有，"
-        "或 token/Cookie 都没有。先跑 `python -m boss_platform_boss.auth login` 落一份。"
+        "或 token/Cookie 都没有。先跑 `python -m jobpilot_platform_boss.auth login` 落一份。"
     )
     out = troubleshoot.humanize(raw)
 
     assert out != raw
     assert "「登录」页" in out
-    assert "python -m boss_platform_boss.auth" not in out
+    assert "python -m jobpilot_platform_boss.auth" not in out
     assert "boss.db" not in out, "状态库路径对用户没意义，不该露出来"
 
 
@@ -90,7 +90,7 @@ def test_health_reports_paths(client, tmp_path):
 
 def test_chrome_status_reports_found(client, monkeypatch):
     """验 `/api/system/chrome` 报出找到的 Chrome 路径。"""
-    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", lambda: r"C:\fake\chrome.exe")
+    monkeypatch.setattr("jobpilot_browser_pool.cdp.find_chrome", lambda: r"C:\fake\chrome.exe")
     body = client.get("/api/system/chrome").json()
 
     assert body["found"] is True
@@ -105,7 +105,7 @@ def test_chrome_status_gives_guidance_when_missing(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("找不到 Chrome：装个 Google Chrome，或用 BOSS_CHROME_BIN 指到 chrome 可执行文件。")
 
-    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
+    monkeypatch.setattr("jobpilot_browser_pool.cdp.find_chrome", boom)
     body = client.get("/api/system/chrome").json()
 
     assert body["found"] is False
@@ -115,7 +115,7 @@ def test_chrome_status_gives_guidance_when_missing(client, monkeypatch):
 
 def test_chrome_mode_roundtrip_persists(client, monkeypatch):
     """验 Chrome 窗口档位写入后能读回并持久化。"""
-    from boss_browser_pool.cdp import CHROME_MODE_ENV
+    from jobpilot_browser_pool.cdp import CHROME_MODE_ENV
 
     resp = client.post("/api/system/chrome/mode", json={"mode": "visible"})
     assert resp.status_code == 200
@@ -137,7 +137,7 @@ def test_chrome_mode_rejects_unknown_value(client):
 
 def test_chrome_mode_empty_restores_default(client, monkeypatch):
     """验档位传空串能恢复默认值。"""
-    from boss_browser_pool.cdp import CHROME_MODE_ENV
+    from jobpilot_browser_pool.cdp import CHROME_MODE_ENV
 
     monkeypatch.setenv(CHROME_MODE_ENV, "visible")
     resp = client.post("/api/system/chrome/mode", json={"mode": ""})
@@ -155,7 +155,7 @@ def test_open_chrome_translates_failure(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("拉不起 Chrome（C:\\x\\chrome.exe）：[WinError 2] 找不到文件")
 
-    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", boom)
+    monkeypatch.setattr("jobpilot_browser_pool.cdp.launch_chrome", boom)
     resp = client.post("/api/system/chrome/open")
 
     assert resp.status_code == 503
@@ -166,7 +166,7 @@ def test_open_chrome_translates_failure(client, monkeypatch):
 
 def test_open_chrome_success_message(client, monkeypatch):
     """验打开 Chrome 成功时给的是人话提示。"""
-    monkeypatch.setattr("boss_browser_pool.cdp.launch_chrome", lambda **kwargs: None)
+    monkeypatch.setattr("jobpilot_browser_pool.cdp.launch_chrome", lambda **kwargs: None)
     resp = client.post("/api/system/chrome/open")
 
     assert resp.status_code == 200
@@ -180,7 +180,7 @@ def test_stoken_error_becomes_friendly_503(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise StokenError("连不上 CDP（ws://127.0.0.1:9222/devtools/browser/abc）：握手被拒")
 
-    monkeypatch.setattr("boss_browser_pool.cdp.find_chrome", boom)
+    monkeypatch.setattr("jobpilot_browser_pool.cdp.find_chrome", boom)
     resp = client.post("/api/system/chrome/open")
 
     body = resp.json()
@@ -196,7 +196,7 @@ def test_unhandled_exception_does_not_leak_traceback(client, monkeypatch):
         """抛预置异常，供测试验证翻译出口。"""
         raise RuntimeError("内部炸了：secret-token-xyz")
 
-    monkeypatch.setattr("boss_db.resolve_db_path", boom)
+    monkeypatch.setattr("jobpilot_db.resolve_db_path", boom)
     resp = client.get("/api/system/health")
 
     assert resp.status_code == 500
@@ -210,7 +210,7 @@ def test_deliver_task_uses_humanize():
     """投递任务的失败文案不该带裸类名。"""
     import inspect
 
-    from boss_server.services import deliver_task
+    from jobpilot_server.services import deliver_task
 
     source = inspect.getsource(deliver_task)
     assert "type(exc).__name__" not in source
@@ -221,7 +221,7 @@ def test_crawl_task_uses_humanize():
     """验抓取任务的报错出口确实走了 `humanize`。"""
     import inspect
 
-    from boss_server.services import crawl_task
+    from jobpilot_server.services import crawl_task
 
     source = inspect.getsource(crawl_task)
     assert "type(exc).__name__" not in source
@@ -235,7 +235,7 @@ def test_runtime_app_data_dir_is_absolute():
 
 def test_greeting_prompt_roundtrip_and_restore(client):
     """验招呼语约束能存能读，空串回到内置默认。"""
-    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT
+    from jobpilot_server.services.greeting_prompt import GREETING_REQUIREMENT
 
     resp = client.get("/api/system/greeting-prompt")
     assert resp.status_code == 200
@@ -299,7 +299,7 @@ def test_greeting_requirement_store_truncates_overlong():
 
 def test_resolve_greeting_requirement_prefers_custom():
     """自定义非空用自定义，空则回落出厂常量。"""
-    from boss_server.services.greeting_prompt import GREETING_REQUIREMENT, resolve_greeting_requirement
+    from jobpilot_server.services.greeting_prompt import GREETING_REQUIREMENT, resolve_greeting_requirement
 
     assert resolve_greeting_requirement() == GREETING_REQUIREMENT
     app_settings_store.apply_greeting_requirement("自定义 {花括号}")

@@ -1,10 +1,10 @@
-"""`boss_server.core` 的单元测试：契约形状、注册表、BOSS 薄壳自述。"""
+"""`jobpilot_server.core` 的单元测试：契约形状、注册表、BOSS 薄壳自述。"""
 
 from __future__ import annotations
 
 import pytest
 
-from boss_server.core import (
+from jobpilot_server.core import (
     ApplyGate,
     ConversationState,
     DeliverFault,
@@ -15,8 +15,8 @@ from boss_server.core import (
     registered_sites,
     reset_registry,
 )
-from boss_platform_boss.adapter import BossAdapter
-from boss_server.core.registry import all_adapters
+from jobpilot_platform_boss.adapter import BossAdapter
+from jobpilot_server.core.registry import all_adapters
 
 
 @pytest.fixture(autouse=True)
@@ -25,14 +25,14 @@ def _restore_registry():
     reset_registry()
     yield
     reset_registry()
-    from boss_server.core.adapters import load
+    from jobpilot_server.core.adapters import load
 
     load()
 
 
 def test_注册表_取到_boss():
     """验 import 装配后能按 site_id 取到 BossAdapter。"""
-    from boss_server.core.adapters import load
+    from jobpilot_server.core.adapters import load
 
     load()
     adapter = get_adapter("boss")
@@ -44,7 +44,7 @@ def test_注册表_取到_boss():
 
 def test_注册表_没这个站点报错():
     """验未知 site_id 抛 KeyError。"""
-    from boss_server.core.adapters import load
+    from jobpilot_server.core.adapters import load
 
     load()
     with pytest.raises(KeyError):
@@ -153,7 +153,7 @@ def test_to_search_params_空维度不进串():
 
 def test_classify_fault_映射():
     """验 BOSS 业务码 → 统一故障类。"""
-    from boss_platform_boss.jobs.errors import ChatSendError, JobApiError, JobTransportError
+    from jobpilot_platform_boss.jobs.errors import ChatSendError, JobApiError, JobTransportError
 
     adapter = get_adapter("boss")
     assert adapter.classify_fault(JobApiError(7, "请先登录")) is DeliverFault.SESSION_CLOSED
@@ -169,7 +169,7 @@ def test_classify_fault_映射():
 
 def test_applier_未接入时诚实拒绝():
     """验 onekeydeliver 通道没接入时不假装成功（要真实接口不要界面模拟）。"""
-    from boss_server.core.contracts import ResumeRef, SessionRef
+    from jobpilot_server.core.contracts import ResumeRef, SessionRef
 
     adapter = get_adapter("boss")
     session = SessionRef(site_id="boss", session_id="j1")
@@ -180,7 +180,7 @@ def test_applier_未接入时诚实拒绝():
 
 def test_conversation_state_默认等回复():
     """验拿不到会话对象时按等回复处理（不误判 REPLIED）。"""
-    from boss_server.core.contracts import SessionRef
+    from jobpilot_server.core.contracts import SessionRef
 
     adapter = get_adapter("boss")
     state = adapter.messenger.conversation_state(

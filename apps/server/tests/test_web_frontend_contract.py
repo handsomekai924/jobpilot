@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pytest
 
-STATIC = Path(__file__).resolve().parents[3] / "apps" / "server" / "src" / "boss_server" / "static"
+STATIC = Path(__file__).resolve().parents[3] / "apps" / "server" / "src" / "jobpilot_server" / "static"
 
 
 def _read(rel: str) -> str:
-    """读旧 SPA（`boss_server/static/legacy/`）下的相对路径文件文本。"""
+    """读旧 SPA（`jobpilot_server/static/legacy/`）下的相对路径文件文本。"""
     path = STATIC / "legacy" / rel
     assert path.is_file(), f"缺少静态文件：legacy/{rel}"
     return path.read_text(encoding="utf-8")
@@ -597,7 +597,7 @@ def test_短信任务不推扫码面板():
 
 def test_后端任务快照带kind():
     """验后端任务快照带 kind（状态机在平台包）。"""
-    from boss_platform_boss.auth import task as login_task_module
+    from jobpilot_platform_boss.auth import task as login_task_module
 
     src = Path(login_task_module.__file__).read_text(encoding="utf-8")
     assert '"kind": self.kind' in src

@@ -23,9 +23,9 @@ ROOT = Path(__file__).resolve().parent.parent
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".saved_web", ".scratch", ".git", "node_modules", ".idea"}
 
 CLI_EXEMPT = {
-    "packages/platform-boss/src/boss_platform_boss/catalog/cli.py",
-    "packages/platform-boss/src/boss_platform_boss/jobs/cli.py",
-    "packages/platform-boss/src/boss_platform_boss/auth/cli.py",
+    "packages/platform-boss/src/jobpilot_platform_boss/catalog/cli.py",
+    "packages/platform-boss/src/jobpilot_platform_boss/jobs/cli.py",
+    "packages/platform-boss/src/jobpilot_platform_boss/auth/cli.py",
     "tools/cli_commands.py",
 }
 

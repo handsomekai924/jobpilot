@@ -9,11 +9,11 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import JobStore
-from boss_server.app import create_app
-from boss_server.services import interview_generator as IG
-from boss_server.services import interview_generation_task as IGT
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import JobStore
+from jobpilot_server.app import create_app
+from jobpilot_server.services import interview_generator as IG
+from jobpilot_server.services import interview_generation_task as IGT
 
 SAMPLE = """# 张三
 
@@ -87,9 +87,9 @@ def client():
 
 def _seed_analysis(job_ids: list[str] | None = None) -> str:
     """落一份简历 + 分析 + 岗位，返回 analysis_id。"""
-    import boss_db
+    import jobpilot_db
 
-    conn = boss_db.acquire()
+    conn = jobpilot_db.acquire()
     now = time.time()
     conn.execute(
         "INSERT INTO resume (resume_id, title, source_name, created_at, content_md, meta) "
@@ -310,16 +310,16 @@ def test_save_questions_replaces_in_place():
     ]
     assert IGT.save_questions(analysis_id="an_1", encrypt_job_id="j1", questions=qs2) == 2
 
-    import boss_db
+    import jobpilot_db
 
-    rows = boss_db.acquire().execute(
+    rows = jobpilot_db.acquire().execute(
         "SELECT question_text FROM interview_questions WHERE analysis_id = 'an_1'"
     ).fetchall()
     assert sorted(str(r["question_text"]) for r in rows) == ["新题1", "新题2"]
 
     qs3 = [IG.InterviewQuestion("终版", "场景", "基础", False, {})]
     assert IGT.save_questions(analysis_id="", encrypt_job_id="j1", questions=qs3) == 1
-    rows = boss_db.acquire().execute(
+    rows = jobpilot_db.acquire().execute(
         "SELECT analysis_id, question_text FROM interview_questions WHERE encrypt_job_id = 'j1'"
     ).fetchall()
     assert len(rows) == 1
@@ -402,9 +402,9 @@ def test_reference_answer_legacy_key_compat(client):
         IG.InterviewQuestion("旧题", "场景", "基础", False, {}),
     ]
     IGT.save_questions(analysis_id="an_1", encrypt_job_id="j1", questions=qs)
-    import boss_db
+    import jobpilot_db
 
-    conn = boss_db.acquire()
+    conn = jobpilot_db.acquire()
     conn.execute(
         "UPDATE interview_questions SET answer_hints = ? WHERE analysis_id = 'an_1'",
         (json.dumps({"approach": "旧", "reference_outline": "旧大纲"}, ensure_ascii=False),),
@@ -419,7 +419,7 @@ def test_reference_answer_legacy_key_compat(client):
 def test_api_generate_task_flow(client, monkeypatch):
     """generate → 任务跑完（假出题）→ 列表能看到题。"""
     _seed_analysis()
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -462,9 +462,9 @@ def test_api_generate_unknown_analysis(client):
 def test_api_generation_jobs_filter(client):
     """出题页岗位列表：抓取记录筛选 + 职位名模糊匹配 + 出题状态。"""
     _seed_analysis()
-    import boss_db
+    import jobpilot_db
 
-    conn = boss_db.acquire()
+    conn = jobpilot_db.acquire()
     now = time.time()
     conn.execute(
         "INSERT INTO crawl_tasks (task_id, source, status, created_at, started_at, job_count) "
@@ -549,7 +549,7 @@ def test_api_generation_records(client):
 def test_api_generate_batch_without_analysis(client, monkeypatch):
     """批量出题：有分析的带上 match，没分析的按裸 JD + 简历出；重跑原地替换。"""
     _seed_analysis(job_ids=["j1", "j2"])
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -617,7 +617,7 @@ def test_api_generate_batch_requires_jobs(client):
 def test_api_supplement_type_and_limit(client, monkeypatch):
     """补题：只补指定题型、追加不覆盖、避开已有题；条数最多 10。"""
     _seed_analysis()
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -681,7 +681,7 @@ def test_parallel_tasks_and_no_dup_submit(client, monkeypatch):
                 has_more=False,
             )
         )
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 
@@ -731,7 +731,7 @@ def test_parallel_tasks_and_no_dup_submit(client, monkeypatch):
 def test_task_center_delete_retry(client, monkeypatch):
     """失败任务保留展示，可删除 / 重试；单岗失败不拖垮，占用口径只算 running。"""
     _seed_analysis(job_ids=["j1", "j2"])
-    from boss_server.services.llm_config_store import LLMConfig, save_config
+    from jobpilot_server.services.llm_config_store import LLMConfig, save_config
 
     save_config(LLMConfig(api_key="sk-1", base_url="https://x/v1", model="m1"))
 

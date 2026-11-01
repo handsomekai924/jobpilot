@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_server import create_app
-from boss_server.services.task_runtime import TaskTypeSpec, hub
+from jobpilot_server import create_app
+from jobpilot_server.services.task_runtime import TaskTypeSpec, hub
 
 
 class FakeTask:

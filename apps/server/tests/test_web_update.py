@@ -8,9 +8,9 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_server import __version__ as APP_VERSION
-from boss_server.app import create_app
-from boss_server.services import app_settings_store, update_check
+from jobpilot_server import __version__ as APP_VERSION
+from jobpilot_server.app import create_app
+from jobpilot_server.services import app_settings_store, update_check
 
 
 @pytest.fixture
@@ -167,7 +167,7 @@ def test_pick_zip_asset_没有_zip_就回_None():
 
 def test_can_self_update_源码跑为假(monkeypatch):
     """验源码跑不能自更新。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: False)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -176,7 +176,7 @@ def test_can_self_update_源码跑为假(monkeypatch):
 
 def test_can_self_update_压缩包预览跑也为假(monkeypatch):
     """验压缩包预览跑不能自更新。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: True)
@@ -185,7 +185,7 @@ def test_can_self_update_压缩包预览跑也为假(monkeypatch):
 
 def test_can_self_update_装在本地的_exe_为真(monkeypatch):
     """验装在本地的 exe 可自更新。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -426,7 +426,7 @@ def test_api_update_带上自更新所需字段(client, monkeypatch):
 
 def test_apply_源码模式回_409(client, monkeypatch):
     """验源码模式回 409。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: False)
     _fake_gitee(monkeypatch, [_release("v9.9.9")])
@@ -437,7 +437,7 @@ def test_apply_源码模式回_409(client, monkeypatch):
 
 def test_apply_压缩包预览跑回_409(client, monkeypatch):
     """验压缩包预览跑回 409。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: True)
@@ -449,7 +449,7 @@ def test_apply_压缩包预览跑回_409(client, monkeypatch):
 
 def test_apply_没有_zip_附件回_409(client, monkeypatch):
     """验没有 zip 附件回 409。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -468,7 +468,7 @@ def test_apply_没有_zip_附件回_409(client, monkeypatch):
 
 def test_apply_版本漂移回_409(client, monkeypatch):
     """验版本漂移回 409。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -480,8 +480,8 @@ def test_apply_版本漂移回_409(client, monkeypatch):
 
 def test_apply_正常情况启动更新任务(client, monkeypatch):
     """验正常情况启动更新任务。"""
-    from boss_server import runtime
-    from boss_server.services import updater
+    from jobpilot_server import runtime
+    from jobpilot_server.services import updater
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: True)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -563,7 +563,7 @@ def test_控制台按行打印_检测失败也要打出当前版本():
 
 def test_日志接口_没有文件也_200_并带诊断(client, monkeypatch):
     """验日志接口没文件也 200 并带诊断。"""
-    from boss_server.services import updater
+    from jobpilot_server.services import updater
 
     monkeypatch.setattr(updater, "work_dir", lambda: __import__("pathlib").Path("/no/such/dir-xyz"))
     resp = client.get("/api/system/update/log")
@@ -595,7 +595,7 @@ def test_日志接口_没有文件也_200_并带诊断(client, monkeypatch):
 
 def test_日志接口_有文件就带回正文(client, monkeypatch, tmp_path):
     """验日志接口有文件就带回正文。"""
-    from boss_server.services import updater
+    from jobpilot_server.services import updater
 
     monkeypatch.setattr(updater, "work_dir", lambda: tmp_path)
     (tmp_path / "update.log").write_text("=== update start ===\nFAIL extract failed\n", encoding="utf-8")
@@ -607,7 +607,7 @@ def test_日志接口_有文件就带回正文(client, monkeypatch, tmp_path):
 
 def test_日志接口_安装方式三种映射(client, monkeypatch):
     """验安装方式三种映射。"""
-    from boss_server import runtime
+    from jobpilot_server import runtime
 
     monkeypatch.setattr(runtime, "is_frozen", lambda: False)
     monkeypatch.setattr(runtime, "is_temp_run", lambda: False)
@@ -685,7 +685,7 @@ def test_启动预热_起的是守护线程(monkeypatch):
 
 def test_有新版就广播_update_available_且每版只播一次(monkeypatch):
     """测到没忽略的新版推一帧 update.available；同一版不许重复推。"""
-    from boss_server.services import task_runtime
+    from jobpilot_server.services import task_runtime
 
     sent: list[tuple[str, dict]] = []
 
@@ -707,7 +707,7 @@ def test_有新版就广播_update_available_且每版只播一次(monkeypatch):
 
 def test_没新版或已忽略都不广播(monkeypatch):
     """should_prompt 为假就不推 update.available。"""
-    from boss_server.services import task_runtime
+    from jobpilot_server.services import task_runtime
 
     sent: list[str] = []
     monkeypatch.setattr(task_runtime.hub, "broadcast", lambda m, d, **k: sent.append(m))
@@ -724,7 +724,7 @@ def test_没新版或已忽略都不广播(monkeypatch):
 
 def test_旧_更新进度_ws_已下线():
     """独立的 `/api/system/update/ws` 已删；进度只走统一 WS `/api/ws`。"""
-    from boss_server.api import system, tasks
+    from jobpilot_server.api import system, tasks
 
     system_paths = {getattr(r, "path", "") for r in system.router.routes}
     assert "/update/ws" not in system_paths

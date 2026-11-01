@@ -6,7 +6,7 @@ Python 走 AST（剥掉 docstring 节点后 `ast.dump`）；JS / Vue 走字符�
 用法：
 
     python tools/code_diff_check.py                 # 比对所有改动过的 .py / .js / .vue
-    python tools/code_diff_check.py apps/server/src/boss_server/static # 只比对指定路径
+    python tools/code_diff_check.py apps/server/src/jobpilot_server/static # 只比对指定路径
 
 退出码 1 = 有文件的代码 token 变了（不只是文档）。
 """

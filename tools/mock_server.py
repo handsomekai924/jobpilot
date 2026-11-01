@@ -37,7 +37,7 @@ for _src in reversed((
     if str(_src) not in sys.path:
         sys.path.insert(0, str(_src))
 
-from boss_platform_boss.auth.crypto import decrypt_account  # noqa: E402
+from jobpilot_platform_boss.auth.crypto import decrypt_account  # noqa: E402
 
 CODE_TTL_SECONDS = 300
 RESEND_COOLDOWN_SECONDS = 60

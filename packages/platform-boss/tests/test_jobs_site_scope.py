@@ -4,22 +4,22 @@ from __future__ import annotations
 
 import pytest
 
-import boss_db
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import DEFAULT_SITE, JobStore
+import jobpilot_db
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import DEFAULT_SITE, JobStore
 
 
 @pytest.fixture(autouse=True)
 def _clean_cache():
     """每条用例前后关掉连接缓存。"""
-    boss_db.close_all()
+    jobpilot_db.close_all()
     yield
-    boss_db.close_all()
+    jobpilot_db.close_all()
 
 
 def _seed(rows: list[tuple[str, str, str]]) -> None:
     """按 `(encrypt_job_id, site, job_name)` 直接落几行职位。"""
-    conn = boss_db.connect(boss_db.resolve_db_path(), migrate=False)
+    conn = jobpilot_db.connect(jobpilot_db.resolve_db_path(), migrate=False)
     try:
         for jid, site, name in rows:
             conn.execute(
@@ -98,7 +98,7 @@ def _job(jid: str, site: str = "") -> Job:
 
 def _site_of(jid: str) -> str:
     """直接读 `jobs.site`（不经过查询层，免得被过滤口径骗了）。"""
-    conn = boss_db.connect(boss_db.resolve_db_path(), migrate=False)
+    conn = jobpilot_db.connect(jobpilot_db.resolve_db_path(), migrate=False)
     try:
         row = conn.execute(
             "SELECT site FROM jobs WHERE encrypt_job_id = ?", (jid,)
@@ -110,7 +110,7 @@ def _site_of(jid: str) -> str:
 
 def _page_sites() -> list[str]:
     """`fetch_pages` 流水的站点归属。"""
-    conn = boss_db.connect(boss_db.resolve_db_path(), migrate=False)
+    conn = jobpilot_db.connect(jobpilot_db.resolve_db_path(), migrate=False)
     try:
         return [str(r[0]) for r in conn.execute("SELECT site FROM fetch_pages ORDER BY id")]
     finally:
@@ -188,7 +188,7 @@ def client():
     """起一个不带假服务端的测试客户端。"""
     from fastapi.testclient import TestClient
 
-    from boss_server import create_app
+    from jobpilot_server import create_app
 
     return TestClient(create_app())
 

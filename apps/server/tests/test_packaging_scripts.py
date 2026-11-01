@@ -24,8 +24,8 @@ def _load_make_zip():
 
 def _fake_dist(root: Path, *, with_base_library: bool = True) -> Path:
     """造一棵假 `dist\\BossAutoDelivery\\`，带可读版本号；文件用随机字节避开「产物太小」守卫。"""
-    (root / "apps" / "server" / "src" / "boss_server").mkdir(parents=True, exist_ok=True)
-    (root / "apps" / "server" / "src" / "boss_server" / "__init__.py").write_text(
+    (root / "apps" / "server" / "src" / "jobpilot_server").mkdir(parents=True, exist_ok=True)
+    (root / "apps" / "server" / "src" / "jobpilot_server" / "__init__.py").write_text(
         '__version__ = "9.9.9"\n', encoding="utf-8"
     )
     app = root / "dist" / "BossAutoDelivery"
@@ -93,14 +93,14 @@ def test_make_zip_不能丢掉_base_library_zip(tmp_path):
     (app / "BossAutoDelivery.exe").write_bytes(b"MZ")
     (app / "_internal" / "base_library.zip").write_bytes(b"PK")
     (app / "_internal" / "stale.zip").write_bytes(b"PK")
-    (app / "_internal" / "boss_server.pdb").write_bytes(b"x")
+    (app / "_internal" / "jobpilot_server.pdb").write_bytes(b"x")
     (app / "data").mkdir()
     (app / "data" / "boss.db").write_bytes(b"x")
 
     rels = {rel.as_posix() for _, rel in mod.iter_files(app)}
     assert "_internal/base_library.zip" in rels, "少了它整包作废"
     assert "_internal/stale.zip" not in rels
-    assert "_internal/boss_server.pdb" not in rels
+    assert "_internal/jobpilot_server.pdb" not in rels
     assert not any(r.startswith("data/") for r in rels)
 
 

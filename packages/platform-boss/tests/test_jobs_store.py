@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import JobStore, open_store
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import JobStore, open_store
 
 
 def make_job(encrypt_job_id: str = "id-1", **overrides) -> Job:
@@ -278,7 +278,7 @@ def test_column_migration_adds_desc_columns(tmp_path):
     """老库（建表时还没有 job_desc 列）打开后要能自动补列，重开也幂等。"""
     import sqlite3
 
-    import boss_db
+    import jobpilot_db
 
     path = tmp_path / "legacy.db"
     conn = sqlite3.connect(str(path))

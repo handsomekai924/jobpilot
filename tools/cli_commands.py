@@ -5,7 +5,7 @@
 
     python tools/cli_commands.py                # 人读表格
     python tools/cli_commands.py --json         # 机器可读
-    python tools/cli_commands.py --module boss_platform_boss.catalog
+    python tools/cli_commands.py --module jobpilot_platform_boss.catalog
     python tools/cli_commands.py --options      # 连选项一起列
 """
 
@@ -153,7 +153,7 @@ def discover_modules(only: str | None = None) -> list[ModuleCli]:
     """在 workspace 源码根下找带 `cli.build_parser` 的包，逐个挖命令。
 
     Args:
-        only: 只看这个模块名（如 `boss_platform_boss.catalog`）；不给就全看。
+        only: 只看这个模块名（如 `jobpilot_platform_boss.catalog`）；不给就全看。
 
     Returns:
         按模块名排序的 CLI 概览；导入/构造失败的模块直接跳过。
@@ -180,7 +180,7 @@ def discover_modules(only: str | None = None) -> list[ModuleCli]:
 
 
 def _candidate_modules() -> list[str]:
-    """各源码根下含 `cli.py` 的包模块名（如 `boss_platform_boss.jobs`）。"""
+    """各源码根下含 `cli.py` 的包模块名（如 `jobpilot_platform_boss.jobs`）。"""
     names: list[str] = []
     for src in SRC_ROOTS:
         if not src.is_dir():
@@ -248,7 +248,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--json", action="store_true", help="按 JSON 输出")
     parser.add_argument("--options", action="store_true", help="连选项一起列")
-    parser.add_argument("--module", default=None, help="只看这个模块（如 boss_platform_boss.catalog）")
+    parser.add_argument("--module", default=None, help="只看这个模块（如 jobpilot_platform_boss.catalog）")
     return parser
 
 

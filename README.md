@@ -48,7 +48,7 @@ pip install -r requirements.txt
 **源码版**（前后端分开启动）：
 
 ```bash
-python -m boss_server              # API 服务：http://127.0.0.1:8787
+python -m jobpilot_server              # API 服务：http://127.0.0.1:8787
 pnpm --dir apps/web dev            # 前端：http://127.0.0.1:5173
 ```
 

@@ -13,9 +13,9 @@ from pathlib import Path
 
 import pytest
 
-from boss_db import DB_ENV
-from boss_browser_pool.cdp import CHROME_PROFILE_ENV
-from boss_server import runtime
+from jobpilot_db import DB_ENV
+from jobpilot_browser_pool.cdp import CHROME_PROFILE_ENV
+from jobpilot_server import runtime
 
 
 @pytest.fixture(autouse=True)
@@ -38,8 +38,8 @@ def test_resource_root_dev_is_repo_root(monkeypatch):
     """验开发态资源根是仓库根。"""
     monkeypatch.delattr(sys, "frozen", raising=False)
     root = runtime.resource_root()
-    assert (root / "apps" / "server" / "src" / "boss_server" / "runtime.py").is_file(), f"应是仓库根，实际 {root}"
-    assert (root / "apps" / "server" / "src" / "boss_server" / "static" / "legacy" / "index.html").is_file()
+    assert (root / "apps" / "server" / "src" / "jobpilot_server" / "runtime.py").is_file(), f"应是仓库根，实际 {root}"
+    assert (root / "apps" / "server" / "src" / "jobpilot_server" / "static" / "legacy" / "index.html").is_file()
 
 
 def test_resource_root_frozen_is_meipass(monkeypatch, tmp_path):

@@ -1,19 +1,19 @@
 [project]
-name = "boss-browser-pool"
+name = "jobpilot-browser-pool"
 version = "1.2.5"
 description = "通用 Chrome / CDP 浏览器池"
 requires-python = ">=3.12"
 dependencies = [
-  "boss-core",
+  "jobpilot-core",
   "websocket-client>=1.6.0",
 ]
 
 [tool.uv.sources]
-boss-core = { workspace = true }
+jobpilot-core = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/boss_browser_pool"]
+packages = ["src/jobpilot_browser_pool"]

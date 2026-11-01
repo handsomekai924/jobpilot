@@ -9,9 +9,9 @@ import json
 
 import pytest
 
-from boss_platform_boss.auth import config as C
-from boss_platform_boss.auth.errors import ValidationError
-from boss_platform_boss.auth.verify import (
+from jobpilot_platform_boss.auth import config as C
+from jobpilot_platform_boss.auth.errors import ValidationError
+from jobpilot_platform_boss.auth.verify import (
     SliderSolution,
     build_helper_html,
     generate_trace_id,

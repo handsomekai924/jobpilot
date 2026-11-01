@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from boss_server.services import updater
+from jobpilot_server.services import updater
 
 
 def _bat() -> str:

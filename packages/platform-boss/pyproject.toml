@@ -1,13 +1,13 @@
 [project]
-name = "boss-platform-boss"
+name = "jobpilot-platform-boss"
 version = "1.2.5"
 description = "BOSS 直聘站点适配器"
 requires-python = ">=3.12"
 dependencies = [
-  "boss-core",
-  "boss-platform-base",
-  "boss-browser-pool",
-  "boss-db",
+  "jobpilot-core",
+  "jobpilot-platform-base",
+  "jobpilot-browser-pool",
+  "jobpilot-db",
   "requests>=2.31.0",
   "websocket-client>=1.6.0",
   "paho-mqtt>=2.1.0",
@@ -16,14 +16,14 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-boss-core = { workspace = true }
-boss-platform-base = { workspace = true }
-boss-browser-pool = { workspace = true }
-boss-db = { workspace = true }
+jobpilot-core = { workspace = true }
+jobpilot-platform-base = { workspace = true }
+jobpilot-browser-pool = { workspace = true }
+jobpilot-db = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/boss_platform_boss"]
+packages = ["src/jobpilot_platform_boss"]

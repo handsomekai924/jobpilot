@@ -12,9 +12,9 @@ from pathlib import Path
 
 import pytest
 
-from boss_platform_boss.catalog import tables
-from boss_platform_boss.catalog.errors import FilterDataError
-from boss_platform_boss.catalog.fallback import (
+from jobpilot_platform_boss.catalog import tables
+from jobpilot_platform_boss.catalog.errors import FilterDataError
+from jobpilot_platform_boss.catalog.fallback import (
     build_fallback_conditions,
     conditions_from_html,
     load_saved_html,

@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from boss_platform_boss.jobs.models import (
+from jobpilot_platform_boss.jobs.models import (
     ExpectItem,
     ExpectList,
     Job,
@@ -206,7 +206,7 @@ def test_clean_pages_stitches_across_pages():
 
 def test_clean_desc_strips_html_and_keeps_lines():
     """验职位描述去标签并保留段落空行。"""
-    from boss_platform_boss.jobs.models import clean_desc
+    from jobpilot_platform_boss.jobs.models import clean_desc
 
     raw = "<p>岗位职责：</p><br>1. 写代码&nbsp;&nbsp;\n\n\n\n2. 测试"
     assert clean_desc(raw) == "岗位职责：\n\n1. 写代码\n\n2. 测试"
@@ -214,7 +214,7 @@ def test_clean_desc_strips_html_and_keeps_lines():
 
 def test_clean_desc_plain_text_passthrough():
     """验纯文本原样通过，空值转空串。"""
-    from boss_platform_boss.jobs.models import clean_desc
+    from jobpilot_platform_boss.jobs.models import clean_desc
 
     assert clean_desc("岗位职责：\n1. 写代码") == "岗位职责：\n1. 写代码"
     assert clean_desc(None) == ""
@@ -223,7 +223,7 @@ def test_clean_desc_plain_text_passthrough():
 
 def test_extract_job_desc_reads_job_info():
     """验正文取自 `zpData.jobInfo.postDescription`。"""
-    from boss_platform_boss.jobs.models import extract_job_desc
+    from jobpilot_platform_boss.jobs.models import extract_job_desc
 
     payload = {
         "code": 0,
@@ -237,7 +237,7 @@ def test_extract_job_desc_reads_job_info():
 
 def test_extract_job_desc_falls_back_to_top_level():
     """验取不到 jobInfo 时回退顶层字段，缺字段给空串。"""
-    from boss_platform_boss.jobs.models import extract_job_desc
+    from jobpilot_platform_boss.jobs.models import extract_job_desc
 
     assert extract_job_desc({"zpData": {"postDescription": "顶层兜底"}}) == "顶层兜底"
     assert extract_job_desc({"zpData": {}}) == ""

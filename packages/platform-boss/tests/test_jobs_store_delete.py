@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import JobStore
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import JobStore
 
 
 def make_job(encrypt_job_id: str = "id-1", **overrides) -> Job:

@@ -30,7 +30,7 @@ for entry in reversed((*SOURCE_DIRS, ROOT)):
     if str(entry) not in sys.path:
         sys.path.insert(0, str(entry))
 
-from boss_platform_boss.auth import ZhipinLoginClient  # noqa: E402
+from jobpilot_platform_boss.auth import ZhipinLoginClient  # noqa: E402
 from tools.mock_server import BURNED_TICKETS, LAST_SMS_REQUEST, STORE, serve  # noqa: E402
 
 
@@ -65,7 +65,7 @@ def clean_store():
 @pytest.fixture(autouse=True)
 def reset_task_hub():
     """任务中心是进程内单例：用例之间清掉任务记录，免得旧任务的占用串场。"""
-    from boss_server.services.task_runtime import hub
+    from jobpilot_server.services.task_runtime import hub
 
     hub.reset()
     yield
@@ -75,15 +75,15 @@ def reset_task_hub():
 @pytest.fixture(autouse=True)
 def isolated_db(monkeypatch, tmp_path):
     """把状态库指到 `tmp_path/boss.db`，CDP 换新换成假令牌。"""
-    import boss_db
+    import jobpilot_db
 
-    monkeypatch.setenv(boss_db.DB_ENV, str(tmp_path / "boss.db"))
+    monkeypatch.setenv(jobpilot_db.DB_ENV, str(tmp_path / "boss.db"))
     monkeypatch.setattr(
-        "boss_platform_boss.stoken_cdp.CdpStokenProvider._acquire_from_chrome",
+        "jobpilot_platform_boss.stoken_cdp.CdpStokenProvider._acquire_from_chrome",
         lambda self: "0138FAKECDP",
     )
     yield
-    boss_db.close_all()
+    jobpilot_db.close_all()
 
 
 @pytest.fixture

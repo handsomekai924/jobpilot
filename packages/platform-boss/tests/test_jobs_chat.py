@@ -9,11 +9,11 @@ import sys
 
 import pytest
 
-from boss_platform_boss.jobs import chat
-from boss_platform_boss.jobs import config as C
-from boss_platform_boss.jobs.chat import ChatCredentials, ChatSocket, encode_text_message, max_message_id
-from boss_platform_boss.jobs.client import JobClient
-from boss_platform_boss.jobs.errors import ChatSendError
+from jobpilot_platform_boss.jobs import chat
+from jobpilot_platform_boss.jobs import config as C
+from jobpilot_platform_boss.jobs.chat import ChatCredentials, ChatSocket, encode_text_message, max_message_id
+from jobpilot_platform_boss.jobs.client import JobClient
+from jobpilot_platform_boss.jobs.errors import ChatSendError
 
 
 class _Rc:
@@ -561,7 +561,7 @@ def _stub_chat_client(monkeypatch):
     client = JobClient(http=FakeHttp([]))
     fetched: list = []
     monkeypatch.setattr(client, "fetch_me", lambda: fetched.append(1) or CREDS)
-    monkeypatch.setattr("boss_platform_boss.jobs.client.ChatSocket", StubChatSocket)
+    monkeypatch.setattr("jobpilot_platform_boss.jobs.client.ChatSocket", StubChatSocket)
     return client, fetched
 
 

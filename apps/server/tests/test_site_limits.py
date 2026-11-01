@@ -6,9 +6,9 @@ import time
 
 import pytest
 
-import boss_db
-from boss_server.core.contracts import DeliverFault
-from boss_server.core.limits import (
+import jobpilot_db
+from jobpilot_server.core.contracts import DeliverFault
+from jobpilot_server.core.limits import (
     BREAKER_TRIP,
     Breaker,
     FaultAction,
@@ -21,22 +21,22 @@ from boss_server.core.limits import (
 @pytest.fixture(autouse=True)
 def _clean_cache():
     """每条用例前后关掉连接缓存。"""
-    boss_db.close_all()
+    jobpilot_db.close_all()
     yield
-    boss_db.close_all()
+    jobpilot_db.close_all()
 
 
 def test_get_没写过这一行_回全默认(tmp_path):
     """库里没有这一行也算有值：节流 0 / 配额 0 / 并发 1 / 不投。"""
-    s = boss_db.get_site_settings("boss", tmp_path / "boss.db")
-    assert s == boss_db.SiteSettings(site="boss")
+    s = jobpilot_db.get_site_settings("boss", tmp_path / "boss.db")
+    assert s == jobpilot_db.SiteSettings(site="boss")
 
 
 def test_set_写进表_读得回(tmp_path):
     """写完读回原值。"""
     p = tmp_path / "boss.db"
-    boss_db.set_site_settings("boss", p, throttle_ms=1200, daily_quota=30, apply_enabled=True)
-    s = boss_db.get_site_settings("boss", p)
+    jobpilot_db.set_site_settings("boss", p, throttle_ms=1200, daily_quota=30, apply_enabled=True)
+    s = jobpilot_db.get_site_settings("boss", p)
     assert (s.throttle_ms, s.daily_quota, s.max_parallel, s.apply_enabled) == (1200, 30, 1, True)
     assert s.updated_at > 0
 
@@ -44,42 +44,42 @@ def test_set_写进表_读得回(tmp_path):
 def test_set_传None的字段不动(tmp_path):
     """跟 `update_config` 同规矩：`None` = 保持原值。"""
     p = tmp_path / "boss.db"
-    boss_db.set_site_settings("boss", p, throttle_ms=800, daily_quota=10)
-    boss_db.set_site_settings("boss", p, daily_quota=25)
-    s = boss_db.get_site_settings("boss", p)
+    jobpilot_db.set_site_settings("boss", p, throttle_ms=800, daily_quota=10)
+    jobpilot_db.set_site_settings("boss", p, daily_quota=25)
+    s = jobpilot_db.get_site_settings("boss", p)
     assert (s.throttle_ms, s.daily_quota) == (800, 25)
 
 
 def test_set_坏值夹回合理区间(tmp_path):
     """负数顶到下限、并发至少 1、开关认真假。"""
     p = tmp_path / "boss.db"
-    s = boss_db.set_site_settings(
+    s = jobpilot_db.set_site_settings(
         "boss", p, throttle_ms=-5, daily_quota=-1, max_parallel=0, apply_enabled=1
     )
     assert (s.throttle_ms, s.daily_quota, s.max_parallel, s.apply_enabled) == (0, 0, 1, True)
-    s = boss_db.set_site_settings("boss", p, apply_enabled=0)
+    s = jobpilot_db.set_site_settings("boss", p, apply_enabled=0)
     assert s.apply_enabled is False
 
 
 def test_list_只列写过的(tmp_path):
     """没写过行的站点不在列表里（用默认值即可）。"""
     p = tmp_path / "boss.db"
-    boss_db.set_site_settings("boss", p, throttle_ms=500)
-    boss_db.set_site_settings("51job", p, daily_quota=3)
-    rows = boss_db.list_site_settings(p)
+    jobpilot_db.set_site_settings("boss", p, throttle_ms=500)
+    jobpilot_db.set_site_settings("51job", p, daily_quota=3)
+    rows = jobpilot_db.list_site_settings(p)
     assert [r.site for r in rows] == ["51job", "boss"]
 
 
 def test_get_站点名不能为空(tmp_path):
     """站点名是主键，空名不许落。"""
     with pytest.raises(ValueError):
-        boss_db.get_site_settings("", tmp_path / "boss.db")
+        jobpilot_db.get_site_settings("", tmp_path / "boss.db")
 
 
 def test_count_greeted_today_只数今天且只数本站(tmp_path):
     """账记在 `jobs.last_greeted_at`：昨天的不算，别的站点不算。"""
     p = tmp_path / "boss.db"
-    conn = boss_db.connect(p, migrate=False)
+    conn = jobpilot_db.connect(p, migrate=False)
     today = time.strftime("%Y-%m-%d", time.localtime())
     yesterday = time.strftime("%Y-%m-%d", time.localtime(time.time() - 86400))
     rows = [
@@ -99,13 +99,13 @@ def test_count_greeted_today_只数今天且只数本站(tmp_path):
         conn.commit()
     finally:
         conn.close()
-    assert boss_db.count_greeted_today("boss", path=p) == 2
-    assert boss_db.count_greeted_today("51job", path=p) == 1
+    assert jobpilot_db.count_greeted_today("boss", path=p) == 2
+    assert jobpilot_db.count_greeted_today("51job", path=p) == 1
 
 
 def test_from_mapping_认仓储行也认dict():
-    """`boss_db.SiteSettings`、裸 dict、`None` 都收得住。"""
-    row = boss_db.SiteSettings(site="boss", throttle_ms=700, daily_quota=5, apply_enabled=True)
+    """`jobpilot_db.SiteSettings`、裸 dict、`None` 都收得住。"""
+    row = jobpilot_db.SiteSettings(site="boss", throttle_ms=700, daily_quota=5, apply_enabled=True)
     s = SiteLimits.from_mapping(row)
     assert (s.site, s.throttle_ms, s.daily_quota, s.apply_enabled) == ("boss", 700, 5, True)
     assert SiteLimits.from_mapping({"throttle_ms": "300"}).throttle_ms == 300
@@ -209,7 +209,7 @@ class FakeGreetClient:
 
     def deliver_greeting(self, **kwargs):
         """记一次招呼发送并回成功。"""
-        from boss_platform_boss.jobs import GreetingDelivery
+        from jobpilot_platform_boss.jobs import GreetingDelivery
 
         self.calls.append(kwargs)
         return GreetingDelivery(boss_uid=0, text=str(kwargs.get("greeting") or ""))
@@ -217,8 +217,8 @@ class FakeGreetClient:
 
 def _run_deliver(matches: list[dict]):
     """落 analysis → 起发送任务 → 等结束，回 `(快照, 假客户端, 睡过的间隔)`。"""
-    from boss_server.services.deliver_task import DeliverTaskManager
-    from boss_server.services.resume_store import save_analysis
+    from jobpilot_server.services.deliver_task import DeliverTaskManager
+    from jobpilot_server.services.resume_store import save_analysis
 
     aid = save_analysis(
         {
@@ -252,7 +252,7 @@ def _run_deliver(matches: list[dict]):
 
 def test_节流间隔_站点配了就盖掉全局默认():
     """`site_settings.throttle_ms` 是站点属性，盖掉 `DELIVER_INTERVAL`。"""
-    boss_db.set_site_settings("boss", throttle_ms=900)
+    jobpilot_db.set_site_settings("boss", throttle_ms=900)
     snap, fake, slept = _run_deliver([_safe("j1"), _safe("j2"), _safe("j3")])
     assert snap["status"] == "done"
     assert len(fake.calls) == 3
@@ -271,7 +271,7 @@ def test_节流没配_用调用方自带的默认():
 
 def test_每日配额_到顶就不再发():
     """配额按发对话条数计，到顶的那些记跳过，不浪费站点调用。"""
-    boss_db.set_site_settings("boss", daily_quota=2)
+    jobpilot_db.set_site_settings("boss", daily_quota=2)
     snap, fake, _slept = _run_deliver([_safe(f"j{i}") for i in range(1, 5)])
     assert len(fake.calls) == 2
     assert snap["skipped"] == 2
@@ -284,8 +284,8 @@ def test_每日配额_到顶就不再发():
 
 def test_每日配额_算上今天已经发过的():
     """配额余量 = 今日上限 - 今天已发数，不是只看这批。"""
-    p = boss_db.resolve_db_path()
-    conn = boss_db.connect(p, migrate=False)
+    p = jobpilot_db.resolve_db_path()
+    conn = jobpilot_db.connect(p, migrate=False)
     today = time.strftime("%Y-%m-%d", time.localtime())
     try:
         for jid in ("old1", "old2"):
@@ -298,7 +298,7 @@ def test_每日配额_算上今天已经发过的():
         conn.commit()
     finally:
         conn.close()
-    boss_db.set_site_settings("boss", daily_quota=3)
+    jobpilot_db.set_site_settings("boss", daily_quota=3)
     snap, fake, _slept = _run_deliver([_safe("j1"), _safe("j2"), _safe("j3")])
     assert snap["limits"]["sent_today"] == 2
     assert snap["limits"]["quota_left"] == 1
@@ -311,7 +311,7 @@ def client():
     """起一个不带假服务端的测试客户端。"""
     from fastapi.testclient import TestClient
 
-    from boss_server import create_app
+    from jobpilot_server import create_app
 
     return TestClient(create_app())
 
@@ -374,8 +374,8 @@ def test_api_legacy别名归boss(client):
 
 def test_api_今日余量随账走(client):
     """`sent_today` / `quota_left` 跟发送账本同一口径。"""
-    p = boss_db.resolve_db_path()
-    conn = boss_db.connect(p, migrate=False)
+    p = jobpilot_db.resolve_db_path()
+    conn = jobpilot_db.connect(p, migrate=False)
     today = time.strftime("%Y-%m-%d", time.localtime())
     try:
         conn.execute(

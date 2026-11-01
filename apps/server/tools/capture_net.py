@@ -5,7 +5,7 @@
 
 默认档（`--preset all`）只排 HTML/CSS/JS，图片和字体也会落盘，抓久了目录会很大。
 实抓接口和 MQTT over WS 用 `--preset api`。本工具默认只附着，退出时不关那台 Chrome；
-只有 `--launch` 自己拉起来的才走 `boss_browser_pool.cdp` 的退出收尾。
+只有 `--launch` 自己拉起来的才走 `jobpilot_browser_pool.cdp` 的退出收尾。
 
 用法：
 
@@ -36,13 +36,13 @@ for _src in reversed((
     if str(_src) not in sys.path:
         sys.path.insert(0, str(_src))
 
-from boss_core.paths import repo_root  # noqa: E402
+from jobpilot_core.paths import repo_root  # noqa: E402
 
 ROOT = repo_root()
 
-from boss_db import DATA_DIR  # noqa: E402
-from boss_browser_pool import capture as CC  # noqa: E402
-from boss_browser_pool.cdp import (  # noqa: E402
+from jobpilot_db import DATA_DIR  # noqa: E402
+from jobpilot_browser_pool import capture as CC  # noqa: E402
+from jobpilot_browser_pool.cdp import (  # noqa: E402
     CDP_PORT_ENV,
     DEFAULT_CDP_PORT,
     probe_debug,
@@ -151,7 +151,7 @@ def _warn_unknown_types(args: argparse.Namespace) -> None:
 
 def _launch_and_probe(port: int | None, *, timeout: float = 20.0) -> str:
     """自己拉一台 Chrome 再等调试口起来。返回 ws 地址，超时回空串。"""
-    from boss_browser_pool.cdp import BrowserError, launch_chrome
+    from jobpilot_browser_pool.cdp import BrowserError, launch_chrome
 
     try:
         launch_chrome(port=port)

@@ -1,0 +1,429 @@
+"""状态库 `jobpilot_db` 的单元测试（离线，全部落在临时目录）。"""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+
+import pytest
+
+import jobpilot_db
+
+
+@pytest.fixture(autouse=True)
+def _clean_cache():
+    """每条用例前后关掉连接缓存。"""
+    jobpilot_db.close_all()
+    yield
+    jobpilot_db.close_all()
+
+
+def test_resolve_默认是_data_jobpilot_db():
+    """验默认库路径是 data/boss.db。"""
+    import os
+
+    os.environ.pop(jobpilot_db.DB_ENV, None)
+    assert jobpilot_db.resolve_db_path() == jobpilot_db.DEFAULT_DB_PATH
+    assert jobpilot_db.DEFAULT_DB_PATH.name == "boss.db"
+    assert jobpilot_db.DEFAULT_DB_PATH.parent.name == "data"
+
+
+def test_resolve_认环境变量(tmp_path, monkeypatch):
+    """验环境变量可覆盖库路径。"""
+    monkeypatch.setenv(jobpilot_db.DB_ENV, str(tmp_path / "x.db"))
+    assert jobpilot_db.resolve_db_path() == tmp_path / "x.db"
+
+
+def test_resolve_显式参数优先(tmp_path, monkeypatch):
+    """验显式参数优先于环境变量。"""
+    monkeypatch.setenv(jobpilot_db.DB_ENV, "from-env.db")
+    assert jobpilot_db.resolve_db_path(tmp_path / "explicit.db") == tmp_path / "explicit.db"
+
+
+def test_resolve_内存库原样透传():
+    """验 `:memory:` 原样透传。"""
+    assert str(jobpilot_db.resolve_db_path(":memory:")) == ":memory:"
+
+
+def test_connect_建出全部表(tmp_path):
+    """验 connect 建出全部业务表。"""
+    conn = jobpilot_db.connect(tmp_path / "boss.db", migrate=False)
+    try:
+        names = {
+            r["name"]
+            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+    finally:
+        conn.close()
+    assert {"doc", "resume", "analysis", "jobs", "fetch_pages", "crawl_tasks",
+            "crawl_task_jobs", "resume_revisions", "interview_questions",
+            "site_settings", "resume_site_map"} <= names
+
+
+def test_建表带_site_列(tmp_path):
+    """验新建库的 jobs/fetch_pages/blacklist_rules/analysis 都带 site 列。"""
+    conn = jobpilot_db.connect(tmp_path / "boss.db", migrate=False)
+    try:
+        for table in ("jobs", "fetch_pages", "blacklist_rules", "analysis"):
+            cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+            assert "site" in cols, f"{table} 缺 site 列"
+    finally:
+        conn.close()
+
+
+def test_建表_doc_是_site_加_name_复合键(tmp_path):
+    """验 doc 表按 `(site, key)` 隔离——主键含 site，同名键各站点各一份。"""
+    conn = jobpilot_db.connect(tmp_path / "boss.db", migrate=False)
+    try:
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(doc)")}
+        assert {"site", "name", "payload", "updated_at"} <= cols
+        pk = [
+            r["name"]
+            for r in conn.execute("PRAGMA table_info(doc)")
+            if int(r["pk"]) > 0
+        ]
+        assert sorted(pk) == ["name", "site"]
+    finally:
+        conn.close()
+
+
+def test_旧库补_site_列(tmp_path):
+    """验旧库（没 site 列）走 `_migrate_columns` 无痛升级，旧行落默认 'boss'。"""
+    import re
+    import sqlite3
+
+    old_ddl = jobpilot_db._SCHEMA
+    old_ddl = old_ddl[: old_ddl.index("CREATE TABLE IF NOT EXISTS site_settings")]
+    old_ddl = re.sub(r"^\s*site\s+TEXT[^\n]*\n", "", old_ddl, flags=re.MULTILINE)
+    old_ddl = (
+        "CREATE TABLE IF NOT EXISTS doc ("
+        " name TEXT PRIMARY KEY, payload TEXT NOT NULL, updated_at REAL NOT NULL);\n"
+        + old_ddl
+    )
+    path = tmp_path / "old.db"
+    conn = sqlite3.connect(str(path))
+    conn.executescript(old_ddl)
+    conn.execute(
+        "INSERT INTO jobs (encrypt_job_id, job_name, brand_name, fetched_at)"
+        " VALUES ('j1', 't', 'b', 'now')"
+    )
+    conn.execute("INSERT INTO doc (name, payload, updated_at) VALUES ('session', '{}', 1)")
+    conn.execute("INSERT INTO doc (name, payload, updated_at) VALUES ('llm_config', '{}', 1)")
+    conn.commit()
+    conn.close()
+
+    upgraded = jobpilot_db.connect(path, migrate=False)
+    try:
+        row = upgraded.execute(
+            "SELECT site FROM jobs WHERE encrypt_job_id = 'j1'"
+        ).fetchone()
+        assert row["site"] == "boss"
+        tables = {
+            r["name"]
+            for r in upgraded.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert {"site_settings", "resume_site_map"} <= tables
+    finally:
+        upgraded.close()
+
+
+def test_doc_往返(tmp_path):
+    """验 doc 读写删的完整往返。"""
+    p = tmp_path / "boss.db"
+    assert jobpilot_db.doc_get("session", p, site="boss") is None
+    jobpilot_db.doc_set("session", {"token": "t", "cookies": {"a": "1"}}, p, site="boss")
+    got = jobpilot_db.doc_get("session", p, site="boss")
+    assert got == {"token": "t", "cookies": {"a": "1"}}
+    assert jobpilot_db.doc_delete("session", p, site="boss") is True
+    assert jobpilot_db.doc_delete("session", p, site="boss") is False
+    assert jobpilot_db.doc_get("session", p, site="boss") is None
+
+
+def test_doc_坏payload按没有处理(tmp_path):
+    """验坏 payload 按没有处理，原文仍可读。"""
+    p = tmp_path / "boss.db"
+    jobpilot_db.doc_set("session", "{不是 json", p, site="boss")
+    assert jobpilot_db.doc_get("session", p, site="boss") is None
+    assert jobpilot_db.doc_get_raw("session", p, site="boss") == "{不是 json"
+
+
+def test_doc_raw_可以直接塞字符串(tmp_path):
+    """验原始字符串也可直接入库。"""
+    p = tmp_path / "boss.db"
+    jobpilot_db.doc_set("llm_config", '{"model": "m1"}', p)
+    assert jobpilot_db.doc_get("llm_config", p) == {"model": "m1"}
+
+
+def test_doc_登录态键必须带站点(tmp_path):
+    """漏传 site 就是跨站点串登录态——直接挡下来，不给静默写进共用位。"""
+    p = tmp_path / "boss.db"
+    with pytest.raises(ValueError, match="site"):
+        jobpilot_db.doc_set("session", {"token": "t"}, p)
+    with pytest.raises(ValueError, match="site"):
+        jobpilot_db.doc_get("session", p)
+
+
+def test_doc_按站点隔离(tmp_path):
+    """验换站点不清别家登录态：同名键各站点各一份。"""
+    p = tmp_path / "boss.db"
+    jobpilot_db.doc_set("session", {"token": "b"}, p, site="boss")
+    jobpilot_db.doc_set("session", {"token": "5"}, p, site="51job")
+    assert jobpilot_db.doc_get("session", p, site="boss") == {"token": "b"}
+    assert jobpilot_db.doc_get("session", p, site="51job") == {"token": "5"}
+    assert jobpilot_db.doc_delete("session", p, site="51job") is True
+    assert jobpilot_db.doc_get("session", p, site="51job") is None
+    assert jobpilot_db.doc_get("session", p, site="boss") == {"token": "b"}
+
+
+def test_旧库_doc_升级成_site_复合键(tmp_path):
+    """验旧 `doc`（name 主键）整表重建：登录态归旧站点，全局配置归共用位。"""
+    import sqlite3
+
+    path = tmp_path / "old.db"
+    conn = sqlite3.connect(str(path))
+    conn.execute(
+        "CREATE TABLE doc (name TEXT PRIMARY KEY, payload TEXT NOT NULL, updated_at REAL NOT NULL)"
+    )
+    conn.execute("INSERT INTO doc (name, payload, updated_at) VALUES ('session', '{\"a\":1}', 1)")
+    conn.execute("INSERT INTO doc (name, payload, updated_at) VALUES ('stoken', '{\"b\":2}', 2)")
+    conn.execute(
+        "INSERT INTO doc (name, payload, updated_at) VALUES ('llm_config', '{\"m\":3}', 3)"
+    )
+    conn.commit()
+    conn.close()
+
+    upgraded = jobpilot_db.connect(path, migrate=False)
+    try:
+        pk = sorted(
+            r["name"] for r in upgraded.execute("PRAGMA table_info(doc)") if int(r["pk"]) > 0
+        )
+        assert pk == ["name", "site"]
+        assert jobpilot_db.doc_get("session", path, site="boss") == {"a": 1}
+        assert jobpilot_db.doc_get("stoken", path, site="boss") == {"b": 2}
+        assert jobpilot_db.doc_get("llm_config", path) == {"m": 3}
+    finally:
+        upgraded.close()
+
+
+def test_内存库共享同一个连接():
+    """验 `JobStore(":memory:")` 与 doc 助手共享同一连接。"""
+    a = jobpilot_db.acquire(":memory:")
+    jobpilot_db.doc_set("stoken", {"token": "x"}, ":memory:", site="boss")
+    b = jobpilot_db.acquire(":memory:")
+    assert a is b
+    row = b.execute("SELECT payload FROM doc WHERE site='boss' AND name='stoken'").fetchone()
+    assert json.loads(row["payload"]) == {"token": "x"}
+
+
+def test_close_all_之后重开(tmp_path):
+    """验 close_all 后重开仍能读到已写数据。"""
+    p = tmp_path / "boss.db"
+    jobpilot_db.doc_set("session", {"a": 1}, p, site="boss")
+    jobpilot_db.close_all()
+    assert jobpilot_db.doc_get("session", p, site="boss") == {"a": 1}
+
+
+def _write_legacy_tree(root):
+    """伪造一套旧账本（内容随便，够断言就行）。"""
+    (root / "data" / "resumes").mkdir(parents=True)
+    (root / "data" / "analyses").mkdir(parents=True)
+    (root / "session.json").write_text(
+        json.dumps({"token": "tok", "cookies": {"wt2": "c"}, "phone_masked": "138****8000"}),
+        encoding="utf-8",
+    )
+    (root / "search_filter.json").write_text(
+        json.dumps({"query": "Python", "city": "101280100"}), encoding="utf-8"
+    )
+    (root / "stoken.json").write_text(
+        json.dumps({"token": "s", "minted_at": 1.0, "expires_at": 2.0, "source": "cdp"}),
+        encoding="utf-8",
+    )
+    (root / "data" / "llm_config.json").write_text(
+        json.dumps({"api_key": "sk-abc", "base_url": "https://x/v1", "model": "m"}),
+        encoding="utf-8",
+    )
+    (root / "data" / "resumes" / "rs_a.md").write_text("# hi\n正文", encoding="utf-8")
+    (root / "data" / "resumes" / "rs_a.json").write_text(
+        json.dumps({"resume_id": "rs_a", "title": "a.md", "created_at": 10.0, "skills": ["Py"]}),
+        encoding="utf-8",
+    )
+    (root / "data" / "analyses" / "an_b.json").write_text(
+        json.dumps(
+            {
+                "analysis_id": "an_b",
+                "resume_id": "rs_a",
+                "created_at": 11.0,
+                "status": "done",
+                "llm": {"base_url": "https://x/v1", "model": "m"},
+                "matches": [{"match_score": 80}, {"match_score": 55}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    src = sqlite3.connect(str(root / "jobs.db"))
+    src.executescript(
+        """
+        CREATE TABLE jobs (encrypt_job_id TEXT PRIMARY KEY, job_name TEXT, brand_name TEXT,
+            location TEXT, salary_desc TEXT, job_experience TEXT, job_degree TEXT,
+            brand_industry TEXT, brand_scale_name TEXT, city_name TEXT, area_district TEXT,
+            business_district TEXT, brand_stage_name TEXT, job_labels TEXT, skills TEXT,
+            welfare_list TEXT, boss_name TEXT, boss_title TEXT, expect_id TEXT, job_type INT,
+            job_valid_status INT, security_id TEXT, lid TEXT, page INT, raw_json TEXT,
+            fetched_at TEXT);
+        CREATE TABLE fetch_pages (id INTEGER PRIMARY KEY AUTOINCREMENT, page INT,
+            raw_count INT, kept_count INT, dropped_count INT, inserted_count INT,
+            updated_count INT, has_more INT, note TEXT, fetched_at TEXT);
+        """
+    )
+    src.execute(
+        "INSERT INTO jobs (encrypt_job_id, job_name, brand_name, fetched_at) VALUES (?,?,?,?)",
+        ("e1", "后端", "某厂", "2026-01-01"),
+    )
+    src.execute(
+        "INSERT INTO fetch_pages (page, raw_count, kept_count, dropped_count, "
+        "inserted_count, updated_count, has_more, note, fetched_at) "
+        "VALUES (1, 2, 1, 1, 1, 0, 1, '', '2026-01-01')"
+    )
+    src.commit()
+    src.close()
+
+
+def test_migrate_一次性导入(tmp_path):
+    """验一次性迁入全部旧账本并清掉源文件。"""
+    legacy = tmp_path / "legacy"
+    legacy.mkdir()
+    _write_legacy_tree(legacy)
+
+    db_path = tmp_path / "boss.db"
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        counts = jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+    finally:
+        conn.close()
+
+    assert counts["session"] == 1
+    assert counts["search_filter"] == 1
+    assert counts["stoken"] == 1
+    assert counts["llm_config"] == 1
+    assert counts["resume"] == 1
+    assert counts["analysis"] == 1
+    assert counts["jobs"] == 1
+    assert counts["fetch_pages"] == 1
+
+    assert jobpilot_db.doc_get("session", db_path, site="boss")["phone_masked"] == "138****8000"
+    assert jobpilot_db.doc_get("search_filter", db_path, site="boss")["query"] == "Python"
+    assert jobpilot_db.doc_get("llm_config", db_path)["model"] == "m"
+
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        r = conn.execute("SELECT title, content_md FROM resume").fetchone()
+        assert r["title"] == "a.md"
+        assert "正文" in r["content_md"]
+        a = conn.execute("SELECT job_count, top_score FROM analysis").fetchone()
+        assert a["job_count"] == 2
+        assert a["top_score"] == 80
+        assert conn.execute("SELECT count(*) AS n FROM jobs").fetchone()["n"] == 1
+    finally:
+        conn.close()
+
+    assert not (legacy / "session.json").exists()
+    assert not (legacy / "search_filter.json").exists()
+    assert not (legacy / "stoken.json").exists()
+    assert not (legacy / "data" / "llm_config.json").exists()
+    assert not (legacy / "data" / "resumes").exists()
+    assert not (legacy / "data" / "analyses").exists()
+    assert not (legacy / "jobs.db").exists()
+    assert (legacy / "jobs.db.migrated").exists()
+
+
+def test_migrate_幂等(tmp_path):
+    """验重复迁移不重复导入。"""
+    legacy = tmp_path / "legacy"
+    legacy.mkdir()
+    _write_legacy_tree(legacy)
+    db_path = tmp_path / "boss.db"
+
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+        again = jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+    finally:
+        conn.close()
+
+    assert again == {}
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        assert conn.execute("SELECT count(*) AS n FROM jobs").fetchone()["n"] == 1
+        assert conn.execute("SELECT count(*) AS n FROM fetch_pages").fetchone()["n"] == 1
+    finally:
+        conn.close()
+
+
+def test_migrate_坏文件跳过不挡别的(tmp_path):
+    """验坏文件跳过且不挡其它文件迁入。"""
+    legacy = tmp_path / "legacy"
+    legacy.mkdir()
+    (legacy / "session.json").write_text("{不是 json", encoding="utf-8")
+    (legacy / "stoken.json").write_text(
+        json.dumps({"token": "s", "minted_at": 1.0, "expires_at": 2.0}), encoding="utf-8"
+    )
+
+    db_path = tmp_path / "boss.db"
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        counts = jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+    finally:
+        conn.close()
+
+    assert counts["session"] == 0
+    assert counts["stoken"] == 1
+    assert (legacy / "session.json").exists()
+    assert not (legacy / "stoken.json").exists()
+
+
+def test_migrate_目标库已有职位就不搬(tmp_path):
+    """验目标库已有职位时不搬旧库职位。"""
+    legacy = tmp_path / "legacy"
+    legacy.mkdir()
+    _write_legacy_tree(legacy)
+    db_path = tmp_path / "boss.db"
+
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        conn.execute(
+            "INSERT INTO jobs (encrypt_job_id, job_name, brand_name, fetched_at) "
+            "VALUES ('mine','x','y','2026-01-01')"
+        )
+        conn.commit()
+        counts = jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+    finally:
+        conn.close()
+
+    assert counts["jobs"] == 0
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        ids = {r["encrypt_job_id"] for r in conn.execute("SELECT encrypt_job_id FROM jobs")}
+    finally:
+        conn.close()
+    assert ids == {"mine"}
+    assert (legacy / "jobs.db.migrated").exists()
+
+
+def test_migrate_坏旧库就不搬职位(tmp_path):
+    """验旧 jobs.db 损坏时不搬职位、其它照迁。"""
+    legacy = tmp_path / "legacy"
+    legacy.mkdir()
+    (legacy / "jobs.db").write_bytes(b"not a sqlite file at all")
+    (legacy / "stoken.json").write_text(
+        json.dumps({"token": "s", "minted_at": 1.0, "expires_at": 2.0}), encoding="utf-8"
+    )
+
+    db_path = tmp_path / "boss.db"
+    conn = jobpilot_db.connect(db_path, migrate=False)
+    try:
+        counts = jobpilot_db.migrate_legacy(conn, db_path, legacy_root=legacy)
+    finally:
+        conn.close()
+
+    assert counts["jobs"] == 0
+    assert counts["stoken"] == 1

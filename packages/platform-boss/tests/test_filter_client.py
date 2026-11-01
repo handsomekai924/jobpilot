@@ -8,10 +8,10 @@ from pathlib import Path
 import pytest
 import requests
 
-import boss_platform_boss.catalog.cli as cli
-from boss_platform_boss.catalog import FilterClient, get_filter_conditions
-from boss_platform_boss.catalog.client import load_industries, parse_conditions_payload
-from boss_platform_boss.catalog.errors import (
+import jobpilot_platform_boss.catalog.cli as cli
+from jobpilot_platform_boss.catalog import FilterClient, get_filter_conditions
+from jobpilot_platform_boss.catalog.client import load_industries, parse_conditions_payload
+from jobpilot_platform_boss.catalog.errors import (
     FilterApiError,
     FilterDataError,
     FilterTransportError,

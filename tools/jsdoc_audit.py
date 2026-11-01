@@ -3,7 +3,7 @@
 用法：
 
     python tools/jsdoc_audit.py                   # 全仓
-    python tools/jsdoc_audit.py apps/server/src/boss_server/static   # 指定路径
+    python tools/jsdoc_audit.py apps/server/src/jobpilot_server/static   # 指定路径
 
 退出码 1 = 有 MISSING / DELETE_ME / RST 残留；过长只告警。
 
@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".saved_web", ".scratch", ".git", "node_modules", ".idea", "images", ".chrome_profile", "data", "docs", "notes", "tools/_scratch"}
 
 EXEMPT_PREFIX = (
-    "packages/platform-boss/src/boss_platform_boss/assets/",
+    "packages/platform-boss/src/jobpilot_platform_boss/assets/",
 )
 
 KEEP_TOOL = (

@@ -12,11 +12,11 @@ import json
 
 import pytest
 
-import boss_db
-from boss_server import config as C
-from boss_server.errors import UpstreamError
-from boss_server.services.llm_client import LLMClient, extract_json
-from boss_server.services.llm_config_store import (
+import jobpilot_db
+from jobpilot_server import config as C
+from jobpilot_server.errors import UpstreamError
+from jobpilot_server.services.llm_client import LLMClient, extract_json
+from jobpilot_server.services.llm_config_store import (
     LLMConfig,
     load_config,
     mask_key,
@@ -111,7 +111,7 @@ def test_update_ignores_sampling_params(tmp_path):
     assert cfg.temperature == C.LLM_TEMPERATURE
     assert cfg.max_tokens == C.LLM_MAX_TOKENS
     assert cfg.timeout == C.LLM_TIMEOUT
-    raw = boss_db.doc_get(boss_db.DOC_LLM_CONFIG, p)
+    raw = jobpilot_db.doc_get(jobpilot_db.DOC_LLM_CONFIG, p)
     assert raw["temperature"] == C.LLM_TEMPERATURE
     assert raw["max_tokens"] == C.LLM_MAX_TOKENS
 
@@ -119,8 +119,8 @@ def test_update_ignores_sampling_params(tmp_path):
 def test_load_normalizes_legacy_values(tmp_path):
     """历史配置里若写过采样参数，读出来也要被拉齐。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(
-        boss_db.DOC_LLM_CONFIG,
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_LLM_CONFIG,
         {
             "api_key": "sk-x",
             "base_url": "https://x/v1",
@@ -334,7 +334,7 @@ def test_upstream_5xx_blames_the_server_not_the_user():
 
 def test_keyword_in_body_wins_over_plain_status_table():
     """同一个 400，有的服务商说余额不足、有的说模型不存在——按原文判更准。"""
-    from boss_server.services.llm_client import _friendly_http_error
+    from jobpilot_server.services.llm_client import _friendly_http_error
 
     assert "模型" in _friendly_http_error(400, '{"error":"Model Not Exist"}')
     assert "余额" in _friendly_http_error(400, '{"error":"Insufficient Balance"}')
@@ -342,7 +342,7 @@ def test_keyword_in_body_wins_over_plain_status_table():
 
 def test_unknown_status_keeps_the_code_but_not_the_body():
     """验证未知状态保留状态码但不透出响应体。"""
-    from boss_server.services.llm_client import _friendly_http_error
+    from jobpilot_server.services.llm_client import _friendly_http_error
 
     out = _friendly_http_error(418, "<html>teapot 内部堆栈 xxx</html>")
     assert "418" in out, "认不出来至少要把状态码给出来，方便用户报障"

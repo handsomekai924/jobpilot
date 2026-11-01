@@ -10,7 +10,7 @@ import base64
 
 import pytest
 
-from boss_platform_boss.auth.crypto import (
+from jobpilot_platform_boss.auth.crypto import (
     ACCOUNT_AES_KEY,
     decrypt_account,
     encrypt_account,

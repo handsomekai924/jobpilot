@@ -12,26 +12,26 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-import boss_db
-from boss_platform_boss.jobs import GreetingDelivery, Job, JobApiError
-from boss_platform_boss.jobs.config import BROWSER_CHECK_GIVEUP
-from boss_platform_boss.jobs.models import PageResult
-from boss_platform_boss.jobs.store import JobStore
-from boss_server import config as C
-from boss_server import create_app
-from boss_server.errors import ConflictError
-from boss_server.services.deliver_config_store import (
+import jobpilot_db
+from jobpilot_platform_boss.jobs import GreetingDelivery, Job, JobApiError
+from jobpilot_platform_boss.jobs.config import BROWSER_CHECK_GIVEUP
+from jobpilot_platform_boss.jobs.models import PageResult
+from jobpilot_platform_boss.jobs.store import JobStore
+from jobpilot_server import config as C
+from jobpilot_server import create_app
+from jobpilot_server.errors import ConflictError
+from jobpilot_server.services.deliver_config_store import (
     DeliverConfig,
     load_config,
     save_config,
     update_config,
 )
-from boss_server.services.deliver_task import (
+from jobpilot_server.services.deliver_task import (
     GREET_COOLDOWN_SECONDS,
     DeliverTaskManager,
     greet_cooldown_state,
 )
-from boss_server.services.resume_store import load_analysis, save_analysis
+from jobpilot_server.services.resume_store import load_analysis, save_analysis
 
 
 class FakeGreetClient:
@@ -70,7 +70,7 @@ def test_save_load_roundtrip(tmp_path):
     p = tmp_path / "boss.db"
     save_config(DeliverConfig(min_score=85), p)
     assert load_config(p).min_score == 85
-    assert boss_db.doc_get(boss_db.DOC_DELIVER_CONFIG, p)["min_score"] == 85
+    assert jobpilot_db.doc_get(jobpilot_db.DOC_DELIVER_CONFIG, p)["min_score"] == 85
 
 
 @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ def test_min_score_is_normalized(tmp_path, raw, expected):
 def test_corrupt_payload_falls_back(tmp_path):
     """payload 不是合法 JSON → 按默认处理，不抛。"""
     p = tmp_path / "boss.db"
-    boss_db.doc_set(boss_db.DOC_DELIVER_CONFIG, "{不是 JSON", p)
+    jobpilot_db.doc_set(jobpilot_db.DOC_DELIVER_CONFIG, "{不是 JSON", p)
     assert load_config(p).min_score == C.DEFAULT_DELIVER_MIN_SCORE
 
 
@@ -145,7 +145,7 @@ def _match(jid: str, **overrides) -> dict:
 
 def _seed_job(jid: str) -> None:
     """把这条职位写进 `jobs`（`last_greeted_at` 的权威落点）。"""
-    from boss_platform_boss.jobs.models import Job, PageResult
+    from jobpilot_platform_boss.jobs.models import Job, PageResult
 
     job = Job(
         job_name=f"岗位 {jid}",
@@ -345,7 +345,7 @@ def test_deliver_session_expired_stops_batch():
 
 def _chat_remind_exc(content: str) -> JobApiError:
     """按真实弹窗结构造一个「开聊提醒」异常，让 `is_chat_remind` 靠结构认出来。"""
-    from boss_platform_boss.jobs.errors import format_api_message
+    from jobpilot_platform_boss.jobs.errors import format_api_message
 
     raw = {
         "code": 1,
@@ -602,7 +602,7 @@ def fake_client() -> FakeGreetClient:
 @pytest.fixture
 def patched_manager(monkeypatch, fake_client):
     """把接口层用的全局任务管理器换成注入假客户端的——绝不打真网络。"""
-    import boss_server.api.deliver as api_deliver
+    import jobpilot_server.api.deliver as api_deliver
 
     mgr = DeliverTaskManager(
         client_factory=lambda: fake_client, sleeper=lambda _s: None, interval=0.0

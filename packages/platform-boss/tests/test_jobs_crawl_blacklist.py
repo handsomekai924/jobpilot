@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from boss_platform_boss.jobs.client import CrawlBlacklistContext, JobClient
-from boss_platform_boss.jobs.store import JobStore
+from jobpilot_platform_boss.jobs.client import CrawlBlacklistContext, JobClient
+from jobpilot_platform_boss.jobs.store import JobStore
 
 
 class FakeResponse:
@@ -341,7 +341,7 @@ def test_关详情_没有JD规则时视为已检查且不阻断(tmp_path):
 
 def test_详情失败_标记failed并阻断自动投递(tmp_path):
     """详情失败标 `failed` 并阻断自动投递。"""
-    from boss_platform_boss.jobs.errors import JobApiError
+    from jobpilot_platform_boss.jobs.errors import JobApiError
 
     rec = RecordingContext(has_jd_rules=True, jd_scopes=("job_desc",), company_matches=empty_matcher)
     store, report, http = run_crawl(
@@ -470,7 +470,7 @@ def test_重抓会刷新旧的安全状态(tmp_path):
 
 def test_期望流路径下公司命中照常跳过(tmp_path):
     """第三条检索路径（recommend/job/list）不能绕过黑名单——钩子在 crawl 里，不在路由上。"""
-    from boss_platform_boss.catalog.expect import JobExpectFilter
+    from jobpilot_platform_boss.catalog.expect import JobExpectFilter
 
     rec = RecordingContext(
         store_blacklisted=False,

@@ -7,7 +7,7 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_server import create_app
+from jobpilot_server import create_app
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def test_health(client: TestClient):
     """验证 /api/health 回服务名。"""
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json()["service"] == "boss_server"
+    assert r.json()["service"] == "jobpilot_server"
 
 
 def test_index_serves_spa(client: TestClient):
@@ -45,8 +45,8 @@ def test_slider_refresh_unknown_task_404(client: TestClient):
 
 def test_slider_refresh_换新挑战重建帮助页(client: TestClient):
     """「重新加载」必须换一张新 challenge：极验票据一次性，重载旧的必然 onError。"""
-    from boss_platform_boss.auth.verify import SliderChallenge
-    from boss_server.services import login_task as lt
+    from jobpilot_platform_boss.auth.verify import SliderChallenge
+    from jobpilot_server.services import login_task as lt
 
     calls: list[int] = []
 
@@ -77,7 +77,7 @@ def test_slider_refresh_换新挑战重建帮助页(client: TestClient):
 
 def test_slider_refresh_without_active_slider_conflicts(client: TestClient):
     """验证没有待验证滑块时刷新冲突 409。"""
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="refresh-2", phone="13800138000")
     lt.login_tasks._tasks[task.task_id] = task
@@ -90,9 +90,9 @@ def test_slider_refresh_without_active_slider_conflicts(client: TestClient):
 
 def test_slider_urls_一律站点作用域(client: TestClient):
     """滑块三条 URL 全是站点作用域，后端自报的入口不得混进 legacy 别名。"""
-    from boss_platform_boss.auth.verify import SliderChallenge
+    from jobpilot_platform_boss.auth.verify import SliderChallenge
 
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     def refresher() -> SliderChallenge:
         """换一张新 challenge 的刷新器。"""
@@ -123,7 +123,7 @@ def test_slider_urls_一律站点作用域(client: TestClient):
 
 def test_qr_image_without_payload_404(client: TestClient):
     """验证二维码无 payload 时图片回 404。"""
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-empty", phone="")
     lt.login_tasks._tasks[task.task_id] = task
@@ -136,7 +136,7 @@ def test_qr_image_without_payload_404(client: TestClient):
 
 def test_qr_image_renders_png(client: TestClient):
     """快照里有 payload 就能出 PNG——给前端 <img src> 用。"""
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-img", phone="")
     task.qr_payload = "qr-uuid-1234"
@@ -153,7 +153,7 @@ def test_qr_image_renders_png(client: TestClient):
 
 def test_qr_snapshot_carries_image_url(client: TestClient):
     """验证扫码快照带上图片地址与扫描状态。"""
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="qr-snap", phone="", kind="qr")
     task.qr_payload = "qr-uuid"
@@ -174,7 +174,7 @@ def test_qr_snapshot_carries_image_url(client: TestClient):
 
 def test_qr_conflict_when_sms_running(client: TestClient):
     """同一时刻只跑一个登录任务：短信没跑完就不该另起扫码。"""
-    from boss_server.services import login_task as lt
+    from jobpilot_server.services import login_task as lt
 
     task = lt.LoginTask(task_id="busy", phone="13800138000")
     task.status = lt.ST_NEED_CODE
@@ -315,7 +315,7 @@ def test_collection_config_旧字段缺省不启用期望流(client: TestClient)
 
 def test_collection_expects_桩响应解析(client: TestClient, monkeypatch):
     """GET /api/collection/expects 把三类期望摊成前端下拉要的行。"""
-    from boss_platform_boss.jobs.models import ExpectItem, ExpectList
+    from jobpilot_platform_boss.jobs.models import ExpectItem, ExpectList
 
     class StubClient:
         """桩客户端：回一份固定的期望列表。"""
@@ -338,7 +338,7 @@ def test_collection_expects_桩响应解析(client: TestClient, monkeypatch):
                 ),
             )
 
-    monkeypatch.setattr("boss_platform_boss.jobs.create_client", lambda *a, **k: StubClient())
+    monkeypatch.setattr("jobpilot_platform_boss.jobs.create_client", lambda *a, **k: StubClient())
     r = client.get("/api/collection/expects")
     assert r.status_code == 200
     body = r.json()
@@ -352,7 +352,7 @@ def test_collection_expects_桩响应解析(client: TestClient, monkeypatch):
 
 def test_collection_expects_上游失败转成人话(client: TestClient, monkeypatch):
     """验证上游失败转成可读报错。"""
-    from boss_platform_boss.jobs.errors import JobError
+    from jobpilot_platform_boss.jobs.errors import JobError
 
     class BoomClient:
         """桩客户端：一律抛 JobError。"""
@@ -361,7 +361,7 @@ def test_collection_expects_上游失败转成人话(client: TestClient, monkeyp
             """抛出 JobError。"""
             raise JobError("没登录")
 
-    monkeypatch.setattr("boss_platform_boss.jobs.create_client", lambda *a, **k: BoomClient())
+    monkeypatch.setattr("jobpilot_platform_boss.jobs.create_client", lambda *a, **k: BoomClient())
     r = client.get("/api/collection/expects")
     assert r.status_code >= 400
     assert "求职期望" in r.text or "没登录" in r.text
@@ -369,31 +369,31 @@ def test_collection_expects_上游失败转成人话(client: TestClient, monkeyp
 
 def test_collection_expects_没登录不炸500(client: TestClient, monkeypatch):
     """没登录时 `create_client()` 先炸：异常要转成人话，不能掉进兜底 500。"""
-    from boss_platform_boss.jobs.errors import JobApiError
+    from jobpilot_platform_boss.jobs.errors import JobApiError
 
     def boom(*_a, **_k):
         """抛出未登录的 JobApiError。"""
         raise JobApiError(
             7,
             "本地没有登录态：状态库 F:\\boss\\data\\boss.db 里没有，"
-            "或 token/Cookie 都没有。先跑 `python -m boss_platform_boss.auth login` 落一份。",
+            "或 token/Cookie 都没有。先跑 `python -m jobpilot_platform_boss.auth login` 落一份。",
         )
 
-    monkeypatch.setattr("boss_platform_boss.jobs.create_client", boom)
+    monkeypatch.setattr("jobpilot_platform_boss.jobs.create_client", boom)
     r = client.get("/api/collection/expects")
     body = r.json()
     assert body["code"] != "internal", body
     assert r.status_code != 500
     assert "「登录」页" in body["message"]
-    assert "python -m boss_platform_boss.auth" not in body["message"]
+    assert "python -m jobpilot_platform_boss.auth" not in body["message"]
 
 
 def test_未处理的JobError有安全网(client: TestClient):
     """路由漏 catch 的 `JobError` 也要被 app 层翻成人话，不许兜底 500。"""
     from fastapi.testclient import TestClient as TC
 
-    from boss_platform_boss.jobs.errors import JobError
-    from boss_server.app import create_app
+    from jobpilot_platform_boss.jobs.errors import JobError
+    from jobpilot_server.app import create_app
 
     app = create_app()
 
@@ -472,7 +472,7 @@ def test_fetch_descriptions_cancel_when_idle_404(client: TestClient):
 def test_fetch_descriptions_start_then_status(client: TestClient, monkeypatch):
     """起一个补抓任务：没有登录态会在任务里报 error，但接口本身要回。"""
     monkeypatch.setattr(
-        "boss_server.services.desc_task.create_client",
+        "jobpilot_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1})
@@ -488,7 +488,7 @@ def test_fetch_descriptions_start_then_status(client: TestClient, monkeypatch):
 def test_fetch_descriptions_interval_默认1秒(client: TestClient, monkeypatch):
     """不传 interval = 服务端 DETAIL_INTERVAL（1s），防风控；前端进度条要能拿到它。"""
     monkeypatch.setattr(
-        "boss_server.services.desc_task.create_client",
+        "jobpilot_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1})
@@ -499,7 +499,7 @@ def test_fetch_descriptions_interval_默认1秒(client: TestClient, monkeypatch)
 def test_fetch_descriptions_interval_可传(client: TestClient, monkeypatch):
     """验证补抓间隔可显式传入。"""
     monkeypatch.setattr(
-        "boss_server.services.desc_task.create_client",
+        "jobpilot_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     r = client.post("/api/jobs/fetch-descriptions", json={"limit": 1, "interval": 2.5})
@@ -509,10 +509,10 @@ def test_fetch_descriptions_interval_可传(client: TestClient, monkeypatch):
 
 def test_desc_task_interval_夹到02秒下限(monkeypatch):
     """手滑填 0.01s 会被夹到 0.2s——比这更快就是自己敲风控。"""
-    from boss_server.services.desc_task import DescTaskManager
+    from jobpilot_server.services.desc_task import DescTaskManager
 
     monkeypatch.setattr(
-        "boss_server.services.desc_task.create_client",
+        "jobpilot_server.services.desc_task.create_client",
         lambda **_kw: (_ for _ in ()).throw(RuntimeError("no session")),
     )
     mgr = DescTaskManager()
@@ -522,8 +522,8 @@ def test_desc_task_interval_夹到02秒下限(monkeypatch):
 
 def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
     """连续 N 次 code 37 = 安全网关整段限速，停整批而不是拿剩下的去探墙。"""
-    from boss_platform_boss.jobs.errors import JobApiError
-    from boss_server.services.desc_task import DescTaskManager
+    from jobpilot_platform_boss.jobs.errors import JobApiError
+    from jobpilot_server.services.desc_task import DescTaskManager
 
     class AlwaysBrowserCheck:
         """桩客户端：详情接口一律回 code 37。"""
@@ -533,14 +533,14 @@ def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
             raise JobApiError(37, "您的环境存在异常.", raw={})
 
     monkeypatch.setattr(
-        "boss_server.services.desc_task.create_client", lambda **_kw: AlwaysBrowserCheck()
+        "jobpilot_server.services.desc_task.create_client", lambda **_kw: AlwaysBrowserCheck()
     )
     monkeypatch.setattr(
-        "boss_server.services.desc_task.JobStore",
+        "jobpilot_server.services.desc_task.JobStore",
         lambda *a, **k: _StoreWithMissing([_fake_job(i) for i in range(10)]),
     )
     real_sleep = time.sleep
-    monkeypatch.setattr("boss_server.services.desc_task.time.sleep", lambda _s: None)
+    monkeypatch.setattr("jobpilot_server.services.desc_task.time.sleep", lambda _s: None)
 
     mgr = DescTaskManager()
     task = mgr.start(limit=0, interval=0.0)
@@ -554,7 +554,7 @@ def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
     assert "stopped" in kinds
     stopped = next(e for e in snap["events"] if e["event"] == "stopped")
     assert "连续" in stopped["reason"] and "code 37" in stopped["reason"]
-    from boss_platform_boss.jobs.config import BROWSER_CHECK_GIVEUP
+    from jobpilot_platform_boss.jobs.config import BROWSER_CHECK_GIVEUP
 
     assert snap["progress"]["failed"] == BROWSER_CHECK_GIVEUP
     assert snap["progress"]["done"] == BROWSER_CHECK_GIVEUP
@@ -562,7 +562,7 @@ def test_desc_task_连环撞37就停批(tmp_path, monkeypatch):
 
 def _fake_job(i: int):
     """造一条待补描述的假职位。"""
-    from boss_platform_boss.jobs.models import Job
+    from jobpilot_platform_boss.jobs.models import Job
 
     return Job.from_api(
         {

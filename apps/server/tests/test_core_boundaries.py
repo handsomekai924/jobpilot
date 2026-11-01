@@ -1,4 +1,4 @@
-"""共享层的边界守卫：站点私有语义与反向依赖不得渗进 `packages/core/src/boss_core/`。
+"""共享层的边界守卫：站点私有语义与反向依赖不得渗进 `packages/core/src/jobpilot_core/`。
 
 Attributes:
     SITE_PRIVATE_WORDS: 站点私有语义的指纹；共享层的代码字符串里一个都不该出现。
@@ -11,9 +11,9 @@ import ast
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-CORE = ROOT / "packages" / "core" / "src" / "boss_core"
-PLATFORM_BOSS = ROOT / "packages" / "platform-boss" / "src" / "boss_platform_boss"
-AI = ROOT / "packages" / "ai" / "src" / "boss_ai"
+CORE = ROOT / "packages" / "core" / "src" / "jobpilot_core"
+PLATFORM_BOSS = ROOT / "packages" / "platform-boss" / "src" / "jobpilot_platform_boss"
+AI = ROOT / "packages" / "ai" / "src" / "jobpilot_ai"
 
 SITE_PRIVATE_WORDS: tuple[str, ...] = (
     "开聊提醒",
@@ -32,12 +32,12 @@ SITE_PRIVATE_WORDS: tuple[str, ...] = (
 )
 
 FORBIDDEN_IMPORTS: tuple[str, ...] = (
-    "boss_db",
-    "boss_server",
-    "boss_platform_base",
-    "boss_platform_boss",
-    "boss_browser_pool",
-    "boss_ai",
+    "jobpilot_db",
+    "jobpilot_server",
+    "jobpilot_platform_base",
+    "jobpilot_platform_boss",
+    "jobpilot_browser_pool",
+    "jobpilot_ai",
 )
 
 
@@ -125,7 +125,7 @@ def test_扫描器认得出docstring和代码字符串(tmp_path):
 
 
 def test_平台包不反向依赖_server():
-    """站点实现只认注入点，不许 import `boss_server`。"""
+    """站点实现只认注入点，不许 import `jobpilot_server`。"""
     leaks: list[str] = []
     files = sorted(PLATFORM_BOSS.rglob("*.py"))
     assert files, "平台包一个文件都没扫到，守卫等于没跑"
@@ -139,7 +139,7 @@ def test_平台包不反向依赖_server():
             else:
                 continue
             for name in names:
-                if name == "boss_server" or name.startswith("boss_server."):
+                if name == "jobpilot_server" or name.startswith("jobpilot_server."):
                     leaks.append(f"{path.name} -> {name}")
     assert not leaks, "platform-boss 反向依赖了 server：\n" + "\n".join(leaks)
 
@@ -161,4 +161,4 @@ def test_ai_包不依赖任何boss包():
             for name in names:
                 if name == "boss" or name.startswith("boss_"):
                     leaks.append(f"{path.name} -> {name}")
-    assert not leaks, "boss_ai 依赖了 boss_* 包（AI 必须能独立复用）：\n" + "\n".join(leaks)
+    assert not leaks, "jobpilot_ai 依赖了 boss_* 包（AI 必须能独立复用）：\n" + "\n".join(leaks)

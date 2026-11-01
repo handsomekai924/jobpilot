@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from boss_platform_boss.auth import (
+from jobpilot_platform_boss.auth import (
     AccountBlocked,
     ApiError,
     CodeRejected,
@@ -200,7 +200,7 @@ class TestSliderVerifyChain:
 
     def test_v2_form_matches_the_login_page_shape(self, client):
         """验 V2 发码表单字段与登录页一致。"""
-        from boss_platform_boss.auth.crypto import decrypt_account
+        from jobpilot_platform_boss.auth.crypto import decrypt_account
         from tools.mock_server import LAST_SMS_REQUEST
 
         client.send_sms_code(SLIDER_PHONE, slider_solver=fake_solver, force=True)
@@ -271,7 +271,7 @@ class TestSliderVerifyChain:
 
     def test_login_v2_form_matches_the_login_page_shape(self, client):
         """验登录表单字段与登录页一致。"""
-        from boss_platform_boss.auth.crypto import decrypt_account
+        from jobpilot_platform_boss.auth.crypto import decrypt_account
         from tools.mock_server import LAST_LOGIN_REQUEST
 
         client.send_sms_code(SLIDER_PHONE, slider_solver=fake_solver, force=True)

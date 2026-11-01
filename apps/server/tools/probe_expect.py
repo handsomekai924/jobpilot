@@ -34,12 +34,12 @@ for _src in reversed((
     if str(_src) not in sys.path:
         sys.path.insert(0, str(_src))
 
-from boss_core.paths import repo_root  # noqa: E402
+from jobpilot_core.paths import repo_root  # noqa: E402
 
 ROOT = repo_root()
 
-from boss_platform_boss.jobs import create_client  # noqa: E402
-from boss_platform_boss.jobs.errors import JobApiError, JobError  # noqa: E402
+from jobpilot_platform_boss.jobs import create_client  # noqa: E402
+from jobpilot_platform_boss.jobs.errors import JobApiError, JobError  # noqa: E402
 
 
 def _brief(payload: Any, *, keys: int = 12) -> dict[str, Any]:
@@ -145,7 +145,7 @@ def main() -> int:
     if want("auth") or want("ids"):
         print("\n=== 点 1/2：GET /pc/recommend/expect/list.json ===")
         path = client.endpoints["job_expect_list"]
-        from boss_platform_boss.jobs import STOKEN_COOKIE
+        from jobpilot_platform_boss.jobs import STOKEN_COOKIE
         saved_stoken = client._get_cookie(STOKEN_COOKIE)
         saved_provider = client.stoken_provider
         strip_cookie(STOKEN_COOKIE)
@@ -167,7 +167,7 @@ def main() -> int:
             probe.note(f"点1：无令牌抛 {type(exc).__name__}")
 
         if saved_stoken:
-            from boss_platform_boss.stoken import put_cookie
+            from jobpilot_platform_boss.stoken import put_cookie
             put_cookie(getattr(http, "cookies", None), STOKEN_COOKIE, saved_stoken)
         client.stoken_provider = saved_provider
         try:

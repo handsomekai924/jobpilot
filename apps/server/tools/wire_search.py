@@ -3,7 +3,7 @@
 跑一遍真实站点的搜索流水线，并把每一段的耗时打出来：装配会话、自动获取
 `__zp_stoken__`、拿筛选条件、装配 `JobSearchFilter`、抓一页搜索结果并清洗。
 筛选条件默认读状态库里那份；`--filter` 可指定一份只读 JSON，其余命令行参数只做覆盖。
-`__zp_stoken__` 的来源见 `boss_platform_boss.stoken_cdp`。
+`__zp_stoken__` 的来源见 `jobpilot_platform_boss.stoken_cdp`。
 
 用法：
 
@@ -35,20 +35,20 @@ for _src in reversed((
     if str(_src) not in sys.path:
         sys.path.insert(0, str(_src))
 
-from boss_core.paths import repo_root  # noqa: E402
+from jobpilot_core.paths import repo_root  # noqa: E402
 
 ROOT = repo_root()
 
-from boss_platform_boss.catalog import (  # noqa: E402
+from jobpilot_platform_boss.catalog import (  # noqa: E402
     JobSearchFilter,
     get_filter_conditions,
     load_search_filter,
     search_filter_from_file,
 )
-from boss_platform_boss.catalog.models import FilterConditions  # noqa: E402
-from boss_platform_boss.jobs import STOKEN_COOKIE, create_client  # noqa: E402
-from boss_platform_boss.jobs.errors import JobApiError, JobError  # noqa: E402
-from boss_platform_boss.stoken import StokenError  # noqa: E402
+from jobpilot_platform_boss.catalog.models import FilterConditions  # noqa: E402
+from jobpilot_platform_boss.jobs import STOKEN_COOKIE, create_client  # noqa: E402
+from jobpilot_platform_boss.jobs.errors import JobApiError, JobError  # noqa: E402
+from jobpilot_platform_boss.stoken import StokenError  # noqa: E402
 
 
 class Timer:

@@ -11,11 +11,11 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_platform_boss.jobs.models import PageResult
-from boss_platform_boss.jobs.store import JobStore
-from boss_server import create_app
-from boss_server.services.deliver_task import DeliverTaskManager
-from boss_server.services.resume_store import load_analysis, save_analysis
+from jobpilot_platform_boss.jobs.models import PageResult
+from jobpilot_platform_boss.jobs.store import JobStore
+from jobpilot_server import create_app
+from jobpilot_server.services.deliver_task import DeliverTaskManager
+from jobpilot_server.services.resume_store import load_analysis, save_analysis
 
 SAFETY_FIELDS = (
     "is_blacklisted",
@@ -37,7 +37,7 @@ class FakeGreetClient:
 
     def deliver_greeting(self, **kwargs):
         """记录一次招呼投递并返回成功结果。"""
-        from boss_platform_boss.jobs import GreetingDelivery
+        from jobpilot_platform_boss.jobs import GreetingDelivery
 
         self.calls.append(kwargs)
         return GreetingDelivery(boss_uid=0, text=str(kwargs.get("greeting") or ""))
@@ -113,7 +113,7 @@ def _run(matches, *, mode="selected", confirmed=False, confirmation_token="", jo
     fake = FakeGreetClient()
     mgr = DeliverTaskManager(client_factory=lambda: fake, sleeper=lambda _s: None, interval=0.0)
     if min_score is not None:
-        from boss_server.services.deliver_config_store import save_config, DeliverConfig
+        from jobpilot_server.services.deliver_config_store import save_config, DeliverConfig
 
         save_config(DeliverConfig(min_score=min_score))
     ids = job_ids if job_ids is not None else [m["encrypt_job_id"] for m in matches]
@@ -343,7 +343,7 @@ def test_规则事后改掉_仍按匹配时快照拦(tmp_path):
     aid = _seed([_safe("j1", company_blacklisted=True, is_blacklisted=True)])
     store = JobStore(tmp_path / "boss.db")
     try:
-        from boss_platform_boss.jobs.models import Job
+        from jobpilot_platform_boss.jobs.models import Job
 
         job = Job.from_api(
             {"encryptJobId": "j1", "jobName": "岗位 j1", "brandName": "示例科技", "securityId": "sec-j1", "lid": "L1"}
@@ -378,7 +378,7 @@ def test_当前库被标黑_匹配快照干净_仍按快照发(tmp_path):
     aid = _seed([_safe("j1")])
     store = JobStore(tmp_path / "boss.db")
     try:
-        from boss_platform_boss.jobs.models import Job
+        from jobpilot_platform_boss.jobs.models import Job
 
         job = Job.from_api(
             {"encryptJobId": "j1", "jobName": "岗位 j1", "brandName": "示例科技", "securityId": "sec-j1", "lid": "L1"}
@@ -409,7 +409,7 @@ def test_当前库被标黑_匹配快照干净_仍按快照发(tmp_path):
 
 def test_api_start_接受mode与确认字段(client: TestClient, monkeypatch):
     """API start 接受 mode 与确认字段。"""
-    import boss_server.api.deliver as api_deliver
+    import jobpilot_server.api.deliver as api_deliver
 
     fake = FakeGreetClient()
     mgr = DeliverTaskManager(client_factory=lambda: fake, sleeper=lambda _s: None, interval=0.0)
@@ -437,7 +437,7 @@ def test_api_start_接受mode与确认字段(client: TestClient, monkeypatch):
 
 def test_api_拒绝未知mode(client: TestClient, monkeypatch):
     """API 拒绝未知 mode。"""
-    import boss_server.api.deliver as api_deliver
+    import jobpilot_server.api.deliver as api_deliver
 
     mgr = DeliverTaskManager(client_factory=FakeGreetClient, sleeper=lambda _s: None, interval=0.0)
     monkeypatch.setattr(api_deliver, "deliver_tasks", mgr)
@@ -451,7 +451,7 @@ def test_api_拒绝未知mode(client: TestClient, monkeypatch):
 
 def test_api_旧客户端默认selected拿不到all权限(client: TestClient, monkeypatch):
     """老请求不带 mode → 按 selected 处理，不能白拿一键全部发送。"""
-    import boss_server.api.deliver as api_deliver
+    import jobpilot_server.api.deliver as api_deliver
 
     fake = FakeGreetClient()
     mgr = DeliverTaskManager(client_factory=lambda: fake, sleeper=lambda _s: None, interval=0.0)

@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-import boss_platform_boss.auth.cli as cli
-from boss_platform_boss.auth.client import ZhipinLoginClient
+import jobpilot_platform_boss.auth.cli as cli
+from jobpilot_platform_boss.auth.client import ZhipinLoginClient
 from tools.mock_server import STORE
 
 PHONE = "13800138000"
@@ -92,19 +92,19 @@ class TestEntrypoint:
 
     def test_default_db_path_is_importable(self):
         """`DEFAULT_DB_PATH` 可从 CLI 模块导入且与 session 一致。"""
-        from boss_platform_boss.auth.cli import DEFAULT_DB_PATH
-        from boss_platform_boss.auth.session import DEFAULT_DB_PATH as real
+        from jobpilot_platform_boss.auth.cli import DEFAULT_DB_PATH
+        from jobpilot_platform_boss.auth.session import DEFAULT_DB_PATH as real
 
         assert DEFAULT_DB_PATH == real
 
     def test_default_db_lives_in_project_data_dir(self):
         """状态库落在项目根 `data/` 下，按包位置定位，不看 cwd。"""
-        import boss_db
-        from boss_core.paths import repo_root
-        from boss_platform_boss.auth.session import DEFAULT_DB_PATH, PROJECT_ROOT
+        import jobpilot_db
+        from jobpilot_core.paths import repo_root
+        from jobpilot_platform_boss.auth.session import DEFAULT_DB_PATH, PROJECT_ROOT
 
         assert PROJECT_ROOT == repo_root(), "PROJECT_ROOT 应该是仓库根"
-        assert DEFAULT_DB_PATH == boss_db.DEFAULT_DB_PATH
+        assert DEFAULT_DB_PATH == jobpilot_db.DEFAULT_DB_PATH
         assert DEFAULT_DB_PATH == PROJECT_ROOT / "data" / "boss.db"
         assert DEFAULT_DB_PATH.is_absolute()
         assert not str(DEFAULT_DB_PATH).startswith(str(Path.home()))
@@ -123,7 +123,7 @@ class TestLoginCommand:
         assert "求职者8000" in out
         assert "首次验证" in out
 
-        from boss_platform_boss.auth.session import load_session
+        from jobpilot_platform_boss.auth.session import load_session
 
         stored = load_session(session)
         assert stored.phone_masked == "138****8000"
@@ -135,7 +135,7 @@ class TestLoginCommand:
         code = seed_code(server, PHONE)
         argv = base(server, session, "login", "--phone", PHONE, "--code", code, "--no-save")
         assert run(argv) == cli.EXIT_OK
-        from boss_platform_boss.auth.session import has_session_row
+        from jobpilot_platform_boss.auth.session import has_session_row
 
         assert has_session_row(session) is False
 
@@ -240,7 +240,7 @@ class TestSliderCommand:
 
     def test_login_auto_solves_slider_on_the_send_step(self, server, session, monkeypatch):
         """默认人机协作过掉滑块并自动重试发码。"""
-        from boss_platform_boss.auth.verify import SliderSolution
+        from jobpilot_platform_boss.auth.verify import SliderSolution
         from tools.mock_server import LAST_SMS_REQUEST, STORE
 
         def fake_solve(challenge, **_kwargs):
@@ -268,7 +268,7 @@ class TestSliderCommand:
 
     def test_login_auto_solves_slider_and_retries_phone_v2(self, server, session, monkeypatch):
         """登录步同样过滑块，重试打 phoneV2 并带票据。"""
-        from boss_platform_boss.auth.verify import SliderSolution
+        from jobpilot_platform_boss.auth.verify import SliderSolution
         from tools.mock_server import LAST_LOGIN_REQUEST
 
         def fake_solve(challenge, **_kwargs):
@@ -298,7 +298,7 @@ class TestSliderCommand:
 
     def test_helper_port_zero_means_system_assigned(self):
         """`--helper-port 0` 是「交给系统分配」，不能被默认值吃掉。"""
-        from boss_platform_boss.auth.config import SLIDER_HELPER_PORT
+        from jobpilot_platform_boss.auth.config import SLIDER_HELPER_PORT
 
         args = cli.build_parser().parse_args(["login", "--phone", PHONE, "--helper-port", "0"])
         solver = cli._make_solver(args)
@@ -328,7 +328,7 @@ class TestSessionCommands:
 
     def test_whoami_on_empty_session_row(self, server, session, capsys):
         """库有空会话行时 whoami 说清「有登录态」但不可用。"""
-        from boss_platform_boss.auth.session import StoredSession, save_session
+        from jobpilot_platform_boss.auth.session import StoredSession, save_session
 
         save_session(StoredSession(), session)
         assert run(base(server, session, "whoami")) == cli.EXIT_ERROR
@@ -337,7 +337,7 @@ class TestSessionCommands:
 
     def test_whoami_when_server_rejects_stale_session(self, server, session, capsys):
         """本地认、服务端不认——说清是「需要重新登录」。"""
-        from boss_platform_boss.auth.session import save_session, StoredSession
+        from jobpilot_platform_boss.auth.session import save_session, StoredSession
 
         save_session(StoredSession(cookies={"__zp_stoken__": "stale"}), session)
         assert run(base(server, session, "whoami")) == cli.EXIT_ERROR
@@ -357,7 +357,7 @@ class TestSessionCommands:
 
     def test_logout_clears_session_and_server_state(self, server, session):
         """logout 清掉本地会话且 whoami 随之失败。"""
-        from boss_platform_boss.auth.session import has_session_row, load_session
+        from jobpilot_platform_boss.auth.session import has_session_row, load_session
 
         code = seed_code(server, PHONE)
         run(base(server, session, "login", "--phone", PHONE, "--code", code))

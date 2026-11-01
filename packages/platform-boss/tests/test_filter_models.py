@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from boss_platform_boss.catalog import tables
-from boss_platform_boss.catalog.models import (
+from jobpilot_platform_boss.catalog import tables
+from jobpilot_platform_boss.catalog.models import (
     CityNode,
     FilterConditions,
     FilterOption,

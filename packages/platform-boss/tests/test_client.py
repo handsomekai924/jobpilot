@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import requests
 
-from boss_platform_boss.auth import (
+from jobpilot_platform_boss.auth import (
     AccountBlocked,
     ApiError,
     BossLoginError,
@@ -27,8 +27,8 @@ from boss_platform_boss.auth import (
     save_session,
     StoredSession,
 )
-from boss_platform_boss.auth import client as client_module
-from boss_platform_boss.auth.config import ENDPOINTS, SMS_SCENES
+from jobpilot_platform_boss.auth import client as client_module
+from jobpilot_platform_boss.auth.config import ENDPOINTS, SMS_SCENES
 
 
 class FakeCookies:
@@ -455,7 +455,7 @@ class TestLoginBySms:
     def test_unknown_error_code_becomes_api_error(self):
         """验未知错误码归 API 错误。"""
         client, _ = make_client([fail(8888, "未知错误")])
-        from boss_platform_boss.auth import ApiError
+        from jobpilot_platform_boss.auth import ApiError
 
         with pytest.raises(ApiError, match="未知错误"):
             client.login_by_sms("13800138000", "123456")
@@ -481,7 +481,7 @@ class TestLoginSlider:
     @staticmethod
     def _solution(challenge: str = "c1", validate: str = "v1", seccode: str = "s1"):
         """构造滑块解题结果。"""
-        from boss_platform_boss.auth.verify import SliderSolution
+        from jobpilot_platform_boss.auth.verify import SliderSolution
 
         return SliderSolution(challenge=challenge, validate=validate, seccode=seccode)
 
@@ -504,7 +504,7 @@ class TestLoginSlider:
 
     def test_v2_form_has_phone_code_but_no_version(self):
         """验登录 v2 表单有 phoneCode、没有 version。"""
-        from boss_platform_boss.auth.crypto import decrypt_account
+        from jobpilot_platform_boss.auth.crypto import decrypt_account
 
         client, _ = make_client([])
         form = client._login_v2_form(
@@ -541,7 +541,7 @@ class TestLoginSlider:
 
     def test_reuses_the_stored_send_ticket(self):
         """验登录复用发码解出来的票据。"""
-        from boss_platform_boss.auth.verify import SliderChallenge
+        from jobpilot_platform_boss.auth.verify import SliderChallenge
 
         def solver(challenge: SliderChallenge):
             """按挑战返回固定票据。"""
@@ -564,7 +564,7 @@ class TestLoginSlider:
 
     def test_falls_back_to_a_fresh_solve_when_reuse_fails(self):
         """验票据复用被拒时重新解一张。"""
-        from boss_platform_boss.auth.verify import SliderChallenge, SliderSolution
+        from jobpilot_platform_boss.auth.verify import SliderChallenge, SliderSolution
 
         def solver(challenge: SliderChallenge):
             """按挑战返回带序号的票据。"""
@@ -597,7 +597,7 @@ class TestLoginSlider:
 
     def test_retry_failure_mentions_phone_v2_not_the_bare_slider(self):
         """验带票仍被拦时提示已交过票。"""
-        from boss_platform_boss.auth.verify import SliderChallenge, SliderSolution
+        from jobpilot_platform_boss.auth.verify import SliderChallenge, SliderSolution
 
         def dead(challenge: SliderChallenge):
             """返回无效票据。"""
@@ -890,7 +890,7 @@ class TestSessionPersistence:
 
     def test_clear(self, tmp_path: Path):
         """验清会话文件。"""
-        from boss_platform_boss.auth import clear_session
+        from jobpilot_platform_boss.auth import clear_session
 
         path = tmp_path / "session.json"
         save_session(StoredSession(token="TK"), path)
@@ -900,7 +900,7 @@ class TestSessionPersistence:
 
     def test_persist_login_writes_full_state(self, tmp_path: Path):
         """验 persist_login 写入完整状态。"""
-        from boss_platform_boss.auth import LoginResult, UserInfo
+        from jobpilot_platform_boss.auth import LoginResult, UserInfo
 
         client, _ = make_client([])
         result = LoginResult(
@@ -950,7 +950,7 @@ class TestProbe:
 
     def test_report_shape(self):
         """验探测报告形状。"""
-        from boss_platform_boss.auth.config import CANDIDATE_ENDPOINTS
+        from jobpilot_platform_boss.auth.config import CANDIDATE_ENDPOINTS
 
         expected = sum(len(v) for v in CANDIDATE_ENDPOINTS.values())
         responses = []
@@ -966,7 +966,7 @@ class TestProbe:
 
     def test_404_marked_dead(self):
         """验 404 端点标为不可用。"""
-        from boss_platform_boss.auth.config import CANDIDATE_ENDPOINTS
+        from jobpilot_platform_boss.auth.config import CANDIDATE_ENDPOINTS
 
         expected = sum(len(v) for v in CANDIDATE_ENDPOINTS.values())
         client, _ = make_client([FakeResponse(status=404)] * expected)

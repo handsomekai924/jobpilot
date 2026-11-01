@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from boss_platform_boss.catalog.models import (
+from jobpilot_platform_boss.catalog.models import (
     CityNode,
     FilterConditions,
     FilterOption,
     IndustryGroup,
     options_from_rows,
 )
-from boss_platform_boss.catalog.search import JobSearchFilter
+from jobpilot_platform_boss.catalog.search import JobSearchFilter
 
 
 def make_conditions() -> FilterConditions:
@@ -243,7 +243,7 @@ def test_resolve_to_dict_结构齐整():
 
 def test_save_load_期望上下文往返(tmp_path):
     """存取往返保留期望上下文。"""
-    from boss_platform_boss.catalog.search import load_search_filter, save_search_filter
+    from jobpilot_platform_boss.catalog.search import load_search_filter, save_search_filter
 
     f = JobSearchFilter(query="python", city="101280100", encrypt_expect_id="E1")
     save_search_filter(f, tmp_path / "boss.db")
@@ -255,11 +255,11 @@ def test_save_load_期望上下文往返(tmp_path):
 
 def test_load_旧库没有期望键就留空(tmp_path):
     """向后兼容：旧库没 encryptExpectId 这把 key → 空串，行为不变。"""
-    import boss_db
-    from boss_platform_boss.catalog.search import load_search_filter
+    import jobpilot_db
+    from jobpilot_platform_boss.catalog.search import load_search_filter
 
-    boss_db.doc_set(
-        boss_db.DOC_SEARCH_FILTER,
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_SEARCH_FILTER,
         {"query": "go", "city": "101010100"},
         tmp_path / "boss.db", site="boss")
     back = load_search_filter(tmp_path / "boss.db")

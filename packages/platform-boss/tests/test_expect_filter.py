@@ -6,13 +6,13 @@ import json
 
 import pytest
 
-from boss_platform_boss.catalog.expect import (
+from jobpilot_platform_boss.catalog.expect import (
     EXPECT_KINDS,
     NEVER_PARAMS,
     PART_TIME_JOB_TYPE,
     JobExpectFilter,
 )
-from boss_platform_boss.catalog.search import JobSearchFilter
+from jobpilot_platform_boss.catalog.search import JobSearchFilter
 
 
 def test_to_params_推荐带city加id加混合类型():
@@ -165,7 +165,7 @@ def test_每页条数至少一():
 
 def _expects():
     """构造一份三类期望齐全的 `ExpectList`。"""
-    from boss_platform_boss.jobs.models import ExpectItem, ExpectList
+    from jobpilot_platform_boss.jobs.models import ExpectItem, ExpectList
 
     return ExpectList(
         mix=ExpectItem(
@@ -211,7 +211,7 @@ def test_from_expects_我的期望取首条():
 
 def test_from_expects_没有可取的报错():
     """验无可取期望时抛 `ValueError`。"""
-    from boss_platform_boss.jobs.models import ExpectList
+    from jobpilot_platform_boss.jobs.models import ExpectList
 
     empty = ExpectList()
     for kind in ("recommend", "part_time", "expect"):

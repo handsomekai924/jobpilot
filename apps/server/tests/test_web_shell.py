@@ -7,13 +7,13 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from boss_server import create_app
+from jobpilot_server import create_app
 
 
 @pytest.fixture
 def static_tree(tmp_path: Path, monkeypatch) -> Path:
     """造一棵同时有新壳与旧壳的静态树，并把它设成 `STATIC_DIR`。"""
-    from boss_server import config as C
+    from jobpilot_server import config as C
 
     (tmp_path / "dist").mkdir()
     (tmp_path / "dist" / "index.html").write_text("<html>新壳</html>", encoding="utf-8")
@@ -68,7 +68,7 @@ def test_未知路径回新壳(client: TestClient):
 
 def test_没建新壳时退回旧壳(tmp_path: Path, monkeypatch):
     """验前端没构建时根路径退回旧壳，不给用户开白屏（自检会另报缺失）。"""
-    from boss_server import config as C
+    from jobpilot_server import config as C
 
     (tmp_path / "legacy").mkdir()
     (tmp_path / "legacy" / "index.html").write_text("<html>旧壳</html>", encoding="utf-8")
@@ -82,7 +82,7 @@ def test_legacy_页面的资源引用指向_legacy_目录():
     """验旧壳 index.html 引用 `/static/legacy/…`——挪了目录就得改引用，漏改就是白屏。"""
     source = (
         Path(__file__).resolve().parents[3]
-        / "apps" / "server" / "src" / "boss_server" / "static" / "legacy" / "index.html"
+        / "apps" / "server" / "src" / "jobpilot_server" / "static" / "legacy" / "index.html"
     ).read_text(encoding="utf-8")
     assert 'href="/static/legacy/css/app.css"' in source
     assert 'src="/static/legacy/js/app.js"' in source

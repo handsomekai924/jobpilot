@@ -7,15 +7,15 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-import boss_db
-from boss_platform_boss.jobs.models import Job, PageResult
-from boss_platform_boss.jobs.store import DEFAULT_SITE, JobStore
-from boss_server import create_app
+import jobpilot_db
+from jobpilot_platform_boss.jobs.models import Job, PageResult
+from jobpilot_platform_boss.jobs.store import DEFAULT_SITE, JobStore
+from jobpilot_server import create_app
 
 
 def _task_site(task_id: str) -> str:
     """直接读 `crawl_tasks.site`（不走 `_row_to_crawl_task`，免得被它的兜底骗了）。"""
-    conn = boss_db.connect(boss_db.resolve_db_path(), migrate=False)
+    conn = jobpilot_db.connect(jobpilot_db.resolve_db_path(), migrate=False)
     try:
         row = conn.execute(
             "SELECT site FROM crawl_tasks WHERE task_id = ?", (task_id,)
@@ -214,7 +214,7 @@ def test_last_greeted_at_survives_resave():
 
 def test_pick_jobs_crawl_task_scope():
     """验证按任务范围挑岗位。"""
-    from boss_server.services import match_task as mt
+    from jobpilot_server.services import match_task as mt
 
     with JobStore() as store:
         store.create_crawl_task("tk_1")
@@ -232,7 +232,7 @@ def test_pick_jobs_crawl_task_scope():
 
 def test_pick_jobs_job_ids_scope_wins_over_all():
     """验证 job_ids 优先于全量。"""
-    from boss_server.services import match_task as mt
+    from jobpilot_server.services import match_task as mt
 
     with JobStore() as store:
         store.save_page(make_page(jobs=[make_job("a"), make_job("b")]))
@@ -242,7 +242,7 @@ def test_pick_jobs_job_ids_scope_wins_over_all():
 
 def test_match_task_scope_info():
     """验证匹配范围说明。"""
-    from boss_server.services import match_task as mt
+    from jobpilot_server.services import match_task as mt
 
     task = mt.MatchTask("rs_1", ["a", "b"], crawl_task_id="tk_9")
     scope = task.scope_info()
@@ -318,7 +318,7 @@ def test_api_task_jobs_marks_missing(client: TestClient):
 
 def test_api_match_task_batch(client: TestClient, monkeypatch):
     """验证批量匹配任务。"""
-    from boss_server.services import match_task as mt
+    from jobpilot_server.services import match_task as mt
 
     with JobStore() as store:
         store.create_crawl_task("tk_1")

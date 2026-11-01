@@ -10,16 +10,16 @@ import json
 
 import pytest
 
-import boss_platform_boss.jobs.cli as cli
-from boss_platform_boss.jobs.client import JobClient, create_client, http_from_session
-from boss_platform_boss.jobs.errors import (
+import jobpilot_platform_boss.jobs.cli as cli
+from jobpilot_platform_boss.jobs.client import JobClient, create_client, http_from_session
+from jobpilot_platform_boss.jobs.errors import (
     JobApiError,
     JobDataError,
     JobTransportError,
     format_api_message,
 )
-from boss_platform_boss.jobs.models import clean_page
-from boss_platform_boss.jobs.store import JobStore
+from jobpilot_platform_boss.jobs.models import clean_page
+from jobpilot_platform_boss.jobs.store import JobStore
 
 
 class FakeResponse:
@@ -234,7 +234,7 @@ def test_crawl_respects_max_pages(tmp_path):
 
 def test_crawl_stops_on_partial_page_without_more(tmp_path):
     """不满页 + hasMore=false = 翻到头了，不再多要一页。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     partial = [api_item(f"id{i}") for i in range(C.PAGE_SIZE - 3)]
     client, http, sleeper = client_with([ok_page(partial, has_more=False)])
@@ -248,7 +248,7 @@ def test_crawl_stops_on_partial_page_without_more(tmp_path):
 
 def test_crawl_ignores_unreliable_has_more_on_full_page(tmp_path):
     """page=1 常回 hasMore=false 但后面还有——满页时不能据此收手。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     full = [api_item(f"id{i}") for i in range(C.PAGE_SIZE)]
     pages = [
@@ -290,7 +290,7 @@ def test_crawl_keeps_already_stored_pages_on_error(tmp_path):
 def test_crawl_opens_default_store_when_not_given(tmp_path, monkeypatch):
     """验不传 store 时自动开默认库。"""
     db_path = tmp_path / "auto.db"
-    monkeypatch.setattr("boss_platform_boss.jobs.client.open_store", lambda path=None: JobStore(db_path))
+    monkeypatch.setattr("jobpilot_platform_boss.jobs.client.open_store", lambda path=None: JobStore(db_path))
     client, _, _ = client_with([ok_page([])])
     report = client.crawl(page_interval=0.0, search_filter=_StubFilter())
     assert report.stats.pages == 1
@@ -479,7 +479,7 @@ def test_retries_then_succeeds():
 
 def test_http_from_session_loads_cookies(tmp_path):
     """用假会话验灌 Cookie 的逻辑；真 requests.Session 见下一个用例。"""
-    from boss_platform_boss.auth.session import StoredSession, save_session
+    from jobpilot_platform_boss.auth.session import StoredSession, save_session
 
     session_path = tmp_path / "session.db"
     """用假会话验灌 Cookie 的逻辑；真 requests.Session 见下一个用例。"""
@@ -500,17 +500,17 @@ def test_http_from_session_loads_cookies(tmp_path):
 
 
 def test_http_from_session_explains_missing_session(tmp_path):
-    """验缺会话文件时错误话术带路径和 boss_platform_boss.auth。"""
+    """验缺会话文件时错误话术带路径和 jobpilot_platform_boss.auth。"""
     missing = tmp_path / "nope.json"
     with pytest.raises(JobApiError) as excinfo:
         http_from_session(missing)
     assert str(missing) in excinfo.value.message
-    assert "boss_platform_boss.auth" in excinfo.value.message
+    assert "jobpilot_platform_boss.auth" in excinfo.value.message
 
 
 def test_create_client_uses_session(tmp_path):
     """验 create_client 读会话 Cookie 并保留页间隔。"""
-    from boss_platform_boss.auth.session import StoredSession, save_session
+    from jobpilot_platform_boss.auth.session import StoredSession, save_session
 
     session_path = tmp_path / "session.db"
     save_session(StoredSession(token="", cookies={"wt2": "x"}, saved_at=1.0), session_path)
@@ -521,7 +521,7 @@ def test_create_client_uses_session(tmp_path):
 
 def write_session(tmp_path, cookies: dict[str, str]):
     """把 Cookie 落成会话文件并回路径。"""
-    from boss_platform_boss.auth.session import StoredSession, save_session
+    from jobpilot_platform_boss.auth.session import StoredSession, save_session
 
     session_path = tmp_path / "session.db"
     save_session(StoredSession(cookies=cookies, saved_at=1.0), session_path)
@@ -575,7 +575,7 @@ def test_换新令牌时不会留下同名旧Cookie(tmp_path, monkeypatch):
     """换新令牌时清掉同名旧 Cookie，避免请求头里同时出现两枚。"""
     import requests
 
-    from boss_platform_boss.stoken import put_cookie
+    from jobpilot_platform_boss.stoken import put_cookie
 
     jar = requests.cookies.RequestsCookieJar()
     jar.set("__zp_stoken__", "OLD")
@@ -600,7 +600,7 @@ def test_stoken_会话里有就不会被环境变量盖掉(tmp_path, monkeypatch
 
 def search_filter(**kwargs):
     """构造一条搜索筛选。"""
-    from boss_platform_boss.catalog.search import JobSearchFilter
+    from jobpilot_platform_boss.catalog.search import JobSearchFilter
 
     kwargs.setdefault("query", "python")
     kwargs.setdefault("city", "101280100")
@@ -661,7 +661,7 @@ def test_fetch_search_page_code37_标记成浏览器校验():
 
 def expect_filter(**kwargs):
     """构造一条期望筛选。"""
-    from boss_platform_boss.catalog.expect import JobExpectFilter
+    from jobpilot_platform_boss.catalog.expect import JobExpectFilter
 
     kwargs.setdefault("kind", "expect")
     kwargs.setdefault("encrypt_expect_id", "E1")
@@ -738,7 +738,7 @@ def test_fetch_expect_page_翻页只改页码():
 
 def test_fetch_expect_page_走stoken重试():
     """验期望流撞 37 先退避拿同一枚重试。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     tokens = []
 
@@ -813,7 +813,7 @@ def test_crawl_只有search_filter_仍走搜索流(tmp_path):
 
 def test_cli_fetch_writes_db(tmp_path, monkeypatch):
     """验 CLI fetch 写库。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     full = [api_item(f"id{i}") for i in range(C.PAGE_SIZE)]
     responses = [
@@ -822,7 +822,7 @@ def test_cli_fetch_writes_db(tmp_path, monkeypatch):
     ]
     fake_http = FakeHttp(responses)
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: fake_http,
     )
     f = tmp_path / "f.json"
@@ -839,7 +839,7 @@ def test_cli_fetch_writes_db(tmp_path, monkeypatch):
 def test_cli_fetch_reports_browser_check(tmp_path, monkeypatch, capsys):
     """验自动补令牌后仍被拒时，提示用 CDP/Chrome 补救。"""
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: FakeHttp(
             [
                 {"code": 37, "message": "你的浏览器环境异常", "zpData": {"seed": "s", "ts": 1, "name": "n"}},
@@ -862,7 +862,7 @@ def test_cli_fetch_reports_browser_check(tmp_path, monkeypatch, capsys):
 def test_cli_fetch_reports_risk_control(tmp_path, monkeypatch, capsys):
     """code 36 是账号风控，话术要明说「不去绕」。"""
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: FakeHttp(
             [{"code": 36, "message": "您的账户存在异常行为", "zpData": {}}]
         ),
@@ -912,7 +912,7 @@ def test_cli_fetch_filter文件_有筛选就走搜索流(tmp_path, monkeypatch, 
     )
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "jobpilot_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--max-pages", "1", "--filter", str(f)])
     assert code == 0
@@ -926,14 +926,14 @@ def test_cli_fetch_filter文件_有筛选就走搜索流(tmp_path, monkeypatch, 
 
 def test_cli_fetch_库里的条件_走搜索流(tmp_path, monkeypatch, capsys):
     """不传 --filter 就用状态库里存的那份条件。"""
-    import boss_db
+    import jobpilot_db
 
     db = tmp_path / "d.db"
-    boss_db.doc_set(
-        boss_db.DOC_SEARCH_FILTER, {"query": "go", "city": "101010100"}, db, site="boss")
+    jobpilot_db.doc_set(
+        jobpilot_db.DOC_SEARCH_FILTER, {"query": "go", "city": "101010100"}, db, site="boss")
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "jobpilot_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(db), "fetch", "--max-pages", "1"])
     assert code == 0
@@ -948,7 +948,7 @@ def test_cli_fetch_两边都没有条件_报错(tmp_path, monkeypatch, capsys):
     """验库里条件全空且没给 --filter/--expect 时报错退出。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
+        "jobpilot_platform_boss.jobs.client.http_from_session", lambda *a, **k: _capturing_http(captured)
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--max-pages", "1"])
     assert code == cli.EXIT_USAGE
@@ -977,7 +977,7 @@ def test_cli_fetch_expect_兼职(tmp_path, monkeypatch, capsys):
     """验 --expect part_time 走期望流，jobType=1903。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(
             captured,
             expects=ok_expects(part_time=[{"encryptExpectId": "PT1", "positionName": "派单", "locationName": "佛山"}]),
@@ -997,7 +997,7 @@ def test_cli_fetch_expect_推荐(tmp_path, monkeypatch, capsys):
     """验 --expect recommend 走混合期望并带 mixExpectType。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(
             captured,
             expects=ok_expects(
@@ -1017,7 +1017,7 @@ def test_cli_fetch_expect_指定期望(tmp_path, monkeypatch, capsys):
     """验 --expect expect:<id> 显式点名，不拉期望列表。"""
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(captured, expects=ok_expects()),
     )
     code = cli.main(
@@ -1039,7 +1039,7 @@ def test_cli_fetch_expect_临时期望(tmp_path, monkeypatch, capsys):
     )
     captured = {}
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session",
+        "jobpilot_platform_boss.jobs.client.http_from_session",
         lambda *a, **k: _routing_http(captured, expects=ok_expects()),
     )
     code = cli.main(
@@ -1065,7 +1065,7 @@ def test_cli_fetch_expect与filter互斥(tmp_path, capsys):
 def test_cli_fetch_expect_取值不认识就报错(tmp_path, monkeypatch, capsys):
     """验 --expect 取值不认识时报错退出。"""
     monkeypatch.setattr(
-        "boss_platform_boss.jobs.client.http_from_session", lambda *a, **k: _routing_http({}, expects=ok_expects())
+        "jobpilot_platform_boss.jobs.client.http_from_session", lambda *a, **k: _routing_http({}, expects=ok_expects())
     )
     code = cli.main(["--db", str(tmp_path / "d.db"), "fetch", "--expect", "bogus"])
     assert code == 2
@@ -1203,7 +1203,7 @@ def test_fetch_job_detail_ensures_stoken():
 
 def test_fetch_job_detail_撞37先歇会儿再用同一枚重试():
     """验 37 先退避拿同一枚重试，不急着换新。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     tokens = []
 
@@ -1258,7 +1258,7 @@ def test_fetch_job_detail_歇完还37才强制换新():
 
 def test_enrich_page_details_survives_single_failure(tmp_path):
     """验单条详情失败只记流水，下一条继续。"""
-    from boss_platform_boss.jobs.models import Job, PageResult
+    from jobpilot_platform_boss.jobs.models import Job, PageResult
 
     jobs = (
         Job.from_api({"encryptJobId": "a", "jobName": "A", "brandName": "甲", "securityId": "s-a", "lid": "l"}),
@@ -1293,7 +1293,7 @@ def test_enrich_page_details_survives_single_failure(tmp_path):
 
 def test_enrich_page_details_已有描述不再重复获取(tmp_path):
     """重抓一页时，已入库且已有 JD 的不该再打详情接口。"""
-    from boss_platform_boss.jobs.models import Job, PageResult
+    from jobpilot_platform_boss.jobs.models import Job, PageResult
 
     jobs = (
         Job.from_api({"encryptJobId": "a", "jobName": "A", "brandName": "甲", "securityId": "s-a", "lid": "l"}),
@@ -1352,8 +1352,8 @@ def test_fetch_job_detail_换新冷却没换到_不再打第三发():
 
 def test_enrich_page_details_连环撞37就停批(tmp_path):
     """验连环撞 N 次 code 37 后停批，不再补 JD。"""
-    from boss_platform_boss.jobs import config as C
-    from boss_platform_boss.jobs.models import Job, PageResult
+    from jobpilot_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs.models import Job, PageResult
 
     jobs = tuple(
         Job.from_api(
@@ -1395,8 +1395,8 @@ def test_enrich_page_details_连环撞37就停批(tmp_path):
 
 def test_enrich_page_details_37失败后多躺一会(tmp_path):
     """验单条 37 后下一条前多睡 COOLOFF，且至少睡过 BACKOFF。"""
-    from boss_platform_boss.jobs import config as C
-    from boss_platform_boss.jobs.models import Job, PageResult
+    from jobpilot_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs.models import Job, PageResult
 
     jobs = (
         Job.from_api({"encryptJobId": "a", "jobName": "A", "brandName": "甲", "securityId": "s-a", "lid": "l"}),
@@ -1597,7 +1597,7 @@ def test_greet_开聊提醒_埋点失败不挡确认():
 
 def test_chat_remind_remaining_抠还剩次数():
     """从弹窗话术里抠「还剩 N 次」；抠不出来回 None（继续发，别瞎停批）。"""
-    from boss_platform_boss.jobs.errors import chat_remind_remaining
+    from jobpilot_platform_boss.jobs.errors import chat_remind_remaining
 
     assert chat_remind_remaining(_chat_remind_payload()) == 30
     assert chat_remind_remaining("您今天已与150位BOSS沟通，还剩0次沟通机会哦") == 0
@@ -1674,7 +1674,7 @@ def test_greet_code37_标记成浏览器校验():
 
 def test_greet_撞37先歇会儿再用同一枚重试():
     """验 greet 与搜索/详情同一套 37 退避重试。"""
-    from boss_platform_boss.jobs import config as C
+    from jobpilot_platform_boss.jobs import config as C
 
     tokens = []
 

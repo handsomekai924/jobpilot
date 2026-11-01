@@ -25,7 +25,6 @@ SOURCE_DIRS = (
     ROOT / "packages" / "db" / "src",
 )
 
-# 逆序插入：src 根排在 ROOT 前面，`tools` 仍从 ROOT 导入。
 for entry in reversed((*SOURCE_DIRS, ROOT)):
     if str(entry) not in sys.path:
         sys.path.insert(0, str(entry))

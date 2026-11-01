@@ -309,8 +309,6 @@ def main(argv: list[str] | None = None) -> int:
         session_ready.set()
         logging.getLogger(__name__).warning("登录态自检预热失败", exc_info=True)
 
-    # 只有打包版才自动开浏览器：开发时前端由 vite 单独跑，这里开了也只会打开
-    # 一个没有前端的 API 端口。`--no-browser` 供自更新重启时避免再弹一个页面。
     if is_frozen() and not args.no_browser:
         threading.Thread(
             target=_open_browser_when_ready,

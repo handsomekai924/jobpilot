@@ -7,6 +7,9 @@
     python tools/cli_commands.py --json         # 机器可读
     python tools/cli_commands.py --module jobpilot_platform_boss.catalog
     python tools/cli_commands.py --options      # 连选项一起列
+
+Attributes:
+    SRC_ROOTS: workspace 的源码根；各包的 `cli.py` 按目录位置发现，不写死模块名。
 """
 
 from __future__ import annotations
@@ -20,7 +23,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-#: workspace 的源码根；各包的 `cli.py` 按目录位置发现，不写死模块名。
 SRC_ROOTS = (
     ROOT / "apps" / "server" / "src",
     ROOT / "packages" / "core" / "src",

@@ -111,7 +111,6 @@ __all__ = [
     "throttle_hook",
 ]
 
-# server 是唯一装配点：import 平台包触发的注册动作在这里绑定给注册表。
 from .adapters import load as _load_adapters  # noqa: E402
 
 set_loader(_load_adapters)

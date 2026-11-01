@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 GITHUB_OWNER = "handsomekai924"
 GITEE_OWNER = "w-kev"
-GITEE_REPO = "boss-automatic-delivery"
+GITEE_REPO = "jobpilot"
 GITEE_RELEASES_API = (
     f"https://gitee.com/api/v5/repos/{GITEE_OWNER}/{GITEE_REPO}/releases?per_page=20"
 )
@@ -90,7 +90,7 @@ class Asset:
     """发行版上的一个下载附件。
 
     Attributes:
-        name: Gitee 上的附件名（`BossAutoDelivery-1.1.3.zip`），用来挑更新包。
+        name: Gitee 上的附件名（`JobPilot-1.1.3.zip`），用来挑更新包。
         url: 下载直链。
     """
 
@@ -151,7 +151,7 @@ def pick_latest(releases: list[dict[str, Any]]) -> Release | None:
 def pick_zip_asset(assets: Any) -> Asset | None:
     """挑出更新用的 zip 附件；没有则回 `None`。
 
-    优先 `BossAutoDelivery*.zip`，其次任意 `*.zip`。名字为空就看 URL 最后一段。
+    优先 `JobPilot*.zip`，其次任意 `*.zip`。名字为空就看 URL 最后一段。
 
     Args:
         assets: `Asset` 或带 `name`/`url` 的字典序列。
@@ -173,7 +173,7 @@ def pick_zip_asset(assets: Any) -> Asset | None:
     zips = [a for a in items if _name_of(a).lower().endswith(".zip")]
     if not zips:
         return None
-    preferred = [a for a in zips if _name_of(a).lower().startswith("bossautodelivery")]
+    preferred = [a for a in zips if _name_of(a).lower().startswith("jobpilot")]
     return preferred[0] if preferred else zips[0]
 
 
@@ -190,7 +190,7 @@ def fetch_latest_release() -> Release:
         resp = requests.get(
             GITEE_RELEASES_API,
             timeout=HTTP_TIMEOUT,
-            headers={"User-Agent": f"BossAutoDelivery/{APP_VERSION}"},
+            headers={"User-Agent": f"JobPilot/{APP_VERSION}"},
         )
         if resp.status_code in (403, 429):
             raise UpdateCheckError(

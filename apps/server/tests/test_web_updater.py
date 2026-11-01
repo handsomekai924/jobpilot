@@ -138,11 +138,11 @@ def test_download_zip_先写_part_再落盘(tmp_path, monkeypatch):
         lambda *a, **k: _FakeResp(b"PK\x03\x04" + b"x" * 200),
     )
     out = updater.download_zip(
-        "https://gitee.com/x/BossAutoDelivery-1.2.0.zip",
+        "https://gitee.com/x/JobPilot-1.2.0.zip",
         tmp_path,
         on_progress=seen.append,
     )
-    assert out.name == "BossAutoDelivery-1.2.0.zip"
+    assert out.name == "JobPilot-1.2.0.zip"
     assert out.read_bytes().startswith(b"PK\x03\x04")
     assert not out.with_name(out.name + ".part").exists()
     assert seen and seen[-1] == 100
@@ -171,19 +171,19 @@ def _make_zip(path: Path, names: list[str]) -> Path:
 
 def test_validate_zip_认扁平布局(tmp_path):
     """扁平布局校验通过。"""
-    p = _make_zip(tmp_path / "a.zip", ["BossAutoDelivery.exe", "_internal/foo.dll"])
+    p = _make_zip(tmp_path / "a.zip", ["JobPilot.exe", "_internal/foo.dll"])
     updater.validate_zip(p)
 
 
 def test_validate_zip_认一层子目录布局(tmp_path):
     """一层子目录布局校验通过。"""
-    p = _make_zip(tmp_path / "a.zip", ["BossAutoDelivery/BossAutoDelivery.exe"])
+    p = _make_zip(tmp_path / "a.zip", ["JobPilot/JobPilot.exe"])
     updater.validate_zip(p)
 
 
 def test_validate_zip_拒_zip_slip(tmp_path):
     """拒绝 zip slip 路径。"""
-    p = _make_zip(tmp_path / "a.zip", ["../evil.txt", "BossAutoDelivery.exe"])
+    p = _make_zip(tmp_path / "a.zip", ["../evil.txt", "JobPilot.exe"])
     with pytest.raises(updater.UpdateApplyError) as ei:
         updater.validate_zip(p)
     assert "可疑路径" in str(ei.value)
@@ -194,7 +194,7 @@ def test_validate_zip_没有_exe_就不给过(tmp_path):
     p = _make_zip(tmp_path / "a.zip", ["readme.txt", "_internal/foo.dll"])
     with pytest.raises(updater.UpdateApplyError) as ei:
         updater.validate_zip(p)
-    assert "BossAutoDelivery.exe" in str(ei.value)
+    assert "JobPilot.exe" in str(ei.value)
 
 
 def test_validate_zip_不是_zip_直接拒(tmp_path):

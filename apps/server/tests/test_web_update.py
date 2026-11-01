@@ -36,12 +36,12 @@ def _release(tag: str, *, prerelease: bool = False, notes: str = "说明") -> di
         "body": notes,
         "assets": [
             {
-                "name": "BossAutoDelivery.exe",
-                "browser_download_url": f"https://gitee.com/x/releases/download/{tag}/BossAutoDelivery.exe",
+                "name": "JobPilot.exe",
+                "browser_download_url": f"https://gitee.com/x/releases/download/{tag}/JobPilot.exe",
             },
             {
-                "name": f"BossAutoDelivery-{tag.lstrip('v')}.zip",
-                "browser_download_url": f"https://gitee.com/x/releases/download/{tag}/BossAutoDelivery-{tag.lstrip('v')}.zip",
+                "name": f"JobPilot-{tag.lstrip('v')}.zip",
+                "browser_download_url": f"https://gitee.com/x/releases/download/{tag}/JobPilot-{tag.lstrip('v')}.zip",
             },
         ],
     }
@@ -135,28 +135,28 @@ def test_pick_latest_发行说明截断():
 def test_pick_latest_带上资产链接():
     """验带上资产下载链接。"""
     latest = update_check.pick_latest([_release("v1.1.0")])
-    assert any(a.url.endswith("BossAutoDelivery.exe") for a in latest.assets)
+    assert any(a.url.endswith("JobPilot.exe") for a in latest.assets)
     assert any(a.name.endswith(".zip") for a in latest.assets)
 
 
-def test_pick_zip_asset_优先叫_BossAutoDelivery_的包():
-    """验优先挑叫 BossAutoDelivery 的 zip。"""
+def test_pick_zip_asset_优先叫_JobPilot_的包():
+    """验优先挑叫 JobPilot 的 zip。"""
     assets = (
         update_check.Asset(name="notes.txt", url="https://x/notes.txt"),
         update_check.Asset(name="随便.zip", url="https://x/随便.zip"),
-        update_check.Asset(name="BossAutoDelivery-1.1.0.zip", url="https://x/BossAutoDelivery-1.1.0.zip"),
+        update_check.Asset(name="JobPilot-1.1.0.zip", url="https://x/JobPilot-1.1.0.zip"),
     )
     picked = update_check.pick_zip_asset(assets)
     assert picked is not None
-    assert picked.name.startswith("BossAutoDelivery")
+    assert picked.name.startswith("JobPilot")
 
 
 def test_pick_zip_asset_名字空看_url_尾段():
     """验资产名为空时看 url 尾段。"""
-    assets = (update_check.Asset(name="", url="https://x/BossAutoDelivery-1.1.0.zip?token=1"),)
+    assets = (update_check.Asset(name="", url="https://x/JobPilot-1.1.0.zip?token=1"),)
     picked = update_check.pick_zip_asset(assets)
     assert picked is not None
-    assert picked.url.startswith("https://x/BossAutoDelivery-1.1.0.zip")
+    assert picked.url.startswith("https://x/JobPilot-1.1.0.zip")
 
 
 def test_pick_zip_asset_没有_zip_就回_None():

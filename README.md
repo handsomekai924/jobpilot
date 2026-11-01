@@ -1,6 +1,6 @@
-# automatic-boss-delivery
+# JobPilot
 
-**BOSS 直聘自动投递助手** —— 登录、找职位、简历匹配、AI 写招呼语、一键投递，一条龙跑通,协议全部走真实接口。
+**JobPilot 求职自动投递助手** —— 登录、找职位、简历匹配、AI 写招呼语、一键投递，一条龙跑通，协议全部走真实接口。首个接入平台为 BOSS 直聘。
 
 ```
 登录 ──► 找职位 ──► 简历匹配 ──► AI 写招呼语 ──► 一键投递
@@ -11,14 +11,14 @@
 
 ## 下载
 
-到 Releases 页面的 **Assets** 里下 `BossAutoDelivery-x.y.z.zip`，无需 Python：
+到 Releases 页面的 **Assets** 里下 `JobPilot-x.y.z.zip`，无需 Python：
 
 | 来源 | 地址 |
 |------|------|
-| **GitHub** | https://github.com/handsomekai924/boss-automatic-delivery/releases |
-| **Gitee**（国内更快） | https://gitee.com/w-kev/boss-automatic-delivery/releases |
+| **GitHub** | https://github.com/handsomekai924/jobpilot/releases |
+| **Gitee**（国内更快） | https://gitee.com/w-kev/jobpilot/releases |
 
-装好后有新版本会在网页里提示，点「立即更新」就地升级。
+装好后有新版本会在网页里提示，点「立即更新」就地升级。从 1.x 升到 2.0.0 需要手动替换一次，详见 `docs/release-notes-v2.0.0.md`。
 
 ---
 
@@ -29,8 +29,8 @@
 **源码版**：
 
 ```bash
-git clone https://github.com/handsomekai924/boss-automatic-delivery.git
-cd boss-automatic-delivery
+git clone https://github.com/handsomekai924/jobpilot.git
+cd jobpilot
 python -m venv .venv
 # Windows:  .venv\Scripts\activate
 # macOS / Linux:  source .venv/bin/activate
@@ -43,7 +43,7 @@ pip install -r requirements.txt
 
 ## 启动
 
-**打包版**：双击 `BossAutoDelivery.exe`，浏览器自动打开控制台。
+**打包版**：双击 `JobPilot.exe`，浏览器自动打开控制台。
 
 **源码版**（前后端分开启动）：
 

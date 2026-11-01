@@ -1,4 +1,4 @@
-"""把 `dist\\BossAutoDelivery\\` 打成发行 zip。
+"""把 `dist\\JobPilot\\` 打成发行 zip。
 
 产物扁平布局（zip 根 = exe + `_internal/`），解压进哪个目录哪个就是安装目录。
 版本号用正则读 `apps/server/src/jobpilot_server/__init__.py`，不 import 包。
@@ -19,8 +19,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST_APP = ROOT / "dist" / "BossAutoDelivery"
-EXE_NAME = "BossAutoDelivery.exe"
+DIST_APP = ROOT / "dist" / "JobPilot"
+EXE_NAME = "JobPilot.exe"
 
 SKIP_DIR_NAMES = {"data", "__pycache__", "chrome_profile", "logs"}
 SKIP_SUFFIXES = {".pdb", ".part"}
@@ -87,7 +87,7 @@ def main() -> int:
         raise SystemExit(f"找不到 {DIST_APP / '_internal'}，这个产物不是 onedir 布局")
 
     version = read_version()
-    out = ROOT / "dist" / f"BossAutoDelivery-{version}.zip"
+    out = ROOT / "dist" / f"JobPilot-{version}.zip"
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists():
         out.unlink()
@@ -101,7 +101,7 @@ def main() -> int:
 
     if count == 0 or out.stat().st_size < 1024:
         _discard(out)
-        raise SystemExit("打出来的 zip 是空的，检查 dist\\BossAutoDelivery\\ 内容")
+        raise SystemExit("打出来的 zip 是空的，检查 dist\\JobPilot\\ 内容")
 
     missing = [n for n in REQUIRED_MEMBERS if not _packed(names, n)]
     if missing:

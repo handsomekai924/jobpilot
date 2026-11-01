@@ -5,8 +5,8 @@
 
     packaging\\build.bat
 
-产物：``dist\\BossAutoDelivery\\``（exe + ``_internal\\``）和
-``dist\\BossAutoDelivery-{version}.zip``（发到 Gitee Release 附件）。
+产物：``dist\\JobPilot\\``（exe + ``_internal\\``）和
+``dist\\JobPilot-{version}.zip``（发到 Gitee Release 附件）。
 
 要点全在注释里，改之前先看 :mod:`jobpilot_server.runtime` 的模块 docstring。
 """
@@ -146,7 +146,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="BossAutoDelivery",
+    name="JobPilot",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -165,5 +165,5 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=False,
-    name="BossAutoDelivery",
+    name="JobPilot",
 )

@@ -1,7 +1,7 @@
 @echo off
 rem Build onedir package + release zip.
-rem Output: dist/BossAutoDelivery/            install dir (exe + _internal)
-rem         dist/BossAutoDelivery-{ver}.zip   upload as Gitee Release asset
+rem Output: dist/JobPilot/            install dir (exe + _internal)
+rem         dist/JobPilot-{ver}.zip   upload as Gitee Release asset
 rem
 rem Keep this file ASCII-only + CRLF. Non-ASCII text in a bat file makes
 rem cmd.exe reparse on codepage switches and shred later lines into garbage
@@ -54,7 +54,7 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo Build OK:
-echo   install dir   dist\BossAutoDelivery\
-echo   release zip   dist\BossAutoDelivery-VERSION.zip  ^(upload as Gitee Release asset^)
-echo   self check    dist\BossAutoDelivery\BossAutoDelivery.exe --self-check
+echo   install dir   dist\JobPilot\
+echo   release zip   dist\JobPilot-VERSION.zip  ^(upload as Gitee Release asset^)
+echo   self check    dist\JobPilot\JobPilot.exe --self-check
 pause

@@ -23,14 +23,14 @@ def _load_make_zip():
 
 
 def _fake_dist(root: Path, *, with_base_library: bool = True) -> Path:
-    """造一棵假 `dist\\BossAutoDelivery\\`，带可读版本号；文件用随机字节避开「产物太小」守卫。"""
+    """造一棵假 `dist\\JobPilot\\`，带可读版本号；文件用随机字节避开「产物太小」守卫。"""
     (root / "apps" / "server" / "src" / "jobpilot_server").mkdir(parents=True, exist_ok=True)
     (root / "apps" / "server" / "src" / "jobpilot_server" / "__init__.py").write_text(
         '__version__ = "9.9.9"\n', encoding="utf-8"
     )
-    app = root / "dist" / "BossAutoDelivery"
+    app = root / "dist" / "JobPilot"
     (app / "_internal").mkdir(parents=True)
-    (app / "BossAutoDelivery.exe").write_bytes(b"MZ" + os.urandom(4096))
+    (app / "JobPilot.exe").write_bytes(b"MZ" + os.urandom(4096))
     if with_base_library:
         (app / "_internal" / "base_library.zip").write_bytes(b"PK" + os.urandom(4096))
     return app
@@ -88,9 +88,9 @@ def test_make_zip_不能丢掉_base_library_zip(tmp_path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    app = tmp_path / "BossAutoDelivery"
+    app = tmp_path / "JobPilot"
     (app / "_internal").mkdir(parents=True)
-    (app / "BossAutoDelivery.exe").write_bytes(b"MZ")
+    (app / "JobPilot.exe").write_bytes(b"MZ")
     (app / "_internal" / "base_library.zip").write_bytes(b"PK")
     (app / "_internal" / "stale.zip").write_bytes(b"PK")
     (app / "_internal" / "jobpilot_server.pdb").write_bytes(b"x")
@@ -113,10 +113,10 @@ def test_make_zip_好包照常出且自我核对通过(tmp_path, monkeypatch):
 
     assert mod.main() == 0
 
-    out = tmp_path / "dist" / "BossAutoDelivery-9.9.9.zip"
+    out = tmp_path / "dist" / "JobPilot-9.9.9.zip"
     with zipfile.ZipFile(out) as zf:
         names = set(zf.namelist())
-    assert "BossAutoDelivery.exe" in names
+    assert "JobPilot.exe" in names
     assert "_internal/base_library.zip" in names
 
 
@@ -131,6 +131,6 @@ def test_make_zip_产物缺_base_library_就拒绝发货(tmp_path, monkeypatch):
         mod.main()
 
     assert "base_library.zip" in str(ei.value)
-    assert not (tmp_path / "dist" / "BossAutoDelivery-9.9.9.zip").exists(), (
+    assert not (tmp_path / "dist" / "JobPilot-9.9.9.zip").exists(), (
         "坏包必须删掉，不能留在 dist 里"
     )

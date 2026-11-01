@@ -34,7 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--reload", action="store_true", help="改代码自动重启（仅开发用，打包后无效）"
     )
     parser.add_argument(
-        "--no-browser", action="store_true", help="启动后不自动打开浏览器"
+        "--no-browser", action="store_true", help="打包版启动也不自动打开浏览器"
     )
     parser.add_argument(
         "--self-check",
@@ -102,12 +102,20 @@ def _setup_logging(level: str) -> None:
 
 
 def _banner(url: str, info: dict[str, str]) -> None:
-    """打印启动横幅。"""
+    """打印启动横幅。
+
+    Args:
+        url: 服务根地址，如 `http://127.0.0.1:8787`。
+        info: `bootstrap` 返回的路径摘要。
+    """
     from . import __version__
 
     print("=" * 60)
     print(f"  BOSS 自动投递助手已启动  v{__version__}")
-    print(f"  控制台地址   {url}")
+    print(f"  接口地址     {url}")
+    print(f"  接口文档     {url}/api/docs")
+    if is_frozen():
+        print(f"  控制台地址   {url}")
     print(f"  数据目录     {info.get('data_dir', C.DATA_DIR)}")
     if info.get("portable") == "0":
         print("  ⚠ 程序所在目录写不进去，数据已改存到上面这个目录")
@@ -285,7 +293,9 @@ def main(argv: list[str] | None = None) -> int:
         session_ready.set()
         logging.getLogger(__name__).warning("登录态自检预热失败", exc_info=True)
 
-    if not args.no_browser:
+    # 只有打包版才自动开浏览器：开发时前端由 vite 单独跑，这里开了也只会打开
+    # 一个没有前端的 API 端口。`--no-browser` 供自更新重启时避免再弹一个页面。
+    if is_frozen() and not args.no_browser:
         threading.Thread(
             target=_open_browser_when_ready,
             args=(server, url, session_ready),

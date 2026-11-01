@@ -1,11 +1,11 @@
-"""`boss_server` — BOSS 直聘可视化控制台。
+"""`boss_server` — BOSS 直聘控制台的后端 API 服务。
 
-把登录 / 抓取 / 筛选 / LLM / 简历分析收进一个网页里，能力层全部复用
+把登录 / 抓取 / 筛选 / LLM / 简历分析收进一套 HTTP 接口，能力层全部复用
 `boss_platform_boss.auth` / `boss_platform_boss.jobs` / `boss_platform_boss.catalog`，本包只做编排与展示。
 
 启动：
 
-    python -m boss_server            # 默认 http://127.0.0.1:8787
+    python -m boss_server            # API http://127.0.0.1:8787，文档 /api/docs
 """
 
 from __future__ import annotations

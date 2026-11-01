@@ -43,14 +43,16 @@ pip install -r requirements.txt
 
 ## 启动
 
-**打包版**：双击 `BossAutoDelivery.exe`。
+**打包版**：双击 `BossAutoDelivery.exe`，浏览器自动打开控制台。
 
-**源码版**：
+**源码版**（前后端分开启动）：
 
 ```bash
-python -m boss_server
-# 默认 http://127.0.0.1:8787 ，浏览器自动打开
+python -m boss_server              # API 服务：http://127.0.0.1:8787
+pnpm --dir apps/web dev            # 前端：http://127.0.0.1:5173
 ```
+
+启动时只打印接口地址与接口文档地址（`http://127.0.0.1:8787/api/docs`），不会自动打开浏览器。
 
 打开后按页面顺序走：登录 → 找职位 → 上传简历 → AI 设置 → 看匹配 → 一键投递。
 

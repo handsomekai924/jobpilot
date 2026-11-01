@@ -214,6 +214,65 @@ def test_横幅先打登录状态占位_测完再补真结果(monkeypatch, capsy
     assert "未登录" in out
 
 
+def test_开发模式不自动打开浏览器_只打印接口与文档地址(monkeypatch, capsys):
+    """源码启动时前后端分开跑：后端只报接口地址，别去开一个没有前端的端口。"""
+    opened: list[str] = []
+    monkeypatch.setattr(cli, "_setup_logging", lambda *_a, **_k: None)
+    monkeypatch.setattr("uvicorn.Server.run", lambda self: None, raising=False)
+    monkeypatch.setattr(cli, "pick_port", lambda *_a, **_k: 8799)
+    monkeypatch.setattr(cli, "is_frozen", lambda: False)
+    monkeypatch.setattr(update_check, "schedule_startup_check", lambda on_done=None: None)
+    monkeypatch.setattr(cli.webbrowser, "open", lambda url: opened.append(url))
+
+    assert cli.main([]) == 0
+    out = capsys.readouterr().out
+    assert opened == []
+    assert "接口地址     http://127.0.0.1:8799" in out
+    assert "接口文档     http://127.0.0.1:8799/api/docs" in out
+    assert "控制台地址" not in out
+
+
+def test_打包版启动自动打开浏览器(monkeypatch, capsys):
+    """exe 双击是终端用户的唯一入口，打包后仍要自动把控制台推出来。"""
+    import threading
+
+    from boss_server.services import session_check
+
+    opened: list[str] = []
+    monkeypatch.setattr(cli, "_setup_logging", lambda *_a, **_k: None)
+    monkeypatch.setattr("uvicorn.Server.run", lambda self: None, raising=False)
+    monkeypatch.setattr(cli, "pick_port", lambda *_a, **_k: 8799)
+    monkeypatch.setattr(cli, "is_frozen", lambda: True)
+    monkeypatch.setattr(update_check, "schedule_startup_check", lambda on_done=None: None)
+    ready = threading.Event()
+    ready.set()
+    monkeypatch.setattr(
+        session_check, "schedule_startup_check", lambda on_done=None, **_kw: ready
+    )
+    monkeypatch.setattr(
+        cli, "_open_browser_when_ready", lambda _server, url, _ready: opened.append(url)
+    )
+
+    class _SyncThread:
+        """同步执行 target，免得测试抢线程时序。"""
+
+        def __init__(self, target=None, args=(), **_kw):
+            """记下启动体，`start()` 时直接跑。"""
+            self.target = target
+            self.args = args
+
+        def start(self) -> None:
+            """直接调用目标函数。"""
+            self.target(*self.args)
+
+    monkeypatch.setattr(cli.threading, "Thread", _SyncThread)
+
+    assert cli.main([]) == 0
+    out = capsys.readouterr().out
+    assert opened == ["http://127.0.0.1:8799"]
+    assert "控制台地址   http://127.0.0.1:8799" in out
+
+
 def test_开浏览器要等登录态自检出结果():
     """首屏会话卡片不能先渲染一份没验过的状态——测完再开，用户不用刷新。"""
     import threading

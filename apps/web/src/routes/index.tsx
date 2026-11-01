@@ -38,14 +38,6 @@ export const LEGACY_REDIRECTS: readonly [string, string][] = [
   ["/llm", "/settings"],
 ];
 
-/** 平台路由 key → 旧壳 hash（`nav_extras` 占位页的「打开旧界面」按钮用）。发对话/投递/期望在旧壳都在「匹配」页里。 */
-const PLATFORM_LEGACY: Record<string, string> = {
-  login: "/login",
-  jobs: "/jobs",
-  deliver: "/match",
-  expect: "/match",
-};
-
 /**
  * 平台私有页注册表：`nav_extras` 的 key → 页面组件。
  *
@@ -73,12 +65,7 @@ function PlatformExtraPage() {
   const Page = key ? PLATFORM_EXTRAS[key] : undefined;
   if (Page) return <Page />;
 
-  return (
-    <PendingPage
-      title={title}
-      legacyHash={PLATFORM_LEGACY[key ?? ""] ?? PLATFORM_LEGACY.expect}
-    />
-  );
+  return <PendingPage title={title} />;
 }
 
 /** 平台根路径落到第一个固定入口（登录），与切平台的回落一致。 */

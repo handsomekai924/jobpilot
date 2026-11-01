@@ -2,7 +2,7 @@
 
 全仓 `*.js` / `*.mjs` / `*.ts` / `*.tsx` 的说明性文字只保留 **JSDoc**（`/** … */`）。行注释 `//` 一律删除（工具链注释除外）。
 
-**例外**：`boss_jobs/assets/` 下的逆向/第三方脚本（如 `run_abc.js`）**不动**——那是抓来的资产，不是我们写的代码；`jsdoc_audit` 也豁免它们。
+**例外**：`packages/platform-boss/src/jobpilot_platform_boss/assets/` 下的逆向/第三方脚本（如 `run_abc.js`）**不动**——那是抓来的资产，不是我们写的代码；`jsdoc_audit` 也豁免它们。
 
 写 JSDoc 只描述三件事：**作用、入参、返回值**。协议逆向、历史背景、实测记录进 `notes/<相对路径>/<文件名>.md`。
 
@@ -107,7 +107,7 @@ JS 的类型是 JSDoc 类型表达式，常用的：
 ## 过长内容的去处
 
 被精简的内容若 ≥ 8 行协议 / 逆向 / 实测细节，先写进 `notes/<相对路径>/<文件名>.md`
-再删（`boss_web/static/js/ui.js` → `notes/boss_web/static/js/ui.md`）。笔记模板同 Python
+再删（`apps/web/src/ws/client.ts` → `notes/apps/web/src/ws/client.md`）。笔记模板同 Python
 （见 [python.md](python.md) 末节），写完在 `notes/INDEX.md` 加一行。
 
 ## 导入路径（`apps/web/src`）
@@ -131,7 +131,7 @@ import { matchApi } from "../../../api/shared";
 import { matchApi } from "/src/api/shared";
 ```
 
-例外：`boss_web/static/legacy/js` 是浏览器原生 ESM，没有打包器解析别名，继续用相对路径；逆向资产 `boss_jobs/assets/` 也不动。
+逆向资产 `packages/platform-boss/src/jobpilot_platform_boss/assets/` 也不动。
 
 ```bash
 python tools/import_path_audit.py   # 默认扫 apps/web/src，hard=0 才算完

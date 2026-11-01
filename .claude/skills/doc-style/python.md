@@ -43,15 +43,15 @@ Attributes:
 
 ## CLI 入口模块（例外）
 
-`boss_filter/cli.py`、`boss_jobs/cli.py`、`boss_login/cli.py`、`tools/cli_commands.py`
+`jobpilot_platform_boss/catalog/cli.py`、`jobpilot_platform_boss/jobs/cli.py`、`jobpilot_platform_boss/auth/cli.py`、`tools/cli_commands.py`
 的模块 docstring 会被 `epilog=__doc__` 直接渲染进 `--help`，且 `tools/cli_commands.py`
 取首行当命令摘要。这四个**保持「一句话 + 缩进用法块」**，不写 `Args:`/`Returns:`：
 
 ```python
 """职位获取命令行入口。
 
-    python -m boss_jobs fetch                      # 分页抓取，页间睡 1s
-    python -m boss_jobs fetch --max-pages 3        # 只翻 3 页
+    python -m jobpilot_platform_boss.jobs fetch                      # 分页抓取，页间睡 1s
+    python -m jobpilot_platform_boss.jobs fetch --max-pages 3        # 只翻 3 页
 
 登录态读状态库 doc('session')。
 """
@@ -134,7 +134,7 @@ def from_api(cls, item: dict[str, Any]) -> "FilterOption":
 ## 过长内容的去处
 
 被精简的内容若 ≥ 8 行协议 / 逆向 / 实测细节，先写进 `notes/<相对路径>/<文件名>.md`
-再删（`boss_jobs/cdp_stoken.py` → `notes/boss_jobs/cdp_stoken.md`）。笔记模板：
+再删（`jobpilot_platform_boss/stoken_cdp.py` → `notes/jobpilot_platform_boss/stoken_cdp.md`）。笔记模板：
 
 ```markdown
 # `<package>.<module>` 协议笔记

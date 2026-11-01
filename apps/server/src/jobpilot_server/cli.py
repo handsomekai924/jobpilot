@@ -176,18 +176,12 @@ def _self_check(info: dict[str, str]) -> int:
 
     static = C.STATIC_DIR
     dist_index = static / "dist" / "index.html"
-    legacy_index = static / "legacy" / "index.html"
-    frontend_ok = dist_index.is_file() or legacy_index.is_file()
-    frontend_note = (
-        "正常"
-        if frontend_ok
-        else "缺失！"
-    )
+    frontend_ok = dist_index.is_file()
+    frontend_note = "正常" if frontend_ok else "缺失！"
     print(f"打包形态     {'exe（frozen）' if is_frozen() else '源码（dev）'}")
     print(f"资源根       {resource_root()}")
     print(f"前端目录     {static}  【{frontend_note}】")
     print(f"  新壳 dist  {dist_index}  【{'正常' if dist_index.is_file() else '缺失！'}】")
-    print(f"  旧壳 legacy {legacy_index}  【{'正常' if legacy_index.is_file() else '缺失！'}】")
     print(f"数据目录     {info.get('data_dir', C.DATA_DIR)}")
     print(f"状态库       {jobpilot_db.resolve_db_path()}")
     _print_migration_status(info)

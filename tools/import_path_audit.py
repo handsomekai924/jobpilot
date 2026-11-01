@@ -9,7 +9,7 @@
 
 Attributes:
     DEFAULT_TARGET: 不传路径时扫描的目录。
-    EXEMPT_PREFIX: 豁免的路径前缀；legacy JS 是浏览器原生 ESM，没有打包器。
+    EXEMPT_PREFIX: 豁免的路径前缀；抓来的第三方资产不是我们的模块。
     SKIP_DIRS: 不扫的目录。
     EXTS: 参与扫描的源码扩展名。
     ALIAS_PREFIX: 唯一允许的别名前缀。
@@ -29,7 +29,6 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DEFAULT_TARGET = "apps/web/src"
 EXEMPT_PREFIX = (
-    "apps/server/src/jobpilot_server/static/legacy/",
     "packages/platform-boss/src/jobpilot_platform_boss/assets/",
 )
 SKIP_DIRS = {".venv", "build", "dist", "__pycache__", ".git", "node_modules", ".idea"}

@@ -41,7 +41,7 @@ def test_resource_root_dev_is_repo_root(monkeypatch):
     monkeypatch.delattr(sys, "frozen", raising=False)
     root = runtime.resource_root()
     assert (root / "apps" / "server" / "src" / "jobpilot_server" / "runtime.py").is_file(), f"应是仓库根，实际 {root}"
-    assert (root / "apps" / "server" / "src" / "jobpilot_server" / "static" / "legacy" / "index.html").is_file()
+    assert (root / "apps" / "server" / "src" / "jobpilot_server" / "static" / "guide" / "README.md").is_file()
 
 
 def test_resource_root_frozen_is_meipass(monkeypatch, tmp_path):

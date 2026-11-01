@@ -3,7 +3,6 @@
  *
  * 连接后服务端先推 `hello` 快照，之后按事件推送。断线自动重连；
  * 连不上时 `status` 为 `"down"`，`wsBridge` 靠合成帧 `ws.status` 起停降级轮询。
- * 与 legacy `static/legacy/js/ws.js` 同一套行为，升级成带信封类型的 TS。
  */
 
 /** `/api/ws` 事件信封：每帧都带 `site`（空 = 共用事件）。 */

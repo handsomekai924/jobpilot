@@ -90,7 +90,6 @@ def create_app() -> FastAPI:
             if (
                 request.url.path.startswith("/static/")
                 or request.url.path == "/"
-                or request.url.path.startswith("/legacy")
             ):
                 response.headers["Cache-Control"] = "no-cache, must-revalidate"
             elif request.url.path.startswith("/api/"):
@@ -98,11 +97,8 @@ def create_app() -> FastAPI:
             return response
 
         def _shell() -> Path:
-            """壳文件：新壳（`static/dist`）优先，没建就退回旧壳（自检会报出来）。"""
-            new_shell = static_dir / "dist" / "index.html"
-            if new_shell.is_file():
-                return new_shell
-            return static_dir / "legacy" / "index.html"
+            """新壳首页。"""
+            return static_dir / "dist" / "index.html"
 
         @app.get("/", include_in_schema=False)
         async def index() -> FileResponse:  # noqa: ANN202
@@ -111,16 +107,10 @@ def create_app() -> FastAPI:
 
         @app.get("/{full_path:path}", include_in_schema=False)
         async def spa_fallback(full_path: str) -> FileResponse:  # noqa: ANN202
-            """真静态文件直接回文件；`legacy/*` 回旧壳，其余回新壳。
-
-            旧 SPA 整棵挪进 `static/legacy/`（M1–M3 共存，M3 删）：经 `/legacy/`
-            打开，hash 路由照旧；资源引用走 `/static/legacy/…`。
-            """
+            """真静态文件直接回文件，其余回新壳首页。"""
             candidate = static_dir / full_path
             if full_path and candidate.is_file():
                 return FileResponse(candidate)
-            if full_path == "legacy" or full_path.startswith("legacy/"):
-                return FileResponse(static_dir / "legacy" / "index.html")
             return FileResponse(_shell())
 
     return app

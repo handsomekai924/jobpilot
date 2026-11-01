@@ -992,7 +992,7 @@ function BlacklistSection() {
 function AppearanceSection() {
   const { mode, setMode } = useThemeMode();
   return (
-    <InsetGroup header="外观" footer="主题记住你的选择（本机 localStorage），跟旧壳共用同一个键。">
+    <InsetGroup header="外观" footer="主题记住你的选择（本机 localStorage）。">
       <InsetRow
         label="主题"
         control={

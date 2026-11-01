@@ -3,8 +3,6 @@ node_modules/
 
 # 构建产物
 dist/
-dist-firefox/
-release/
 # PyInstaller 的中间目录（packaging/build.bat）。注意 .gitignore 里 # 只在行首
 # 才是注释，写在模式后面会被当成目录名的一部分。
 build/
@@ -31,16 +29,13 @@ Thumbs.db
 .scratch/
 docs/
 
-# 用户点名的导出物（`python -m boss_filter export --out filters.json` 的示例名）
+# 用户点名的导出物（`python -m jobpilot_platform_boss.catalog export --out filters.json` 的示例名）
 filters.json
-
-# 设计过程产物（surface brief / review 截图 / build state），不发到浏览器
-.impeccable/
 
 # 真浏览器配置（CDP 取 __zp_stoken__ 用，动了 Chrome 就废）
 .chrome_profile/
 
-# 职位库旧档 / 回滚副本（数据已进 data/boss.db，核对后自行删）
+# 职位库旧档 / 回滚副本（数据已进 data/jobpilot.db，核对后自行删）
 jobs.db
 jobs.db.migrated
 

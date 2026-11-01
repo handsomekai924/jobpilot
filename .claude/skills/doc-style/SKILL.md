@@ -64,9 +64,8 @@ python tools/code_diff_check.py        # 去掉文档注释后与 HEAD 的 AST �
 | 陷阱 | 对策 |
 |---|---|
 | 字符串字面量里有 `#`、`"""`、`//`、`/*` | 删注释必须用 `tokenize`（Python）或字符串感知扫描（JS），不能按行正则 |
-| `epilog=__doc__` 的 CLI 帮助被改坏 | `boss_filter/cli.py`、`boss_jobs/cli.py`、`boss_login/cli.py`、`tools/cli_commands.py` 的模块 docstring 是 `--help` 尾部，保持「一句话 + 缩进用法块」 |
+| `epilog=__doc__` 的 CLI 帮助被改坏 | `jobpilot_platform_boss/catalog/cli.py`、`jobpilot_platform_boss/jobs/cli.py`、`jobpilot_platform_boss/auth/cli.py`、`tools/cli_commands.py` 的模块 docstring 是 `--help` 尾部，保持「一句话 + 缩进用法块」 |
 | `tools/cli_commands.py` 取 docstring 首行当命令摘要 | 那四个模块首行必须是可独立阅读的一句话 |
 | 字典字面量里的 `#:`（`ENDPOINTS = { #: ... }`） | 汇进模块 `Attributes:` 写成 `ENDPOINTS["k"]: 说明。` |
 | 把函数体中部的字符串表达式当成 docstring | 只有 `def`/`class`/`async def` 紧跟的第一个字符串才是 docstring |
 | 只删注释却顺手「优化」了 import | AST 对比会红；未使用的 import 是 HEAD 遗留，别动 |
-| 把 `boss_web/static/legacy/js` 也改成 `@/` 别名 | legacy 是浏览器原生 ESM，没有打包器解析别名，继续用相对路径；审计已豁免 |

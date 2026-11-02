@@ -84,6 +84,7 @@ hiddenimports = [
     "jobpilot_platform_boss.auth.task",
     "jobpilot_platform_boss.catalog",
     "jobpilot_platform_boss.jobs",
+    "jobpilot_platform_boss.stoken",
     "jobpilot_platform_boss.stoken_cdp",
     "jobpilot_browser_pool.cdp",
     "jobpilot_browser_pool.capture",

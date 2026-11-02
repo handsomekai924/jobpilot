@@ -7,6 +7,7 @@
 ```
 
 > 后续会更新其他平台
+
 ---
 
 ## 下载
@@ -18,7 +19,7 @@
 | **GitHub** | https://github.com/handsomekai924/jobpilot/releases |
 | **Gitee**（国内更快） | https://gitee.com/w-kev/jobpilot/releases |
 
-装好后有新版本会在网页里提示，点「立即更新」就地升级。从 1.x 升到 2.0.0 需要手动替换一次，详见 `docs/release-notes-v2.0.0.md`。
+装好后有新版本会在网页里提示，点「立即更新」就地升级。从 1.x 升到 2.0.0 需要手动替换一次，详见 Release 页面的更新说明。
 
 ---
 
@@ -26,18 +27,22 @@
 
 **打包版**：解压到任意目录即装好，数据就存在解压目录的 `data\` 里（换机器整个文件夹拷走）。
 
-**源码版**：
+**源码版**：Python 侧是 uv workspace，一条 `uv sync` 把所有包与依赖装进 `.venv`。先装 uv（没装的话）：
+
+```bash
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"   # Windows
+curl -LsSf https://astral.sh/uv/install.sh | sh              # macOS / Linux
+# 或 pip install uv
+```
 
 ```bash
 git clone https://github.com/handsomekai924/jobpilot.git
 cd jobpilot
-python -m venv .venv
-# Windows:  .venv\Scripts\activate
-# macOS / Linux:  source .venv/bin/activate
-pip install -r requirements.txt
+uv sync              # 装齐 Python 包与依赖（Python 3.12+ 由 uv 自动备好）
+pnpm install         # 前端依赖（需 Node.js + pnpm）
 ```
 
-环境：Python 3.10+（打包版不需要）、Chrome 浏览器、一个能收短信的手机号。
+环境：Chrome 浏览器、一个能收短信的手机号（打包版不需要 Python）。
 
 ---
 
@@ -48,13 +53,24 @@ pip install -r requirements.txt
 **源码版**（前后端分开启动）：
 
 ```bash
-python -m jobpilot_server              # API 服务：http://127.0.0.1:8787
-pnpm --dir apps/web dev            # 前端：http://127.0.0.1:5173
+uv run python -m jobpilot_server    # API 服务：http://127.0.0.1:8787
+pnpm dev                            # 前端：http://127.0.0.1:5173
 ```
 
-启动时只打印接口地址与接口文档地址（`http://127.0.0.1:8787/api/docs`），不会自动打开浏览器。
+启动时只打印接口地址与接口文档地址，不会自动打开浏览器。端口被占用会自动往后顺延，前端代理跟着实际端口走。
+
+常用参数：`--reload` 改代码自动重启（开发用）、`--self-check` 只做路径/环境自检、`--port` 指定端口。
 
 打开后按页面顺序走：登录 → 找职位 → 上传简历 → AI 设置 → 看匹配 → 一键投递。
+
+---
+
+## 开发
+
+```bash
+uv run pytest        # 测试
+packaging\build.bat  # 打包 exe（需 pnpm，产物在 dist\）
+```
 
 ---
 

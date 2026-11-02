@@ -34,7 +34,7 @@ docs/
 filters.json
 
 # 真浏览器配置（CDP 取 __zp_stoken__ 用，动了 Chrome 就废）
-.chrome_profile/
+.chrome_profile*/
 
 # 职位库旧档 / 回滚副本（数据已进 data/jobpilot.db，核对后自行删）
 jobs.db

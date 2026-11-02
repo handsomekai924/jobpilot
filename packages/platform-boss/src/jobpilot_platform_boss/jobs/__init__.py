@@ -17,6 +17,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from .client import (
     BossData,
     CrawlBlacklistContext,
@@ -73,15 +75,16 @@ from .models import (
     clean_salary,
     clean_text,
 )
-from ..stoken import (
-    StokenChallenge,
-    StokenError,
-    StokenProvider,
-    compute_stoken,
-    load_security_js,
-    mint_offline,
-    parse_challenge,
-)
+if TYPE_CHECKING:
+    from ..stoken import (
+        StokenChallenge,
+        StokenError,
+        StokenProvider,
+        compute_stoken,
+        load_security_js,
+        mint_offline,
+        parse_challenge,
+    )
 from .store import JobStore, SaveOutcome, open_store
 
 __version__ = "0.1.0"
@@ -149,3 +152,24 @@ __all__ = [
     "STOKEN_ENV",
     "__version__",
 ]
+
+_STOKEN_EXPORTS: frozenset[str] = frozenset(
+    {
+        "StokenChallenge",
+        "StokenError",
+        "StokenProvider",
+        "compute_stoken",
+        "load_security_js",
+        "mint_offline",
+        "parse_challenge",
+    }
+)
+
+
+def __getattr__(name: str) -> Any:
+    """延迟转发 `jobpilot_platform_boss.stoken` 的公开名，避免它先导入时和本包循环卡死。"""
+    if name in _STOKEN_EXPORTS:
+        from .. import stoken as _stoken
+
+        return getattr(_stoken, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
